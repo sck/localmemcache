@@ -26,7 +26,8 @@ test: $(TARGET)
 
 clean: 
 	rm -f *.log *.so *.a *.o tests/core tests/vgcore* tests/Makefile \
-	    tests/*.so tests/*.o
+	    tests/*.so tests/*.o  ruby-binding/*.o ruby-binding/*.so \
+	    ruby-binding/Makefile
 
 distclean: clean
 	rm -f config.status Makefile config.h
