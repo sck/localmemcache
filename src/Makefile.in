@@ -1,0 +1,33 @@
+CC=@CC@
+TARGET=liblmc.a
+CFLAGS=-Wall -Wunused  -fPIC
+LDFLAGS=
+AR=ar
+RANLIB=@RANLIB@
+LIBS=
+OFILES= \
+	valloc.o \
+	lmc_error.o \
+	hashtable.o \
+	shm.o \
+	lock.o \
+	localmemcache.o 
+
+
+$(TARGET): $(OFILES)
+	$(AR) r $@ $(OFILES)
+	$(RANLIB) $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+test: $(TARGET)
+	./tests/runtest.sh
+
+clean: 
+	rm -f *.log *.so *.a *.o tests/core tests/vgcore* tests/Makefile \
+	    tests/*.so tests/*.o
+
+distclean: clean
+	rm -f config.status Makefile config.h
+	rm -rf autom4te.cache

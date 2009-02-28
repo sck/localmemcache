@@ -1,0 +1,33 @@
+local-memcache README
+=====================
+
+Efficiently sharing a Hashtable on a local Unix computer.
+
+WHAT IS IT?
+===========
+
+local-memcache to be faster than using memcached locally by using shared
+memory, but providing a similar interface.
+
+WHY?
+====
+
+If you use memcache locally (eg. for communication between processes that are
+written in different programming languages), it's very inefficient.
+
+HOW?
+====
+Local memcache is essentially three components:
+
+- wrapper around mmap()
+- allocator that works with relative memory addresses (replaces malloc(), etc.)
+- hashtable data type
+
+SUPPORTED SYSTEMS
+=================
+
+- Unix (for mmap)
+- A CPU architecture with more than 32 bit is recommended, since otherwise you
+  might run out of virtual address space when you use larger shared memory
+  segments
+

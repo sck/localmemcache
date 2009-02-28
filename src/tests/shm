@@ -1,0 +1,11 @@
+#! /bin/sh
+D=`dirname $0`
+DIR=`cd $D; pwd`
+script=$DIR/shm.rb
+
+if test "x$1" = "x-d"; then
+  irb -r $script
+else
+  #valgrind --leak-check=full --tool=memcheck ruby $script
+  time ruby $script
+fi

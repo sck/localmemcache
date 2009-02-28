@@ -1,0 +1,8 @@
+AC_INIT(${srcdir}/config.h.in)
+AC_CONFIG_HEADER(${srcdir}/config.h)
+AC_PROG_CC
+AC_SUBST(CC)
+AC_PROG_RANLIB
+AC_SUBST(RANLIB)
+
+AC_OUTPUT(Makefile)
