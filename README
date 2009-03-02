@@ -9,19 +9,54 @@ WHAT IS IT?
 localmemcache aims to be faster than using memcached locally by using shared
 memory, but providing a similar interface.
 
-WHY?
-====
+EXAMPLE
+=======
 
-If you use memcache locally (eg. for communication between processes that are
-written in different programming languages), it's very inefficient.
+In Ruby:
 
-HOW?
-====
+require 'localmemcache'
+$lm = LocalMemCache.new :namespace => :viewcounters, :size_mb => 200
+$lm[:foo] = 1
+
+In C:
+#include <stdio.h>
+#include <localmemcache.h>
+
+local_memcache_t *lm;
+lmc_error_t e;
+int success = local_memcache_clear_namespace("viewcounters", &e) &&
+    (lm = local_memcache_create("viewcounters", 200, &e)) &&
+    local_memcache_set(lm, "foo", "1", &e) 
+
+if (!success) fprintf(stderr, "error: %s\n", e.error_str);
+if (lm) local_memcache_free(lm, &e);
+
+
+
+
+INSTALLATION
+============
+
+Ruby interface:
+
+$ gem install localmemcache
+
+C:
+
+$ cd src
+$ ./configure && make install
+
+
+How localmemcache works
+=======================
+
 localmemcache is essentially three components:
 
 - a wrapper around mmap()
 - an allocator that works with relative memory addresses (replaces malloc(), etc.)
 - hashtable data type
+
+Namespaces exist in 
 
 SUPPORTED SYSTEMS
 =================
@@ -30,3 +65,4 @@ SUPPORTED SYSTEMS
 - A CPU architecture with more than 32 bit is recommended, since otherwise you
   might run out of virtual address space when you use larger shared memory
   segments.
+
