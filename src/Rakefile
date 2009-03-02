@@ -1,0 +1,54 @@
+task :default do
+end
+
+def manifest
+  r = `git ls-files`.split("\n")
+  p r
+  r.select {|n| n !~ /\.sw.$/ && n !~ /.debug.c$/ }
+end
+
+begin
+  require 'rubygems'
+
+  require 'rake'
+  require 'rake/clean'
+  require 'rake/packagetask'
+  require 'rake/gempackagetask'
+  require 'fileutils'
+rescue LoadError
+else
+
+  spec = Gem::Specification.new do |s|
+    s.name            = "localmemcache"
+    s.version         = "0.0.1"
+    s.platform        = Gem::Platform::RUBY
+    s.summary         = "Efficiently sharing a hashtable between " +
+        "processes on a local Unix machine."
+
+    s.description = <<-EOF
+
+Localmemcache aims to be faster than using memcached locally by using shared
+memory, but providing a similar interface.
+    EOF
+
+    s.files           = manifest 
+    s.bindir          = 'bin'
+    s.require_path    = 'lib'
+    s.has_rdoc        = true
+    s.extra_rdoc_files = #['README', 'SPEC', 'RDOX', 'KNOWN-ISSUES']
+    s.test_files      = Dir['test/*.rb']
+
+    s.author          = 'Sven C. Koehler'
+    s.email           = 'schween@snafu.de'
+    s.homepage        = 'http://localmemcache.rubyforge.org/'
+    s.rubyforge_project = 'localmemcache'
+  end
+
+  Rake::GemPackageTask.new(spec) do |p|
+    p.gem_spec = spec
+    p.need_tar = false
+    p.need_zip = false
+  end
+
+end
+
