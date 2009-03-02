@@ -25,10 +25,10 @@ test: $(TARGET)
 	./tests/runtest.sh
 
 clean: 
-	rm -f *.log *.so *.a *.o tests/core tests/vgcore* tests/Makefile \
-	    tests/*.so tests/*.o  ruby-binding/*.o ruby-binding/*.so \
-	    ruby-binding/Makefile
+	rm -f *.log *.so *.a *.o tests/core tests/vgcore* \
+	    tests/*.so tests/*.o  ruby-binding/*.o ruby-binding/*.so 
+	    
 
 distclean: clean
-	rm -f config.status Makefile config.h
-	rm -rf autom4te.cache
+	rm -f config.status Makefile config.h tests/Makefile ruby-binding/Makefile
+	rm -rf autom4te.cache 

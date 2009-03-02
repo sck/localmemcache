@@ -35,11 +35,11 @@ va_ht_hash_t ht_hash_create(void *base, lmc_error_t *e) {
 }
 
 int ht_hash_destroy(void *base, va_ht_hash_t ht) { 
-  printf("ht_hash_destroy\n");
+  // ignore: Hashes are only deleted by deleting the namespace region
   return 1;
 }
 
-ht_hash_entry_t *ht_lookup(void* base, va_ht_hash_t va_ht, const char *key) {
+ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key) {
   va_ht_hash_entry_t va_hr;
   ht_hash_entry_t *hr;
   ht_hash_t *ht = base + va_ht;
@@ -52,7 +52,8 @@ ht_hash_entry_t *ht_lookup(void* base, va_ht_hash_t va_ht, const char *key) {
 }
 
 char *ht_get(void *base, va_ht_hash_t va_ht, const char *key) { 
-  char *r = base + ht_lookup(base, va_ht, key)->va_value; 
+  size_t va = ht_lookup(base, va_ht, key)->va_value; 
+  char *r = va ? base + va : 0;
   return r;
 }
 
@@ -82,6 +83,21 @@ int ht_set(void *base, va_ht_hash_t va_ht, const char *key,
 }
 
 int ht_delete(void *base, va_ht_hash_t va_ht, const char *key) {
-  printf("ht_delete\n");
-  return 1;
+  va_ht_hash_entry_t va_hr;
+  ht_hash_entry_t *hr;
+  ht_hash_entry_t *p = NULL;
+  ht_hash_t *ht = base + va_ht;
+  unsigned long k = ht_hash_key(key);
+  for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
+      va_hr = hr->va_next) {
+    hr = va_hr ? base + va_hr : 0;
+    if (hr && (strcmp(key, base + hr->va_key) == 0)) { 
+      // remove previous entry
+      if (p) { p->va_next = hr->va_next; }
+      else { ht->va_buckets[k] = 0; }
+      return 1; 
+    }
+    p = base + hr->va_key;
+  }
+  return 0;
 }

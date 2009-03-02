@@ -19,6 +19,7 @@ typedef struct {
   size_t total_size;
   size_t magic;
   size_t va_hash;
+  int locked;
 } mem_descriptor_t;
 
 

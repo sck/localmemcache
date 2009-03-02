@@ -108,6 +108,7 @@ void lmc_init_memory(void *ptr, size_t size) {
   // size: enough space for mem_descriptor_t + mem_chunk_descriptor_t
   md->first_free = sizeof(mem_descriptor_t);
   md->magic = 0xF00D;
+  md->locked = 0;
   md->total_size = s;
   mem_chunk_descriptor_t *c = ptr + sizeof(mem_descriptor_t);
   c->next = 0;

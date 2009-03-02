@@ -27,6 +27,14 @@ static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size) {
   return Data_Wrap_Struct(klass, NULL, local_memcache_free, lmc);
 }
 
+static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns) {
+  lmc_error_t e;
+  if (!local_memcache_clear_namespace(rstring_ptr(ns), &e)) {
+    raise_exception(LocalMemCacheError, &e); 
+  }
+  return Qnil;
+}
+
 local_memcache_t *get_LocalMemCache(VALUE obj) {
   local_memcache_t *lmc;
   Data_Get_Struct(obj, local_memcache_t, lmc);
@@ -46,6 +54,12 @@ static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
   return Qnil;
 }
 
+static VALUE LocalMemCache__delete(VALUE obj, VALUE key) {
+  return local_memcache_delete(get_LocalMemCache(obj), 
+      rstring_ptr(key));
+  return Qnil;
+}
+
 static VALUE LocalMemCache__close(VALUE obj) {
   local_memcache_free(get_LocalMemCache(obj));
   return Qnil;
@@ -57,7 +71,12 @@ void Init_rblocalmemcache() {
   LocalMemCacheError = rb_define_class("LocalMemCacheError", rb_eStandardError);
   LocalMemCache = rb_define_class("LocalMemCache", rb_cObject);
   rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 2);
+  rb_define_singleton_method(LocalMemCache, "clear_namespace", 
+      LocalMemCache__clear_namespace, 1);
   rb_define_method(LocalMemCache, "get", LocalMemCache__get, 1);
+  rb_define_method(LocalMemCache, "[]", LocalMemCache__get, 1);
+  rb_define_method(LocalMemCache, "delete", LocalMemCache__delete, 1);
   rb_define_method(LocalMemCache, "set", LocalMemCache__set, 2);
+  rb_define_method(LocalMemCache, "[]=", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
 }

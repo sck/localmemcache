@@ -16,6 +16,7 @@ typedef struct {
   lmc_shm_t *shm;
   size_t va_hash;
   lmc_lock_t *lock;
+  lmc_lock_t *root_lock;
   void* base;
   lmc_error_t error;
 } local_memcache_t;
@@ -26,5 +27,6 @@ char *local_memcache_get(local_memcache_t *lmc, const char *key);
 int local_memcache_set(local_memcache_t *lmc, const char *key, const char* value);
 int local_memcache_delete(local_memcache_t *lmc, char *key);
 int local_memcache_free(local_memcache_t *lmc);
+int local_memcache_clear_namespace(const char *namespace, lmc_error_t *e);
 
 #endif

@@ -6,13 +6,34 @@ require 'localmemcache'
 
 Bacon.summary_on_exit
 
-$lm = LocalMemCache.new :namespace=>"baba", :size_mb => 1
+$lm = LocalMemCache.new :namespace=>"testing", :size_mb => 1
 
 describe 'LocalMemCache' do
 
   it 'should allow to set and query keys' do
+    $lm.get("non-existant").should.be.nil
     $lm.set("foo", "1")
     $lm.get("foo").should.equal "1"
+  end
+
+  it 'should support the [] and []= operators' do
+    $lm["boo"] = "2"
+    $lm["boo"].should.equal "2"
+  end
+
+  it 'should allow deletion of keys' do
+    $lm["deleteme"] = "blah"
+    $lm["deleteme"].should.not.be.nil
+    $lm.delete("deleteme")
+    $lm["deleteme"].should.be.nil
+  end
+
+  it 'should support iteration' do
+    puts "TBD"
+  end
+
+  it 'should support clearing of namespaces' do
+    LocalMemCache.clear_namespace("testing");
   end
 
 end
@@ -24,39 +45,40 @@ def tmeasure(c, &block)
   puts "#{(now - _then)*1000} ms"
 end
 
+$lm2 = LocalMemCache.new :namespace=>"speed-comparison", :size_mb => 20
+
 def compare_speed(n)
   
-  puts "Hashtable"
+  puts "LocalMemCache"
   tmeasure(n) {
     r = rand(10000).to_s
-    $lm.get(r)
-    $lm.set(r, r)
-    nr = $lm.get(r)
-    if nr != r
-      $stderr.puts "FAILED: #{nr.inspect} != #{r.inspect}"
-    end
+#    $lm2.get(r)
+    $lm2.set(r, r)
+#    nr = $lm2.get(r)
+#    if nr != r
+#      $stderr.puts "FAILED: #{nr.inspect} != #{r.inspect}"
+#    end
   }
   
   puts "builtin"
   $hh = {}
   tmeasure(n) {
     r = rand(10000).to_s
-    $hh[r]
+#    $hh[r]
     $hh[r] = r
-    if $hh[r] != r
-      $stderr.puts "FAILED!"
-    end
+#    if $hh[r] != r
+#      $stderr.puts "FAILED!"
+#    end
   }
 end
 
-#compare_speed(20000)
+compare_speed(2_000_000)
 
-$stdout.write "ht shm setting x 20000: "
-#ht.set("f", 1) 
-tmeasure (2_000_000) { 
-  v = $lm.get("f").to_i + 1
-  #puts "v:#{v}"
-  $lm.set("f", v) 
-}
-puts "foo: #{$lm.get("f")}"
+#$stdout.write "ht shm setting x 20000: "
+#tmeasure (2_000_000) { 
+#  v = $lm2.get("f").to_i + 1
+#  #puts "v:#{v}"
+#  $lm2.set("f", v) 
+#}
+#puts "foo: #{$lm2.get("f")}"
  

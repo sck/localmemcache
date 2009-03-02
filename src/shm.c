@@ -26,14 +26,34 @@ void lmc_shm_ensure_root_path() {
   }
 }
 
-void lmc_shm_ensure_namespace_file(char *ns) {
-  lmc_shm_ensure_root_path();
-  char fn[1024];
-  snprintf(fn, 1023, "%s/%s.lmc", LMC_SHM_ROOT_PATH, ns);
-  if (!lmc_does_file_exist(fn)) { close(open(fn, O_CREAT, 0777)); }
+void lmc_file_path_for_namespace(char *result, const char *ns) {
+  snprintf(result, 1023, "%s/%s.lmc", LMC_SHM_ROOT_PATH, ns);
 }
 
-lmc_shm_t *lmc_shm_create(char* namespace, size_t size, int use_persistence,
+int lmc_does_namespace_exist(const char *ns) {
+  char fn[1024];
+  lmc_file_path_for_namespace((char *)&fn, ns);
+  return lmc_does_file_exist(fn);
+}
+
+int lmc_clean_namespace(const char *ns, lmc_error_t *e) {
+  lmc_shm_ensure_root_path();
+  char fn[1024];
+  lmc_file_path_for_namespace((char *)&fn, ns);
+  if (lmc_does_namespace_exist(ns)) {
+    if (!lmc_handle_error(unlink(fn) == -1,  "unlink", e)) { return 0; }
+  }
+  return 1;
+}
+
+void lmc_shm_ensure_namespace_file(const char *ns) {
+  lmc_shm_ensure_root_path();
+  char fn[1024];
+  lmc_file_path_for_namespace((char *)&fn, ns);
+  if (!lmc_does_namespace_exist(ns)) { close(open(fn, O_CREAT, 0777)); }
+}
+
+lmc_shm_t *lmc_shm_create(const char* namespace, size_t size, int use_persistence,
     lmc_error_t *e) {
   lmc_shm_t *mc = calloc(1, sizeof(lmc_shm_t));
   if (!mc) { 
@@ -46,40 +66,12 @@ lmc_shm_t *lmc_shm_create(char* namespace, size_t size, int use_persistence,
 
   lmc_shm_ensure_namespace_file(mc->namespace);
   char fn[1024];
-  snprintf(fn, 1023, "%s/%s.lmc", LMC_SHM_ROOT_PATH, mc->namespace);
-
-//#define FILESIZE 2000
-//  int fd = open(fn, O_RDWR, (mode_t)0600);
-//  if (fd==-1) { printf("e:o\n"); }
-//  int r = lseek(fd, mc->size-1, SEEK_SET);
-//  if (r==-1) { printf("e:s\n"); }
-//  r = write(fd, "", 1);
-//  if (r!=1) { printf("e:w\n"); }
-//  void *b = mmap(0, mc->size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-//  printf("shm: %x\n", b);
-//  if (b == MAP_FAILED) { printf("e:m\n"); }
-//
-//  exit(0);
-
-  //char fn[1024];
-  snprintf(fn, 1023, "%s/%s.lmc", LMC_SHM_ROOT_PATH, mc->namespace);
+  lmc_file_path_for_namespace((char *)&fn, mc->namespace);
   if (!lmc_handle_error((mc->fd = open(fn, O_RDWR, (mode_t)0777)) == -1, 
       "open", e)) goto open_failed;
   if (!lmc_handle_error(lseek(mc->fd, mc->size - 1, SEEK_SET) == -1, "lseek", e)) 
       goto failed;
   if (!lmc_handle_error(write(mc->fd, "", 1) != 1, "write", e)) goto failed;
-  //} else {
-  //char n[1024];
-  //snprintf(n, 1023, "/lmc-%s", mc->namespace);
-  //printf("shm2\n");
-  //mc->fd = shm_open(n, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-  //if (!lmc_handle_error(mc->fd == -1, "shm_open", e)) goto failed;
-  //printf("shm2.5\n");
-
-  //if (!lmc_handle_error(ftruncate(mc->fd, mc->size) == -1, "ftruncate", e))
-  //    goto failed;
-  //printf("shm3\n");
-
   mc->base = mmap(0, mc->size, PROT_READ | PROT_WRITE, MAP_SHARED, mc->fd, 
       (off_t)0);
   if (!lmc_handle_error(mc->base == MAP_FAILED, "mmap", e))  goto failed;
