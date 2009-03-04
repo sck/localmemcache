@@ -19,7 +19,6 @@ task :changelog do
       date = chunk[/Date: (.*)/, 1].strip
       desc, detail = $'.strip.split("\n", 2)
       detail ||= ""
-      detail = detail.gsub(/.*darcs-hash:.*/, '')
       detail.rstrip!
       out.puts "#{date}  #{author}"
       out.puts "  * #{desc.strip}"
@@ -54,17 +53,17 @@ Localmemcache aims to be faster than using memcached locally by using shared
 memory, but providing a similar interface.
     EOF
 
-    s.files           = manifest 
-    s.bindir          = 'bin'
-    s.require_path    = 'lib'
-    s.has_rdoc        = true
-    s.extra_rdoc_files = #['README', 'SPEC', 'RDOX', 'KNOWN-ISSUES']
-    s.test_files      = Dir['test/*.rb']
+    s.files = manifest 
+    s.extensions = ['configure', 'src/ruby-binding/extconf.rb']
+    s.require_path = 'src/ruby-binding'
+    s.has_rdoc = true
+    #s.extra_rdoc_files = #['README', 'SPEC', 'RDOX', 'KNOWN-ISSUES']
+    s.test_files = Dir['src/test/*.rb']
 
-    s.author          = 'Sven C. Koehler'
-    s.email           = 'schween@snafu.de'
-    #s.homepage        = 'http://localmemcache.rubyforge.org/'
-    s.rubyforge_project = 'localmemcache'
+    s.author = 'Sven C. Koehler'
+    s.email = 'schween@snafu.de'
+    s.homepage = 'http://github.com/sck/localmemcache'
+    #s.rubyforge_project = 'localmemcache'
   end
 
   Rake::GemPackageTask.new(spec) do |p|

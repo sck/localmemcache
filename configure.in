@@ -26,6 +26,10 @@ exec_prefix=$PREFIX
 AC_SUBST(PREFIX)
 AC_MSG_RESULT([$PREFIX])
 
+AC_MSG_CHECKING([if inside RubyGems])
+env > /tmp/lmc.env
+AC_MSG_RESULT([$PREFIX])
+
 
 
 #--------------------------------------------------------------------
