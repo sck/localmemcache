@@ -1,5 +1,5 @@
 $DIR=File.dirname(__FILE__)
-['..'].each {|p| $:.unshift File.join($DIR, p) }
+['.', '..'].each {|p| $:.unshift File.join($DIR, p) }
 
 require 'bacon'
 require 'lmctestapi'

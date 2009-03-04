@@ -1,5 +1,5 @@
 $DIR=File.dirname(__FILE__)
-['..', '../ruby-binding/'].each {|p| $:.unshift File.join($DIR, p) }
+['.', '..', '../ruby-binding/'].each {|p| $:.unshift File.join($DIR, p) }
 
 require 'bacon'
 require 'localmemcache'
@@ -26,11 +26,12 @@ describe 'LocalMemCache' do
     $lm["deleteme"].should.not.be.nil
     $lm.delete("deleteme")
     $lm["deleteme"].should.be.nil
+    $lm.delete("non-existant")
   end
 
-  it 'should support iteration' do
-    puts "TBD"
-  end
+  #it 'should support iteration' do
+  #  puts "TBD"
+  #end
 
   it 'should support clearing of namespaces' do
     LocalMemCache.clear_namespace("testing");

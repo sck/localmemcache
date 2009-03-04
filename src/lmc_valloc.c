@@ -96,7 +96,9 @@ void lmc_show_status(void *base) {
 int is_lmc_already_initialized(void *base) {
   mem_descriptor_t *md = base;
   if (md->magic == 0xF00D) {
+#ifdef LMC_DEBUG_ALLOC
     printf("memory already initialized, skipping...\n");
+#endif
     return 1;
   }
   return 0;

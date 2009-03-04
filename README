@@ -9,6 +9,26 @@ WHAT IS IT?
 localmemcache aims to be faster than using memcached locally by using shared
 memory, but providing a similar interface.
 
+
+PERFORMANCE
+===========
+Here's a quick speed comparison
+
+Benchmark code:
+
+2_000_000.times {
+  index = rand(10000).to_s
+  $hash.set(index, index)
+  $hash.get(index)
+}
+
+MemCache:      253326.122 ms
+LocalMemCache: 7220.071 ms
+Ruby's Hash:   4963.313 ms
+
+localmemcache is about 30-40 faster than using memcache locally, and about
+twice as slow as using Ruby's hash.
+
 EXAMPLE
 =======
 
