@@ -2,8 +2,8 @@ CC=@CC@
 VERSION=@VERSION@
 TARGET=liblmc.a
 CFLAGS=-Wall -Wunused  -fPIC
+RUBY_LIB=rblocalmemcache.so
 LDFLAGS=
-PACKAGE=pkg/localmemcache-$(VERSION).tar.gz
 AR=ar
 RANLIB=@RANLIB@
 PREFIX=@PREFIX@
@@ -16,6 +16,15 @@ OFILES= \
 	lmc_lock.o \
 	localmemcache.o 
 
+compile: $(TARGET) 
+
+ruby-binding: $(RUBY_LIB)
+
+$(RUBY_LIB): $(TARGET)
+	cd ruby-binding; ruby extconf.rb
+	-$(MAKE) -C ruby-binding 
+	cd tests; ruby extconf.rb
+	-$(MAKE) -C tests
 
 $(TARGET): $(OFILES)
 	$(AR) r $@ $(OFILES)
@@ -36,15 +45,9 @@ install: $(TARGET)
 	install -m644 lmc_config.h lmc_error.h lmc_hashtable.h lmc_lock.h \
 	lmc_shm.h lmc_valloc.h ${PREFIX}/include 
 
-package:
-	@echo "CREATING package $(PACKAGE)"
-	mkdir -f pkg
-	-$(MAKE) distclean
-
 clean: 
 	rm -f *.log *.so *.a *.o tests/core tests/vgcore* \
 	    tests/*.so tests/*.o  ruby-binding/*.o ruby-binding/*.so 
 
 distclean: clean
-	rm -f config.status Makefile config.h tests/Makefile ruby-binding/Makefile
-	rm -rf autom4te.cache 
+	rm -f lmc_config.h tests/Makefile ruby-binding/Makefile

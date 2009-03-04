@@ -1,0 +1,18 @@
+CC=@CC@
+VERSION=@VERSION@
+PACKAGE=pkg/localmemcache-$(VERSION).tar.gz
+
+compile ruby-binding clean install: 
+	-$(MAKE) -C src $@
+
+distclean:
+	rm -f config.status Makefile 
+	rm -rf autom4te.cache 
+	-$(MAKE) -C src $@
+
+package:
+	@echo "CREATING package $(PACKAGE)"
+	test -d pkg || mkdir pkg
+	-tar cvfz $(PACKAGE) `git ls-files`
+	
+

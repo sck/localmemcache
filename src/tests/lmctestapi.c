@@ -3,9 +3,9 @@
  */
 
 #include <ruby.h>
-#include "shm.h"
-#include "hashtable.h"
-#include "valloc.h"
+#include "lmc_shm.h"
+#include "lmc_hashtable.h"
+#include "lmc_valloc.h"
 
 void *memp = NULL;
 static VALUE OutOfMemoryError;

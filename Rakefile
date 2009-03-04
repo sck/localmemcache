@@ -4,12 +4,10 @@ end
 def manifest
   r = `git ls-files`.split("\n")
   p r
-  r.select {|n| n !~ /\.sw.$/ && n !~ /.debug.c$/ }
+  r
 end
 
-def version
-  File.read("../VERSION")
-end
+def version() File.read("VERSION") end
 
 puts "version: #{version}"
 
@@ -45,7 +43,7 @@ else
 
   spec = Gem::Specification.new do |s|
     s.name            = "localmemcache"
-    s.version         = "0.0.1"
+    s.version         = version
     s.platform        = Gem::Platform::RUBY
     s.summary         = "Efficiently sharing a hashtable between " +
         "processes on a local Unix machine."
@@ -65,7 +63,7 @@ memory, but providing a similar interface.
 
     s.author          = 'Sven C. Koehler'
     s.email           = 'schween@snafu.de'
-    s.homepage        = 'http://localmemcache.rubyforge.org/'
+    #s.homepage        = 'http://localmemcache.rubyforge.org/'
     s.rubyforge_project = 'localmemcache'
   end
 
