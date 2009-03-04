@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include <time.h>
-#include "lock.h"
+#include "lmc_lock.h"
 
 int c_l(lmc_lock_t *l, lmc_error_t *e) { 
   if (!l) { strncpy(e->error_str, "Semaphore not initialized", 1023); }

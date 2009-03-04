@@ -1,8 +1,8 @@
 #include "localmemcache.h"
 #include <stdio.h>
 #include <string.h>
-#include "valloc.h"
-#include "shm.h"
+#include "lmc_valloc.h"
+#include "lmc_shm.h"
 
 int lmc_set_lock_flag(void *base, lmc_error_t *e) {
   mem_descriptor_t *md = base;

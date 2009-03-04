@@ -1,16 +1,19 @@
 CC=@CC@
+VERSION=@VERSION@
 TARGET=liblmc.a
 CFLAGS=-Wall -Wunused  -fPIC
 LDFLAGS=
+PACKAGE=pkg/localmemcache-$(VERSION).tar.gz
 AR=ar
 RANLIB=@RANLIB@
+PREFIX=@PREFIX@
 LIBS=
 OFILES= \
-	valloc.o \
+	lmc_valloc.o \
 	lmc_error.o \
-	hashtable.o \
-	shm.o \
-	lock.o \
+	lmc_hashtable.o \
+	lmc_shm.o \
+	lmc_lock.o \
 	localmemcache.o 
 
 
@@ -24,10 +27,23 @@ $(TARGET): $(OFILES)
 test: $(TARGET)
 	./tests/runtest.sh
 
+install: $(TARGET) 
+	@echo "INSTALLING localmemcache to ${PREFIX}"
+	install -d -m755 ${PREFIX}/lib
+	install -d -m755 ${PREFIX}/include
+	install -m644 ${TARGET} ${PREFIX}/lib
+	@echo INSTALLING headers to ${PREFIX}/include
+	install -m644 lmc_config.h lmc_error.h lmc_hashtable.h lmc_lock.h \
+	lmc_shm.h lmc_valloc.h ${PREFIX}/include 
+
+package:
+	@echo "CREATING package $(PACKAGE)"
+	mkdir -f pkg
+	-$(MAKE) distclean
+
 clean: 
 	rm -f *.log *.so *.a *.o tests/core tests/vgcore* \
 	    tests/*.so tests/*.o  ruby-binding/*.o ruby-binding/*.so 
-	    
 
 distclean: clean
 	rm -f config.status Makefile config.h tests/Makefile ruby-binding/Makefile

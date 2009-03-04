@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hashtable.h"
-#include "valloc.h"
+#include "lmc_hashtable.h"
+#include "lmc_valloc.h"
 
 size_t ht_strdup(void *base, const char *s) {
   size_t va_s = lmc_valloc(base, strlen(s) + 1);

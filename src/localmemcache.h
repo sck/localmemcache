@@ -2,9 +2,9 @@
 #define _LOCAL_MEMCACHE_INCLUDED_
 
 #include <stdlib.h>
-#include "hashtable.h"
-#include "shm.h"
-#include "lock.h"
+#include "lmc_hashtable.h"
+#include "lmc_shm.h"
+#include "lmc_lock.h"
 #include "lmc_error.h"
 
 #define LOCAL_MEMCACHE_FAILED 0

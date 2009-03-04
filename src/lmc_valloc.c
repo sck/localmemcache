@@ -11,9 +11,9 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#include "valloc.h"
+#include "lmc_valloc.h"
 
-#include "lock.h"
+#include "lmc_lock.h"
 
 typedef struct {
   size_t next;

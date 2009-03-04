@@ -598,7 +598,8 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
-ac_unique_file="${srcdir}/config.h.in"
+ac_unique_file="${srcdir}/lmc_config.h.in"
+ac_default_prefix=$prefix
 ac_subst_vars='SHELL
 PATH_SEPARATOR
 PACKAGE_NAME
@@ -644,6 +645,8 @@ ac_ct_CC
 EXEEXT
 OBJEXT
 RANLIB
+VERSION
+PREFIX
 LIBOBJS
 LTLIBOBJS'
 ac_subst_files=''
@@ -1719,7 +1722,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-ac_config_headers="$ac_config_headers ${srcdir}/config.h"
+ac_config_headers="$ac_config_headers ${srcdir}/lmc_config.h"
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -2751,6 +2754,39 @@ fi
 
 
 
+{ $as_echo "$as_me:$LINENO: checking version" >&5
+$as_echo_n "checking version... " >&6; }
+VERSION=`cat ${srcdir}/../VERSION`
+
+{ $as_echo "$as_me:$LINENO: result: $VERSION" >&5
+$as_echo "$VERSION" >&6; }
+
+{ $as_echo "$as_me:$LINENO: checking installation directory prefix" >&5
+$as_echo_n "checking installation directory prefix... " >&6; }
+
+if test "$prefix" = "NONE"; then
+    if test "x$PREFIX" != "x" ; then
+  prefix=$PREFIX
+    else
+  prefix=/usr/local
+    fi
+fi
+
+PREFIX=$ac_default_prefix
+PREFIX=$prefix
+exec_prefix=$PREFIX
+
+{ $as_echo "$as_me:$LINENO: result: $PREFIX" >&5
+$as_echo "$PREFIX" >&6; }
+
+
+
+#--------------------------------------------------------------------
+# Propagate prefix argument as installation directory.
+#--------------------------------------------------------------------
+
+
+
 ac_config_files="$ac_config_files Makefile"
 
 cat >confcache <<\_ACEOF
@@ -3336,7 +3372,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "${srcdir}/config.h") CONFIG_HEADERS="$CONFIG_HEADERS ${srcdir}/config.h" ;;
+    "${srcdir}/lmc_config.h") CONFIG_HEADERS="$CONFIG_HEADERS ${srcdir}/lmc_config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

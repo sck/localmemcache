@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#include "shm.h"
+#include "lmc_shm.h"
 
 #define LMC_SHM_ROOT_PATH "/var/tmp/localmemcache"
 
