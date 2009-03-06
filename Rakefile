@@ -24,6 +24,13 @@ task :changelog do
   }
 end
 
+#task :pushsite => [:rdoc] do
+task :pushsite do
+  #sh "rsync -avz doc/ chneukirchen@rack.rubyforge.org:/var/www/gforge-projects/rack/doc/"
+  sh "rsync -avz site/ chneukirchen@rack.rubyforge.org:/var/www/gforge-projects/rack/"
+end 
+
+
 
 begin
   require 'rubygems'
