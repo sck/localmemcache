@@ -2,7 +2,7 @@ task :default do
 end
 
 def manifest
-  `git ls-files`.split("\n").select{|n| !%r!/homepage/!.match(n) }
+  `git ls-files`.split("\n").select{|n| !%r!/site/!.match(n) }
 end
 
 def version() File.read("VERSION") end
@@ -26,11 +26,11 @@ end
 
 #task :pushsite => [:rdoc] do
 task :pushsite do
-  #sh "rsync -avz doc/ chneukirchen@rack.rubyforge.org:/var/www/gforge-projects/rack/doc/"
-  sh "rsync -avz site/ chneukirchen@rack.rubyforge.org:/var/www/gforge-projects/rack/"
-end 
-
-
+  sh "chmod 755 site"
+  sh "chmod 644 site/*.html"
+  sh "chmod 644 site/*.css"
+  sh 'rsync --rsh="ssh -i $HOME/.ssh/id_rsa_projects -l sck" -avz site/ sck@localmemcache.rubyforge.org:/var/www/gforge-projects/localmemcache/'
+end
 
 begin
   require 'rubygems'

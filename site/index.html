@@ -1,11 +1,12 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>LocalMemCache</title>
+    <title>Localmemcache</title>
     <link type="text/css" rel="stylesheet" href="style.css" media="screen"/>
   </head>
   <body>  
 
+<div id="content">
 <h1>Efficiently sharing a hashtable between processes on a local Unix machine.</h1>
 
 <p><b>Localmemcache</b> aims to be faster than using <a href="http://www.danga.com/memcached/">memcached</a> locally by using shared memory and providing a similar interface for Ruby and C.
@@ -18,32 +19,21 @@
 </code></pre>
 
 <h2>Using</h2>
-
-<p>
-<pre>
-<code>
-require 'localmemcache'
+<p><pre><code>require 'localmemcache'
 $lm = LocalMemCache.new :namespace => :viewcounters
 $lm[:foo] = 1
 $lm[:foo]
 $lm.delete(:foo)
-</code>
-</pre>
-
-<a href="http://github.com/sck/localmemcache/tree/master">Read more</a>.
-
-
+</code></pre> 
 </p>
+<a href="http://github.com/sck/localmemcache/tree/master">Read more</a>.
 
 <h2>Performance</h2>
 
 <p>Here's a quick speed comparison, made on an 
-<b>Intel(R) Xeon(R) CPU E5205 @ 1.86GHz</b></p>:
-
+<b>Intel(R) Xeon(R) CPU E5205 @ 1.86GHz</b>:</p>
 Benchmark pseudo code:
-
-<pre><code>
-2_000_000.times {
+<pre><code>2_000_000.times {
   index = rand(10000).to_s
   $hash.set(index, index)
   $hash.get(index)
@@ -57,7 +47,7 @@ Ruby's Hash:   <b>4,963.313</b> ms
 </pre>
 
 <b>Localmemcache</b> is about <b>40</b> times faster than using memcached
-locally, and about 20% slower than Ruby's hash.
+locally, and about <b>20%</b> slower than Ruby's hash.
 
 <h2>Source code</h2>
 
