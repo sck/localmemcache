@@ -6,7 +6,7 @@ require 'localmemcache'
 
 Bacon.summary_on_exit
 
-$lm = LocalMemCache.new :namespace=>"testing", :size_mb => 1
+$lm = LocalMemCache.new :namespace=>"testing"
 
 describe 'LocalMemCache' do
 
@@ -46,7 +46,7 @@ def tmeasure(c, &block)
   puts "#{(now - _then)*1000} ms"
 end
 
-$lm2 = LocalMemCache.new :namespace=>"speed-comparison", :size_mb => 20
+$lm2 = LocalMemCache.new :namespace=>"speed-comparison"
 
 def compare_speed(n)
   

@@ -19,9 +19,4 @@ int lmc_lock_release(const char *where, lmc_lock_t* l, lmc_error_t *e);
 int lmc_is_locked(lmc_lock_t* l, lmc_error_t *e);
 int lmc_is_lock_working(lmc_lock_t* l, lmc_error_t *e);
 void lmc_lock_repair(lmc_lock_t *l);
-
-
-int lmc_ref_counter_get_value(lmc_lock_t *l, lmc_error_t *e);
-int lmc_ref_counter_manip(lmc_lock_t *l, int i, lmc_error_t *e);
-int lmc_ref_counter_reset(lmc_lock_t *l, lmc_error_t *e);
 #endif

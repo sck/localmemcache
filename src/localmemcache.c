@@ -28,8 +28,15 @@ int lmc_release_lock_flag(void *base, lmc_error_t *e) {
   return 1;
 }
 
-int local_memcache_clear_namespace(const char *namespace, lmc_error_t *e) {
-  return lmc_clean_namespace(namespace, e);
+int local_memcache_clear_namespace(const char *namespace, int repair, 
+    lmc_error_t *e) {
+  lmc_clean_namespace(namespace, e);
+  if (repair) { 
+    lmc_lock_t *l = lmc_lock_init(namespace, 1, e);
+    lmc_lock_repair(l);
+    free(l);
+  }
+  return 1;
 }
 
 local_memcache_t *local_memcache_create(const char *namespace, size_t size,
@@ -118,5 +125,6 @@ int local_memcache_free(local_memcache_t *lmc) {
   if (!lmc_unlock_shm_region("local_memcache_free", lmc)) return 0;
   lmc_shm_destroy(lmc->shm, &e);
   free(lmc->namespace);
+  free(lmc->lock);
   return r;
 }

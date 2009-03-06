@@ -12,7 +12,8 @@
 size_t ht_strdup(void *base, const char *s) {
   size_t va_s = lmc_valloc(base, strlen(s) + 1);
   if (!va_s) { return 0; }
-  memcpy(base + va_s, s, strlen(s) + 1);
+  //memcpy(base + va_s, s, strlen(s) + 1);
+  strcpy(base + va_s, s);
   return va_s;
 }
 
@@ -41,7 +42,7 @@ int ht_hash_destroy(void *base, va_ht_hash_t ht) {
 
 ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key) {
   va_ht_hash_entry_t va_hr;
-  ht_hash_entry_t *hr;
+  ht_hash_entry_t *hr ;
   ht_hash_t *ht = base + va_ht;
   for (va_hr = ht->va_buckets[ht_hash_key(key)]; 
       va_hr != 0 && hr != NULL; va_hr = hr->va_next) {

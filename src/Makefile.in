@@ -1,7 +1,7 @@
 CC=@CC@
 VERSION=@VERSION@
 TARGET=liblmc.a
-CFLAGS=-Wall -Wunused  -fPIC
+CFLAGS=-Wall -Wunused  -fPIC -O2
 RUBY_LIB=rblocalmemcache.so
 LDFLAGS=
 AR=ar

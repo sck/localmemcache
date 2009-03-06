@@ -1,0 +1,45 @@
+/* #E4AC3D  pride of the leo (orange)
+ * #CBCFB6  sandy field (light gray)
+ * #7DA478  neverending garden (green)
+ * #444130  lost independance (brown)
+ * #F74343  Groovy Baby (red)
+ */
+body {
+  background: #FFF;
+  color: #444130;
+  font-family: bell mt,georgia,helvetica;
+  line-height: 15pt;
+  font-size: 13pt;
+  margin: 0;
+}
+
+h1, h2, h3, h4 { 
+  color: #7DA478;
+  padding: 0;
+  margin: 1em 0;
+}
+
+pre, code {
+  font-family: Courier;
+  font-size: 11pt;
+  overflow: auto;
+}
+
+a { color: #E4AC3D; }
+#license { 
+  font-size: 8pt; 
+  line-height: 10pt;
+}
+
+#content { 
+  margin: 1em auto ;
+  max-width: 35em;
+}
+
+ol, ul { padding-left: 0; }
+
+#content p {
+}
+#about {
+  list-style:none;
+}

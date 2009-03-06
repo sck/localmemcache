@@ -12,9 +12,10 @@ memory, but providing a similar interface.
 
 PERFORMANCE
 ===========
-Here's a quick speed comparison
+Here's a quick speed comparison, made on an 
+Intel(R) Xeon(R) CPU E5205 @ 1.86GHz:
 
-Benchmark code:
+Benchmark pseudo code:
 
 2_000_000.times {
   index = rand(10000).to_s
@@ -23,11 +24,11 @@ Benchmark code:
 }
 
 MemCache:      253326.122 ms
-LocalMemCache: 7220.071 ms
+LocalMemCache: 6055.552 ms
 Ruby's Hash:   4963.313 ms
 
-localmemcache is about 30-40 faster than using memcache locally, and about
-twice as slow as using Ruby's hash.
+So localmemcache is about 40 times faster than using memcache locally, and
+about 20% slower than Ruby's hash.
 
 EXAMPLE
 =======
@@ -35,22 +36,16 @@ EXAMPLE
 In Ruby:
 
 require 'localmemcache'
-$lm = LocalMemCache.new :namespace => :viewcounters, :size_mb => 200
+$lm = LocalMemCache.new :namespace => :viewcounters
 $lm[:foo] = 1
+$lm[:foo]
+$lm.delete(:foo)
 
 
 INSTALLATION
 ============
 
-Ruby interface:
-
-$ gem install localmemcache
-
-C:
-
-$ cd src
-$ ./configure && make install
-
+# gem install localmemcache
 
 How localmemcache works
 =======================
@@ -61,6 +56,20 @@ localmemcache is essentially three components:
 - an allocator that works with relative memory addresses (replaces malloc(), etc.)
 - hashtable data type
 
+Namespace life-cycle
+====================
+
+| $lm = LocalMemCache.new :namespace => :viewcounters
+
+Namespaces reside as memory-mapped files in /var/tmp/localmemcache.  If the
+namespace does not yet exist, it is created with a default size of 1GB.  It is
+not possible to resize a namespace, so choose a size that will be enough to
+hold all your data.  The class method clear_namespace can be used to delete
+namespaces.  You should also use this function in case your namespace becomes
+inconsistent.  Note that just deleting the memory-mapped file is not enough.
+
+For more documentation see the RDoc on LocalMemCache.
+
 SUPPORTED SYSTEMS
 =================
 
@@ -68,4 +77,3 @@ SUPPORTED SYSTEMS
 - A CPU architecture with more than 32 bit is recommended, since otherwise you
   might run out of virtual address space when you use larger shared memory
   segments.
-

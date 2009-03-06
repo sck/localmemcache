@@ -2,14 +2,10 @@ task :default do
 end
 
 def manifest
-  r = `git ls-files`.split("\n")
-  p r
-  r
+  `git ls-files`.split("\n").select{|n| !%r!/homepage/!.match(n) }
 end
 
 def version() File.read("VERSION") end
-
-puts "version: #{version}"
 
 desc "Generate a ChangeLog"
 task :changelog do
@@ -56,14 +52,13 @@ memory, but providing a similar interface.
     s.files = manifest 
     s.extensions = ['configure', 'src/ruby-binding/extconf.rb']
     s.require_path = 'src/ruby-binding'
-    s.has_rdoc = true
-    #s.extra_rdoc_files = #['README', 'SPEC', 'RDOX', 'KNOWN-ISSUES']
+    s.has_rdoc = false
     s.test_files = Dir['src/test/*.rb']
 
     s.author = 'Sven C. Koehler'
     s.email = 'schween@snafu.de'
-    s.homepage = 'http://github.com/sck/localmemcache'
-    #s.rubyforge_project = 'localmemcache'
+    s.homepage = 'http://localmemcache.rubyforge.org/'
+    s.rubyforge_project = 'localmemcache'
   end
 
   Rake::GemPackageTask.new(spec) do |p|
