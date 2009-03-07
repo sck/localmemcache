@@ -19,7 +19,8 @@ class LocalMemCache
   def self.new(options)
     o = { :size_mb => 1024 }.update(options || {})
     raise "Missing mandatory option ':namespace'" if !o[:namespace]
-    _new(o[:namespace].gsub("/", "-"), (o[:size_mb].to_f * 1024 * 1024).to_i );
+    _new(o[:namespace].to_s.gsub("/", "-"), 
+        (o[:size_mb].to_f * 1024 * 1024).to_i );
   end
 
   # Deletes the given namespaces, removing semaphores if necessary.
@@ -27,6 +28,6 @@ class LocalMemCache
   # processes.
   #
   def self.clear_namespace(namespace, repair = false) 
-    _clear_namespace(namespace, repair)
+    _clear_namespace(namespace.to_s, repair)
   end
 end

@@ -1,4 +1,4 @@
-localmemcache README
+Localmemcache README
 =====================
 
 Efficiently sharing a hashtable between processes on a local Unix machine.
@@ -6,7 +6,7 @@ Efficiently sharing a hashtable between processes on a local Unix machine.
 WHAT IS IT?
 ===========
 
-localmemcache aims to be faster than using memcached locally by using shared
+Localmemcache aims to be faster than using memcached locally by using shared
 memory, but providing a similar interface.
 
 
@@ -36,7 +36,7 @@ EXAMPLE
 In Ruby:
 
 require 'localmemcache'
-$lm = LocalMemCache.new :namespace => :viewcounters
+$lm = LocalMemCache.new :namespace => "viewcounters"
 $lm[:foo] = 1
 $lm[:foo]
 $lm.delete(:foo)

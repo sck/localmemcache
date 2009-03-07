@@ -29,9 +29,9 @@ describe 'LocalMemCache' do
     $lm.delete("non-existant")
   end
 
-  #it 'should support iteration' do
-  #  puts "TBD"
-  #end
+  it 'should return a list of keys' do
+    p $lm.keys()
+  end
 
   it 'should support clearing of namespaces' do
     LocalMemCache.clear_namespace("testing");

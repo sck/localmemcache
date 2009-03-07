@@ -15,7 +15,7 @@ char *rstring_ptr(VALUE s) {
   return r ? r : "nil";
 }
 /* :nodoc: */
-static VALUE ruby_string(char *s) { return s ? rb_str_new2(s) : Qnil; }
+static VALUE ruby_string(const char *s) { return s ? rb_str_new2(s) : Qnil; }
 /* :nodoc: */
 int bool_value(VALUE v) { return v == Qtrue; }
 
@@ -102,6 +102,32 @@ static VALUE LocalMemCache__close(VALUE obj) {
   return Qnil;
 }
 
+typedef struct {
+  VALUE ary;
+} lmc_ruby_iter_collect_keys;
+
+int lmc_ruby_iter(void *ctx, const char* key, const char* value) {
+  lmc_ruby_iter_collect_keys *data = ctx;
+  rb_ary_push(data->ary, ruby_string(key));
+  return 1;
+}
+
+/* 
+ *  call-seq:
+ *     lmc.keys()   ->   array or nil
+ *
+ *  Returns a list of keys.
+ */
+static VALUE LocalMemCache__keys(VALUE obj) {
+  VALUE r = rb_ary_new();
+  lmc_ruby_iter_collect_keys data;
+  data.ary = r;
+  int success = local_memcache_iterate(get_LocalMemCache(obj), 
+      (void *) &data, lmc_ruby_iter);
+  if (!success) { return Qnil; }
+  return r;
+}
+
 static VALUE LocalMemCache;
 
 void Init_rblocalmemcache() {
@@ -115,5 +141,6 @@ void Init_rblocalmemcache() {
   rb_define_method(LocalMemCache, "delete", LocalMemCache__delete, 1);
   rb_define_method(LocalMemCache, "set", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "[]=", LocalMemCache__set, 2);
+  rb_define_method(LocalMemCache, "keys", LocalMemCache__keys, 0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
 }

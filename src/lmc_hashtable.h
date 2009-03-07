@@ -16,6 +16,7 @@ typedef struct {
 } ht_hash_entry_t;
 
 #define HT_BUCKETS 499
+#define ITERATOR_P(n) int ((n)) (void *ctx, const char *key, const char *value)
 
 typedef size_t va_ht_hash_t;
 typedef struct {
@@ -30,4 +31,5 @@ ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key);
 char *ht_get(void *base, va_ht_hash_t ht, const char *key);
 int ht_delete(void *base, va_ht_hash_t va_ht, const char *key);
 int ht_hash_destroy(void *base, va_ht_hash_t ht);
+int ht_hash_iterate(void *base, va_ht_hash_t ht, void *ctx, ITERATOR_P(iter));
 #endif

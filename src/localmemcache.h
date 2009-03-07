@@ -27,6 +27,7 @@ char *local_memcache_get(local_memcache_t *lmc, const char *key);
 int local_memcache_set(local_memcache_t *lmc, const char *key, const char* value);
 int local_memcache_delete(local_memcache_t *lmc, char *key);
 int local_memcache_free(local_memcache_t *lmc);
+int local_memcache_iterate(local_memcache_t *lmc, void *ctx, ITERATOR_P(iter));
 int local_memcache_clear_namespace(const char *namespace, int repair, 
     lmc_error_t *e);
 

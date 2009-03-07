@@ -128,3 +128,10 @@ int local_memcache_free(local_memcache_t *lmc) {
   free(lmc->lock);
   return r;
 }
+
+int local_memcache_iterate(local_memcache_t *lmc, void *ctx, ITERATOR_P(iter)) {
+  if (!lmc_lock_shm_region("local_memcache_iterate", lmc)) return 0;
+  int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, iter);
+  if (!lmc_unlock_shm_region("local_memcache_delete", lmc)) return 0;
+  return r;
+}
