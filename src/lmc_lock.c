@@ -39,7 +39,11 @@ int lmc_is_lock_working(lmc_lock_t* l, lmc_error_t *e) {
   if (!c_l(l, e)) { return 0; }
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
+#ifdef DO_TEST_CRASH
+  ts.tv_nsec += 100000000;
+#else
   ts.tv_sec += 2;
+#endif
   if (sem_timedwait(l->sem, &ts) == -1) {
     return 0;
   } else {

@@ -36,11 +36,34 @@ static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size) {
 }
 
 /* :nodoc: */
-static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns, VALUE repair) {
+static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns, 
+    VALUE repair) {
   lmc_error_t e;
   if (!local_memcache_clear_namespace(rstring_ptr(ns), bool_value(repair), &e)) {
     raise_exception(LocalMemCacheError, &e); 
   }
+  return Qnil;
+}
+
+/* :nodoc: */
+static VALUE LocalMemCache__check_namespace(VALUE klass, VALUE ns) {
+  lmc_error_t e;
+  if (!local_memcache_check_namespace(rstring_ptr(ns), &e)) {
+    raise_exception(LocalMemCacheError, &e); 
+  }
+  return Qnil;
+}
+
+/* :nodoc: */
+static VALUE LocalMemCache__enable_test_crash(VALUE klass) {
+  srand(getpid());
+  lmc_test_crash_enabled = 1;
+  return Qnil;
+}
+
+/* :nodoc: */
+static VALUE LocalMemCache__disable_test_crash(VALUE klass) {
+  lmc_test_crash_enabled = 0;
   return Qnil;
 }
 
@@ -128,6 +151,7 @@ static VALUE LocalMemCache__keys(VALUE obj) {
   return r;
 }
 
+
 static VALUE LocalMemCache;
 
 void Init_rblocalmemcache() {
@@ -136,6 +160,12 @@ void Init_rblocalmemcache() {
   rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 2);
   rb_define_singleton_method(LocalMemCache, "_clear_namespace", 
       LocalMemCache__clear_namespace, 2);
+  rb_define_singleton_method(LocalMemCache, "check_namespace", 
+      LocalMemCache__check_namespace, 1);
+  rb_define_singleton_method(LocalMemCache, "disable_test_crash", 
+      LocalMemCache__disable_test_crash, 0);
+  rb_define_singleton_method(LocalMemCache, "enable_test_crash", 
+      LocalMemCache__enable_test_crash, 0);
   rb_define_method(LocalMemCache, "get", LocalMemCache__get, 1);
   rb_define_method(LocalMemCache, "[]", LocalMemCache__get, 1);
   rb_define_method(LocalMemCache, "delete", LocalMemCache__delete, 1);

@@ -6,6 +6,7 @@ require 'localmemcache'
 
 Bacon.summary_on_exit
 
+LocalMemCache.clear_namespace("testing", true)
 $lm = LocalMemCache.new :namespace=>"testing"
 
 describe 'LocalMemCache' do
@@ -33,47 +34,54 @@ describe 'LocalMemCache' do
     p $lm.keys()
   end
 
-  it 'should support clearing of namespaces' do
-    LocalMemCache.clear_namespace("testing");
+  it 'should support checking of namespaces' do 
+    LocalMemCache.check_namespace("testing")
   end
 
+  it 'should support clearing of namespaces' do
+    LocalMemCache.clear_namespace("testing")
+  end
+
+
 end
 
-def tmeasure(c, &block)
-  _then = Time.now
-  c.times { block.call }
-  now = Time.now
-  puts "#{(now - _then)*1000} ms"
-end
+#$lm.check_consistency
 
-$lm2 = LocalMemCache.new :namespace=>"speed-comparison"
+#def tmeasure(c, &block)
+#  _then = Time.now
+#  c.times { block.call }
+#  now = Time.now
+#  puts "#{(now - _then)*1000} ms"
+#end
 
-def compare_speed(n)
-  
-  puts "LocalMemCache"
-  tmeasure(n) {
-    r = rand(10000).to_s
-#    $lm2.get(r)
-    $lm2.set(r, r)
-#    nr = $lm2.get(r)
-#    if nr != r
-#      $stderr.puts "FAILED: #{nr.inspect} != #{r.inspect}"
-#    end
-  }
-  
-  puts "builtin"
-  $hh = {}
-  tmeasure(n) {
-    r = rand(10000).to_s
-#    $hh[r]
-    $hh[r] = r
-#    if $hh[r] != r
-#      $stderr.puts "FAILED!"
-#    end
-  }
-end
-
-compare_speed(2_000_000)
+#$lm2 = LocalMemCache.new :namespace=>"speed-comparison"
+#
+#def compare_speed(n)
+#  
+#  puts "LocalMemCache"
+#  tmeasure(n) {
+#    r = rand(10000).to_s
+##    $lm2.get(r)
+#    $lm2.set(r, r)
+##    nr = $lm2.get(r)
+##    if nr != r
+##      $stderr.puts "FAILED: #{nr.inspect} != #{r.inspect}"
+##    end
+#  }
+#  
+#  puts "builtin"
+#  $hh = {}
+#  tmeasure(n) {
+#    r = rand(10000).to_s
+##    $hh[r]
+#    $hh[r] = r
+##    if $hh[r] != r
+##      $stderr.puts "FAILED!"
+##    end
+#  }
+#end
+#
+#compare_speed(2_000_000)
 
 #$stdout.write "ht shm setting x 20000: "
 #tmeasure (2_000_000) { 

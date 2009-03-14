@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009, Sven C. Koehler
+ */
+
 #ifndef _LOCAL_MEMCACHE_INCLUDED_
 #define _LOCAL_MEMCACHE_INCLUDED_
 
@@ -6,6 +10,7 @@
 #include "lmc_shm.h"
 #include "lmc_lock.h"
 #include "lmc_error.h"
+#include "lmc_common.h"
 
 #define LOCAL_MEMCACHE_FAILED 0
 #define LOCAL_MEMCACHE_SUCCESS 1
@@ -30,5 +35,6 @@ int local_memcache_free(local_memcache_t *lmc);
 int local_memcache_iterate(local_memcache_t *lmc, void *ctx, ITERATOR_P(iter));
 int local_memcache_clear_namespace(const char *namespace, int repair, 
     lmc_error_t *e);
+int local_memcache_check_namespace(const char *namespace, lmc_error_t *e);
 
 #endif

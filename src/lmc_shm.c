@@ -20,6 +20,12 @@ int lmc_does_file_exist(const char *fn) {
   return stat(fn, &st) != -1;
 }
 
+int lmc_file_size(const char *fn) {
+  struct stat st;
+  if (stat(fn, &st) == -1) return 0;
+  return st.st_size;
+}
+
 void lmc_shm_ensure_root_path() {
   if (!lmc_does_file_exist(LMC_SHM_ROOT_PATH)) {
     mkdir(LMC_SHM_ROOT_PATH, 01777);
@@ -35,6 +41,14 @@ int lmc_does_namespace_exist(const char *ns) {
   lmc_file_path_for_namespace((char *)&fn, ns);
   return lmc_does_file_exist(fn);
 }
+
+int lmc_namespace_size(const char *ns) {
+  char fn[1024];
+  lmc_file_path_for_namespace((char *)&fn, ns);
+  if (!lmc_does_file_exist(fn)) { return 0; }
+  return lmc_file_size(fn);
+}
+
 
 int lmc_clean_namespace(const char *ns, lmc_error_t *e) {
   lmc_shm_ensure_root_path();

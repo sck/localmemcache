@@ -1,7 +1,7 @@
 CC=@CC@
 VERSION=@VERSION@
 TARGET=liblmc.a
-CFLAGS=-Wall -Wunused  -fPIC -O2
+CFLAGS_ADD=-Wall -Wunused  -fPIC -O2
 RUBY_LIB=rblocalmemcache.so
 LDFLAGS=
 AR=ar
@@ -14,6 +14,7 @@ OFILES= \
 	lmc_hashtable.o \
 	lmc_shm.o \
 	lmc_lock.o \
+	lmc_common.o \
 	localmemcache.o 
 
 compile: $(TARGET) 
@@ -31,7 +32,7 @@ $(TARGET): $(OFILES)
 	$(RANLIB) $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS_ADD) $(CFLAGS) -c -o $@ $<
 
 test: $(TARGET)
 	./tests/runtest.sh
@@ -42,8 +43,8 @@ install: $(TARGET)
 	install -d -m755 ${PREFIX}/include
 	install -m644 ${TARGET} ${PREFIX}/lib
 	@echo INSTALLING headers to ${PREFIX}/include
-	install -m644 lmc_config.h lmc_error.h lmc_hashtable.h lmc_lock.h \
-	lmc_shm.h lmc_valloc.h ${PREFIX}/include 
+	install -m644 lmc_config.h lmc_common.h lmc_error.h lmc_hashtable.h \
+	lmc_lock.h lmc_shm.h lmc_valloc.h ${PREFIX}/include 
 
 clean: 
 	rm -f *.log *.so *.a *.o tests/core tests/vgcore* \
