@@ -173,24 +173,23 @@ int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc) {
   return r;
 }
 
-char *local_memcache_get(local_memcache_t *lmc, const char *key) {
-  if (!lmc_lock_shm_region("local_memcache_get", lmc)) return 0;
-  char *r = ht_get(lmc->base, lmc->va_hash, key);
-  if (!lmc_unlock_shm_region("local_memcache_get", lmc)) return 0;
-  return r;
+const char *local_memcache_get(local_memcache_t *lmc, 
+    const char *key, size_t n_key, size_t *n_value) {
+  return ht_get(lmc->base, lmc->va_hash, key, n_key, n_value);
 }
 
 int local_memcache_set(local_memcache_t *lmc, 
-   const char *key, const char* value) {
+   const char *key, size_t n_key, const char* value, size_t n_value) {
   if (!lmc_lock_shm_region("local_memcache_set", lmc)) return 0;
-  int r = ht_set(lmc->base, lmc->va_hash, key, value, &lmc->error);
-  if (!lmc_unlock_shm_region("local_memcache_get", lmc)) return 0;
+  int r = ht_set(lmc->base, lmc->va_hash, key, n_key, value, n_value, 
+      &lmc->error);
+  if (!lmc_unlock_shm_region("local_memcache_set", lmc)) return 0;
   return r;
 }
 
-int local_memcache_delete(local_memcache_t *lmc, char *key) {
+int local_memcache_delete(local_memcache_t *lmc, char *key, size_t n_key) {
   if (!lmc_lock_shm_region("local_memcache_delete", lmc)) return 0;
-  int r = ht_delete(lmc->base, lmc->va_hash, key);
+  int r = ht_delete(lmc->base, lmc->va_hash, key, n_key);
   if (!lmc_unlock_shm_region("local_memcache_delete", lmc)) return 0;
   return r;
 }
@@ -207,9 +206,7 @@ int local_memcache_free(local_memcache_t *lmc) {
 }
 
 int local_memcache_iterate(local_memcache_t *lmc, void *ctx, ITERATOR_P(iter)) {
-  if (!lmc_lock_shm_region("local_memcache_iterate", lmc)) return 0;
   int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, iter);
-  if (!lmc_unlock_shm_region("local_memcache_delete", lmc)) return 0;
   return r;
 }
 

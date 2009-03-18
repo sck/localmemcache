@@ -1,0 +1,15 @@
+#! /bin/sh
+D=`dirname $0`
+DIR=`cd $D; pwd`
+script=$DIR/allocfailure.rb
+
+export CFLAGS=-DDO_TEST_ALLOC_FAILURE
+make -C .. clean && make -C .. && make -C ../ruby-binding && 
+ruby extconf.rb && make clean && make
+
+if test "x$1" = "x-d"; then
+  irb -r $script
+else
+  #valgrind --leak-check=full --tool=memcheck ruby $script
+  ruby $script
+fi

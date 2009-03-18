@@ -14,16 +14,32 @@ char *rstring_ptr(VALUE s) {
   char* r = NIL_P(s) ? "nil" : RSTRING_PTR(rb_String(s)); 
   return r ? r : "nil";
 }
+
+size_t rstring_length(VALUE s) { 
+  size_t r = NIL_P(s) ? 0 : RSTRING_LEN(rb_String(s)); 
+  return r;
+}
 /* :nodoc: */
 static VALUE ruby_string(const char *s) { return s ? rb_str_new2(s) : Qnil; }
 /* :nodoc: */
 int bool_value(VALUE v) { return v == Qtrue; }
 
-static VALUE LocalMemCacheError;
+static VALUE lmc_ruby_string2(const char *s, size_t l) { 
+  return s ? rb_str_new(s, l) : Qnil; 
+}
+
+static VALUE lmc_ruby_string(const char *s) { 
+  return lmc_ruby_string2(s + sizeof(size_t), *(size_t *) s);
+}
+
+
+static VALUE LocalMemCache;
 
 /* :nodoc: */
-void raise_exception(VALUE error_klass, lmc_error_t *e) {
-  rb_raise(error_klass, e->error_str);
+void raise_exception(lmc_error_t *e) {
+  VALUE eid = rb_intern(e->error_type);
+  VALUE k = rb_const_get(LocalMemCache, eid);
+  rb_raise(k, e->error_str);
 }
 
 /* :nodoc: */
@@ -31,7 +47,7 @@ static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size) {
   lmc_error_t e;
   local_memcache_t *lmc = local_memcache_create(rstring_ptr(namespace), 
       long_value(size), &e);
-  if (!lmc) { raise_exception(LocalMemCacheError, &e); }
+  if (!lmc) { raise_exception(&e); }
   return Data_Wrap_Struct(klass, NULL, local_memcache_free, lmc);
 }
 
@@ -40,7 +56,7 @@ static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns,
     VALUE repair) {
   lmc_error_t e;
   if (!local_memcache_clear_namespace(rstring_ptr(ns), bool_value(repair), &e)) {
-    raise_exception(LocalMemCacheError, &e); 
+    raise_exception(&e); 
   }
   return Qnil;
 }
@@ -49,7 +65,7 @@ static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns,
 static VALUE LocalMemCache__check_namespace(VALUE klass, VALUE ns) {
   lmc_error_t e;
   if (!local_memcache_check_namespace(rstring_ptr(ns), &e)) {
-    raise_exception(LocalMemCacheError, &e); 
+    raise_exception(&e); 
   }
   return Qnil;
 }
@@ -82,8 +98,10 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
  *  Retrieve value from hashtable.
  */
 static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
-  return ruby_string(local_memcache_get(get_LocalMemCache(obj), 
-      rstring_ptr(key)));
+  size_t l;
+  const char* r = local_memcache_get(get_LocalMemCache(obj), 
+      rstring_ptr(key), rstring_length(key), &l);
+  return lmc_ruby_string2(r, l);
 }
 
 /* 
@@ -96,8 +114,9 @@ static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
 
 static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
   local_memcache_t *lmc = get_LocalMemCache(obj);
-  if (!local_memcache_set(lmc, rstring_ptr(key), rstring_ptr(value))) { 
-    raise_exception(LocalMemCacheError, &lmc->error); 
+  if (!local_memcache_set(lmc, rstring_ptr(key), rstring_length(key), 
+      rstring_ptr(value), rstring_length(value))) { 
+    raise_exception(&lmc->error); 
   }
   return Qnil;
 }
@@ -110,7 +129,7 @@ static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
  */
 static VALUE LocalMemCache__delete(VALUE obj, VALUE key) {
   return local_memcache_delete(get_LocalMemCache(obj), 
-      rstring_ptr(key));
+      rstring_ptr(key), rstring_length(key));
   return Qnil;
 }
 
@@ -131,7 +150,7 @@ typedef struct {
 
 int lmc_ruby_iter(void *ctx, const char* key, const char* value) {
   lmc_ruby_iter_collect_keys *data = ctx;
-  rb_ary_push(data->ary, ruby_string(key));
+  rb_ary_push(data->ary, lmc_ruby_string(key));
   return 1;
 }
 
@@ -151,11 +170,7 @@ static VALUE LocalMemCache__keys(VALUE obj) {
   return r;
 }
 
-
-static VALUE LocalMemCache;
-
 void Init_rblocalmemcache() {
-  LocalMemCacheError = rb_define_class("LocalMemCacheError", rb_eStandardError);
   LocalMemCache = rb_define_class("LocalMemCache", rb_cObject);
   rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 2);
   rb_define_singleton_method(LocalMemCache, "_clear_namespace", 

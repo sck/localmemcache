@@ -3,19 +3,21 @@ $DIR=File.dirname(__FILE__)
 
 require 'localmemcache'
 
-#LocalMemCache.clear_namespace("crash-test");
-LocalMemCache.check_namespace("crash-test");
+LocalMemCache.clear_namespace("crash-test", true);
+#exit
+#puts "c"
+#LocalMemCache.check_namespace("crash-test");
 
 
 begin
 $pid = fork {
   LocalMemCache.enable_test_crash
   $lm2 = LocalMemCache.new :namespace=>"crash-test"
-  begin 
+  20.times {
     r = rand(10000).to_s
     $lm2.set(r, r)
     $lm2.get(r)
-  end while true
+  }
 }
 
 Process.wait $pid

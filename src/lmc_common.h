@@ -12,7 +12,15 @@ extern int lmc_test_crash_enabled;
 #define LMC_TEST_CRASH
 #endif
 
+#ifdef DO_TEST_ALLOC_FAILURE
+#define lmc_valloc(base, s) \
+    lmc_test_valloc_fail(__FILE__, __LINE__, __FUNCTION__, base, s)
+#endif
+
+
 void lmc_test_crash(const char* file, int line, const char *function);
+size_t lmc_test_valloc_fail(const char *file, int line, const char *function,
+    void *base, size_t s);
 
 #endif
 

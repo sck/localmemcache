@@ -27,6 +27,20 @@ def compare_speed(n)
   }
 end
 
+def test_gdbm(n)
+  require 'gdbm'
+  
+  puts "GDBM"
+  h = GDBM.new("/tmp/fruitstore.db")
+  measure_time(n) {
+    r = rand(10000).to_s
+    h[r] = r
+    h[r]
+  }
+  h.close
+end
+
+
 def measure_time(c, &block)
   _then = Time.now
   c.times { block.call }
@@ -35,6 +49,7 @@ def measure_time(c, &block)
 end
 
 compare_speed(2_000_000)
+#test_gdbm(2_000_000)
 
 #$stdout.write "ht shm setting x 20000: "
 #tmeasure (2_000_000) { 

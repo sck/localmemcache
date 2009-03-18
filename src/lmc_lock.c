@@ -20,7 +20,7 @@ lmc_lock_t *lmc_lock_init(const char *namespace, int init, lmc_error_t *e) {
   strncpy((char *)&l->namespace, namespace, 1023);
   
   lmc_handle_error((l->sem = sem_open(l->namespace, O_CREAT, 0600, init)) == NULL,
-      "sem_open", e);
+      "sem_open", "LockError", e);
   if (!l->sem) { free(l); return NULL; }
   return l;
 }
@@ -61,9 +61,11 @@ void lmc_lock_repair(lmc_lock_t *l) {
 }
 
 int lmc_lock_obtain(const char *where, lmc_lock_t* l, lmc_error_t *e) {
-  return c_l(l,e) && lmc_handle_error(sem_wait(l->sem) == -1, "sem_wait", e);
+  return c_l(l,e) && lmc_handle_error(sem_wait(l->sem) == -1, "sem_wait", 
+      "LockError", e);
 }
 
 int lmc_lock_release(const char *where, lmc_lock_t* l, lmc_error_t *e) {
-  return c_l(l, e) && lmc_handle_error(sem_post(l->sem) == -1, "sem_post", e);
+  return c_l(l, e) && lmc_handle_error(sem_post(l->sem) == -1, "sem_post", 
+      "LockError", e);
 }

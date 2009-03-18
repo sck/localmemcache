@@ -9,6 +9,9 @@ Bacon.summary_on_exit
 LocalMemCache.clear_namespace("testing", true)
 $lm = LocalMemCache.new :namespace=>"testing"
 
+LocalMemCache.clear_namespace("testing-small", true)
+$lms = LocalMemCache.new :namespace=>"testing-small", :size_mb => 0.01;
+
 describe 'LocalMemCache' do
 
   it 'should allow to set and query keys' do
@@ -31,7 +34,17 @@ describe 'LocalMemCache' do
   end
 
   it 'should return a list of keys' do
-    p $lm.keys()
+    $lm.keys().size.should.equal 2
+  end
+
+  it 'should support \0 in values and keys' do
+    $lm["null"] = "foo\0goo"
+    $lm["null"].should.equal "foo\0goo"
+  end
+
+  it 'should throw exception if pool is full' do
+    $lms["one"] = "a";
+    should.raise(LocalMemCache::MemoryPoolFull) { $lms["two"] = "b" * 8000; }
   end
 
   it 'should support checking of namespaces' do 

@@ -9,6 +9,12 @@ require 'rblocalmemcache'
 #
 class LocalMemCache
 
+  class LocalMemCacheError < StandardError; end
+  class ShmError < LocalMemCacheError; end
+  class MemoryPoolFull < LocalMemCacheError; end
+  class LockError < LocalMemCacheError; end
+  class OutOfMemoryError < LocalMemCacheError; end
+
   #  Creates a new handle for accessing a shared memory region.
   #
   #  LocalMemCache.new :namespace=>"foo", :size_mb=> 1
