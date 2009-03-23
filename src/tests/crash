@@ -7,9 +7,13 @@ export CFLAGS=-DDO_TEST_CRASH
 make -C .. clean && make -C .. && make -C ../ruby-binding && 
 ruby extconf.rb && make clean && make
 
+#ulimit -c 0
+
 if test "x$1" = "x-d"; then
   irb -r $script
 else
   #valgrind --leak-check=full --tool=memcheck ruby $script
   ruby $script
 fi
+
+#ulimit -c unlimited

@@ -24,8 +24,6 @@ size_t lmc_ht_strdup(void *base, const char *s, size_t l) {
   *(size_t *) p = l;
   p += sizeof(size_t);
   memcpy(p, s, l);
-  char *pp = base + va_s;
-  //printf("new string: (%zd) '%s'\n", *(size_t *) pp, pp + sizeof(size_t));
   return va_s;
 }
 
@@ -64,6 +62,11 @@ ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key,
       va_hr != 0 && hr != NULL; va_hr = hr->va_next) {
     hr = va_hr ? base + va_hr : 0;
     if (!hr) continue;
+    if (!lmc_is_va_valid(base, hr->va_key)) {
+      printf("va is invalid: %x\n", hr->va_key);
+      printf("value: %x\n", hr->va_value);
+    }
+    //printf("va_key: %d\n", hr->va_key);
     char *s = base + hr->va_key;
     size_t l = *(size_t *) s;
     if (l != n_key) continue;
@@ -80,8 +83,8 @@ ht_hash_entry_t *ht_lookup2(void *base, va_ht_hash_t va_ht, char *k) {
   return ht_lookup(base, va_ht, k + sizeof(size_t), *(size_t *) k);
 }
 
-const char *ht_get(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key,
-    size_t *n_value) { 
+const char *ht_get(void *base, va_ht_hash_t va_ht, const char *key, 
+    size_t n_key, size_t *n_value) { 
   size_t va = ht_lookup(base, va_ht, key, n_key)->va_value; 
   char *r = va ? base + va : 0;
   if (!r) return 0;
@@ -97,10 +100,10 @@ int ht_redo(void *base, va_ht_hash_t va_ht, lmc_log_descriptor_t *l,
     lmc_error_t *e) {
   if (l->op_id == LMC_OP_HT_SET) {
     lmc_log_ht_set *l_set = (lmc_log_ht_set *)l;
-    printf("log: (%zd) key:\n", l_set->va_key);
-    printf("log: (%zd) value:\n", l_set->va_value);
+    //printf("log: (%zd) key:\n", l_set->va_key);
+    //printf("log: (%zd) value:\n", l_set->va_value);
     if (l_set->va_key == 0 || l_set->va_value == 0) {
-      printf("OP:set incomplete\n");
+      //printf("OP:set incomplete\n");
       return 1;
     }
     char *k = base + l_set->va_key;
@@ -118,25 +121,23 @@ int ht_redo(void *base, va_ht_hash_t va_ht, lmc_log_descriptor_t *l,
 
 int ht_set(void *base, va_ht_hash_t va_ht, const char *key, 
     size_t n_key, const char *value, size_t n_value, lmc_error_t *e) {
-  lmc_log_ht_set *l = (lmc_log_ht_set *)lmc_log_op(base, LMC_OP_HT_SET);
-  if ((l->va_value = lmc_ht_strdup(base, value, n_value)) == 0 ||
-      (l->va_key = lmc_ht_strdup(base, key, n_key)) == 0) {
-    LMC_MEMORY_POOL_FULL("ht_set");
-    //lmc_handle_error_with_err_string("ht_set", "memory pool full", e);
-    return 0; 
-  }
   ht_hash_t *ht = base + va_ht;
-  ht_hash_entry_t *hr = ht_lookup2(base, va_ht, base + l->va_key);
-  int free_key = 1;
+  ht_hash_entry_t *hr = ht_lookup(base, va_ht, key, n_key);
   unsigned v;
   if (hr->va_key == 0) {
+    int free_key = 1;
+    lmc_log_ht_set *l = (lmc_log_ht_set *)lmc_log_op(base, LMC_OP_HT_SET);
+    if ((l->va_value = lmc_ht_strdup(base, value, n_value)) == 0 ||
+        (l->va_key = lmc_ht_strdup(base, key, n_key)) == 0) {
+      LMC_MEMORY_POOL_FULL("ht_set");
+      goto failed;
+    }
     free_key = 0;
     va_ht_hash_entry_t va = lmc_valloc(base, sizeof(ht_hash_entry_t));
     hr = va ? base + va : 0;
     if (hr == NULL) { 
       LMC_MEMORY_POOL_FULL("ht_set");
-      //lmc_handle_error_with_err_string("ht_set", "memory pool full", e);
-      return 0; 
+      goto failed;
     }
     LMC_TEST_CRASH
     hr->va_key = l->va_key;
@@ -144,25 +145,35 @@ int ht_set(void *base, va_ht_hash_t va_ht, const char *key,
     LMC_TEST_CRASH
     hr->va_next = ht->va_buckets[v];
     ht->va_buckets[v] = va;
+    hr->va_value = l->va_value;
+    if (free_key) {
+      size_t va = l->va_key;
+      l->op_id = 0;
+      LMC_TEST_CRASH
+      lmc_free(base, va);
+    }
+    lmc_log_finish(base);
   } else {
     LMC_TEST_CRASH
-    lmc_free(base, hr->va_value);
-  }
-  hr->va_value = l->va_value;
-  if (free_key) {
-    size_t va = l->va_key;
-    l->op_id = 0;
-    LMC_TEST_CRASH
+    size_t va = hr->va_value;
+    if ((hr->va_value = lmc_ht_strdup(base, value, n_value)) == 0) {
+      LMC_MEMORY_POOL_FULL("ht_set");
+      goto failed_no_log;
+    }
     lmc_free(base, va);
   }
-  lmc_log_finish(base);
   return 1;
+
+failed:
+  lmc_log_finish(base);
+failed_no_log:
+  return 0;
 }
 
 int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
   va_ht_hash_entry_t va_hr;
   ht_hash_entry_t *hr;
-  ht_hash_entry_t *p = NULL;
+  size_t va_p;
   ht_hash_t *ht = base + va_ht;
   size_t i;
   unsigned long k = ht_hash_key(key, n_key);
@@ -178,15 +189,24 @@ int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
       if (s[i] != key[i]) continue;
     }
 
+    if (!lmc_is_va_valid(base, va_p)) {
+      printf("va is invalid: %x\n", va_p);
+      abort();
+    }
+    ht_hash_entry_t *p = va_p ? base + va_p : 0;
+    printf("va_p: %x\n", va_p);
     if (p) { p->va_next = hr->va_next; }
     else { ht->va_buckets[k] = 0; }
+    printf("1\n");
     lmc_free(base, hr->va_key);
+    printf("2\n");
     lmc_free(base, hr->va_value);
+    printf("3\n");
     lmc_free(base, va_hr);
     return 1; 
 
   next:
-    p = base + hr->va_key;
+    va_p = hr->va_key;
   }
   return 0;
 }
@@ -200,6 +220,11 @@ int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx, ITERATOR_P(iter))
     for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
         va_hr = hr->va_next) {
       hr = va_hr ? base + va_hr : 0;
+      if (!lmc_is_va_valid(base, hr->va_key)) {
+        printf("va is invalid: %x\n", hr->va_key);
+        printf("value: %x\n", hr->va_value);
+        abort();
+      }
       iter(ctx, base + hr->va_key, base + hr->va_value);
     }
   }

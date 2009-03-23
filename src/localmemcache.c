@@ -11,8 +11,8 @@
 int lmc_set_lock_flag(void *base, lmc_error_t *e) {
   lmc_mem_descriptor_t *md = base;
   if (md->locked != 0) {
-    strncpy(e->error_str, "Failed to lock shared memory region--"
-        "may be corrupt.", 1023); 
+    lmc_handle_error_with_err_string("lmc_set_lock_flag",
+        "Failed to lock shared memory--may be corrupt!", "ShmLockFailed", e);
     return 0;
   } else {
     md->locked = 1;
@@ -23,8 +23,9 @@ int lmc_set_lock_flag(void *base, lmc_error_t *e) {
 int lmc_release_lock_flag(void *base, lmc_error_t *e) {
   lmc_mem_descriptor_t *md = base;
   if (md->locked != 1) {
-    strncpy(e->error_str, "Shared memory region appears to be unlocked already"
-        "--may be corrupt.", 1023); 
+    lmc_handle_error_with_err_string("lmc_release_lock_flag",
+        "Shared memory appears to be unlocked already--may be corrupt!", 
+        "ShmUnlockFailed", e);
     return 0;
   } else {
     md->locked = 0;
@@ -32,13 +33,39 @@ int lmc_release_lock_flag(void *base, lmc_error_t *e) {
   return 1;
 }
 
+void lmc_clean_namespace_string(char *result, const char* original) {
+  size_t n = strlen(original);
+  if (n > 256) { n = 256; }
+  const char *s = original;
+  char *d = result;
+  char ch;
+  for (; n--; d++, s++) { 
+    ch = *s;
+    if ((ch >= 'a' && ch <= 'z') || 
+        (ch >= 'A' && ch <= 'Z')) {
+      *d = ch;
+    } else {
+      *d = '-';
+    }
+  }
+  *d = 0x0;
+}
+
 int local_memcache_clear_namespace(const char *namespace, int repair, 
     lmc_error_t *e) {
-  lmc_clean_namespace(namespace, e);
+  char clean_ns[1024];
+  lmc_clean_namespace_string((char *)clean_ns, namespace);
+  lmc_clean_namespace((char *)clean_ns, e);
   if (repair) { 
-    lmc_lock_t *l = lmc_lock_init(namespace, 1, e);
+    lmc_lock_t *l = lmc_lock_init((char *)clean_ns, 1, e);
     lmc_lock_repair(l);
     free(l);
+    char check_lock_name[1024];
+    snprintf((char *)&check_lock_name, 1023, "%s-check", (char *)clean_ns);
+    lmc_lock_t *check_l;
+    check_l =  lmc_lock_init(check_lock_name, 1, e);
+    lmc_lock_repair(check_l);
+    free(check_l);
   }
   return 1;
 }
@@ -52,12 +79,15 @@ local_memcache_t *__local_memcache_create(const char *namespace, size_t size,
   if (!lmc || (lmc->namespace = strdup(namespace)) == NULL) return NULL;
   lmc->size = size;
   if ((lmc->lock = lmc_lock_init(lmc->namespace, 1, e)) == NULL) goto failed;
+retry:
   if (!lmc_is_lock_working(lmc->lock, e)) {
-    printf("lmc_is_lock_working\n");
     if (!force) {
-      strncpy(e->error_str, "Failed to lock shared memory!", 1023); 
+      printf("Mount failed\n");
+      if (local_memcache_check_namespace(namespace, e))  goto retry;
+      lmc_handle_error_with_err_string("local_memcache_create",
+          "Failed to repair shared memory!", "ShmLockFailed", e);
       goto failed;
-    }
+    } 
     *ok = 0;
   }
   {
@@ -100,65 +130,96 @@ failed:
 
 local_memcache_t *local_memcache_create(const char *namespace, size_t size, 
     lmc_error_t* e) {  
-  return __local_memcache_create(namespace, size, 0, 0, e);
+  char clean_ns[1024];
+  lmc_clean_namespace_string((char *)clean_ns, namespace);
+  return __local_memcache_create((char *)clean_ns, size, 0, 0, e);
 }
 
 int local_memcache_check_namespace(const char *namespace, lmc_error_t *e) {
-  if (!lmc_does_namespace_exist(namespace)) { 
-    printf("namespace '%s' does not exist!\n", namespace);
+  char clean_ns[1024];
+  lmc_clean_namespace_string((char *)clean_ns, namespace);
+  if (!lmc_does_namespace_exist((char *)clean_ns)) { 
+    printf("namespace '%s' does not exist!\n", (char *)clean_ns);
     return 1;
   }
+
+  char check_lock_name[1024];
+  snprintf((char *)check_lock_name, 1023, "%s-check", (char *)clean_ns);
+  lmc_lock_t *check_l;
+  if ((check_l = lmc_lock_init(check_lock_name, 1, e)) == NULL)  {
+    lmc_handle_error_with_err_string("lmc_lock_init", 
+        "Unable to initialize lock for checking namespace", "LockError", e);
+    return 0;
+  }
+  if (!lmc_lock_obtain_mandatory("local_memcache_check_namespace", 
+      check_l, e))  goto check_lock_failed;
   lmc_mem_descriptor_t *md = 0;
-  size_t ns_size = lmc_namespace_size(namespace);
+  size_t ns_size = lmc_namespace_size((char *)clean_ns);
   int ok;
-  local_memcache_t *lmc = __local_memcache_create(namespace, ns_size, 1, &ok, e);
-  printf("lmc: %x\n", lmc);
+  local_memcache_t *lmc = __local_memcache_create((char *)clean_ns, ns_size, 
+      1, &ok, e);
   if (!lmc) {
     printf("WOAH: lmc == 0!\n");
-    return 0;
+    goto failed;
   }
   md = lmc->base;
   if (!ok) {
-    printf("namespace is not OK!\n");
-    printf("e: %s\n", e->error_str);
-    if (!md->locked) {
-      printf("Just has a stale lock\n");
-      goto release;
-    }
-    printf("md: %x\n", md);
-    printf("log: %d\n", md->log.op_id);
-    if (md->log.op_id == 0) {
-      printf("No op_id set..\n");
-      goto unlock_and_release;
-    }
-    if (ht_redo(lmc->base, md->va_hash, &md->log, e)) {
-      goto unlock_and_release;
-    }
-    return 0;
+    printf("[lmc] Auto repairing namespace '%s'\n", namespace);
+    if (!md->locked) goto release;
+    if (md->log.op_id == 0) goto unlock_and_release;
+    if (ht_redo(lmc->base, md->va_hash, &md->log, e)) goto unlock_and_release;
+    goto failed;
+  } else {
+    //printf("ns OK!\n");
+    //if (md->locked != 0) {
+    //  printf("But md is still locked...\n");
+    //}
   }
-  if (md && !ht_check_memory(lmc->base, md->va_hash)) goto failed;
-  return 1;
+  //if (md && !ht_check_memory(lmc->base, md->va_hash)) goto failed;
+  goto release_but_no_lock_correction;
 
 unlock_and_release:
   if (md) {
     if (!ht_check_memory(lmc->base, md->va_hash)) goto failed;
-    printf("check OK\n");
     md->locked = 0;
   }
 release:
-  lmc_lock_release("local_memcache_create", lmc->lock, e);
+  {
+    int v; 
+    sem_getvalue(lmc->lock->sem, &v);
+    //printf("AFTER REPAIR: %d\n", v);
+    if (v == 0) {
+      lmc_lock_release("local_memcache_create", lmc->lock, e);
+    }
+  }
+release_but_no_lock_correction:
   local_memcache_free(lmc);
+  lmc_lock_release("local_memcache_check_namespace", check_l, e);
+  free(check_l);
   return 1;
 failed:
-  strncpy(e->error_str, "Unable to recover namespace", 1023); 
-  lmc_lock_release("local_memcache_create", lmc->lock, e);
+  lmc_handle_error_with_err_string("local_memcache_check_namespace",
+      "Unable to recover namespace", "RecoveryFailed", e);
   local_memcache_free(lmc);
+  lmc_lock_release("local_memcache_check_namespace", check_l, e);
+check_lock_failed:
+  free(check_l);
+  printf("[lmc] Failed to repair namespace '%s'\n", namespace);
   return 0;
 }
 
 
 int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
-  if (!lmc_lock_obtain(who, lmc->lock, &lmc->error)) return 0;
+  int r;
+  printf("[%s] LOCK\n", who);
+retry:
+  r = lmc_lock_obtain(who, lmc->lock, &lmc->error);
+  if (!r && (strcmp(lmc->error.error_type, "LockTimedOut") == 0)) {
+    printf("timedout!\n");
+    if (local_memcache_check_namespace(lmc->namespace, &lmc->error))  goto retry;
+    printf("[lmc] Cannot repair namespace '%s'\n", lmc->namespace);
+  }
+  if (!r) return 0;
   if (!lmc_set_lock_flag(lmc->base, &lmc->error)) {
     lmc_lock_release(who, lmc->lock, &lmc->error);
     return 0;
@@ -167,6 +228,7 @@ int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
 }
 
 int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc) {
+  printf("[%s] unlock\n", who);
   int r = 1;
   if (!lmc_release_lock_flag(lmc->base, &lmc->error)) r = 0;
   lmc_lock_release(who, lmc->lock, &lmc->error);
@@ -175,7 +237,10 @@ int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc) {
 
 const char *local_memcache_get(local_memcache_t *lmc, 
     const char *key, size_t n_key, size_t *n_value) {
-  return ht_get(lmc->base, lmc->va_hash, key, n_key, n_value);
+  if (!lmc_lock_shm_region("local_memcache_get", lmc)) return 0;
+  const char *r = ht_get(lmc->base, lmc->va_hash, key, n_key, n_value);
+  if (!lmc_unlock_shm_region("local_memcache_get", lmc)) return 0;
+  return r;
 }
 
 int local_memcache_set(local_memcache_t *lmc, 
@@ -206,7 +271,9 @@ int local_memcache_free(local_memcache_t *lmc) {
 }
 
 int local_memcache_iterate(local_memcache_t *lmc, void *ctx, ITERATOR_P(iter)) {
+  if (!lmc_lock_shm_region("local_memcache_iterate", lmc)) return 0;
   int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, iter);
+  if (!lmc_unlock_shm_region("local_memcache_iterate", lmc)) return 0;
   return r;
 }
 

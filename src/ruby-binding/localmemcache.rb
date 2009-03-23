@@ -13,7 +13,11 @@ class LocalMemCache
   class ShmError < LocalMemCacheError; end
   class MemoryPoolFull < LocalMemCacheError; end
   class LockError < LocalMemCacheError; end
+  class LockTimedOut < LocalMemCacheError; end
   class OutOfMemoryError < LocalMemCacheError; end
+  class RecoveryFailed < LocalMemCacheError; end
+  class ShmLockFailed < LocalMemCacheError; end
+  class ShmUnlockFailed < LocalMemCacheError; end
 
   #  Creates a new handle for accessing a shared memory region.
   #

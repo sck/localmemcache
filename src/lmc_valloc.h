@@ -29,6 +29,10 @@ typedef struct {
   lmc_log_descriptor_t log;
 } lmc_mem_descriptor_t;
 
+typedef struct {
+  size_t next;
+  size_t size;
+} lmc_mem_chunk_descriptor_t;
 
 
 size_t lmc_valloc(void *base, size_t size);

@@ -39,16 +39,16 @@ class TortureTesting
         d << [] if d.size == 2
         _obj, method, parameter_description = d
 	obj = Symbol === _obj ? self.send(obj) : _obj
-        begin
+        #begin
           para = randomize_parameters(parameter_description)
           obj.send(*([method] + para))
-	rescue Exception => e
-	  r = handle_exception.call(obj, para, e) if handle_exception 
-	  if r
-	    puts "FAILED #{method}: #{para.inspect}"
-	    break
-	  end
-        end
+	#rescue Exception => e
+	#  r = handle_exception.call(obj, para, e) if handle_exception 
+	#  if r
+	#    puts "FAILED #{method}: #{para.inspect}"
+	#    break
+	#  end
+        #end
       }
     end
   end

@@ -49,7 +49,6 @@ int lmc_namespace_size(const char *ns) {
   return lmc_file_size(fn);
 }
 
-
 int lmc_clean_namespace(const char *ns, lmc_error_t *e) {
   lmc_shm_ensure_root_path();
   char fn[1024];

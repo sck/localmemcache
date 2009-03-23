@@ -3,24 +3,39 @@ $DIR=File.dirname(__FILE__)
 
 require 'localmemcache'
 
-LocalMemCache.clear_namespace("crash-test", true);
+LocalMemCache.clear_namespace("crash-t", true);
 #exit
 #puts "c"
-#LocalMemCache.check_namespace("crash-test");
+#LocalMemCache.check_namespace("crash-t");
 
 
-begin
+$pids = []
+5.times { $pids << fork {
+  lm = LocalMemCache.new :namespace=>"crash-t"
+  puts "pid: #{$$}"
+  c = 0;
+  40000000.times {
+      c += 1
+      r = rand(10000).to_s
+      lm.set(r, r)
+      lm.get(r) == r
+  }
+  puts "#{$$} Worker finished"
+}}
+
+40.times {
 $pid = fork {
   LocalMemCache.enable_test_crash
-  $lm2 = LocalMemCache.new :namespace=>"crash-test"
-  20.times {
+  $lm2 = LocalMemCache.new :namespace=>"crash-t"
+  2000.times {
     r = rand(10000).to_s
     $lm2.set(r, r)
     $lm2.get(r)
   }
 }
-
 Process.wait $pid
-LocalMemCache.disable_test_crash
-LocalMemCache.check_namespace("crash-test")
-end while true
+sleep 3
+}
+
+$pids.each {|p| Process.kill "TERM", p }
+Process.wait $pids.last

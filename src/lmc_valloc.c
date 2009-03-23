@@ -15,13 +15,7 @@
 #include "lmc_lock.h"
 #include "lmc_common.h"
 
-#define LMC_TEST_CRASH 
 #undef lmc_valloc 
-
-typedef struct {
-  size_t next;
-  size_t size;
-} lmc_mem_chunk_descriptor_t;
 
 lmc_mem_chunk_descriptor_t *md_first_free(void *base) {
   lmc_mem_descriptor_t *md = base;
@@ -391,7 +385,7 @@ int lmc_um_find_leaks(void *base, char *bf) {
     space += i - gs;
     __lmc_free(base, gs, i - gs);
   }
-  printf("total leaks: %zd block, %zd bytes total\n", gap_count, space);
+  //printf("total leaks: %zd block, %zd bytes total\n", gap_count, space);
   return 1;
 }
 
@@ -455,7 +449,6 @@ int lmc_um_mark_allocated(void *base, char *bf, size_t va) {
 }
 
 char *lmc_um_new_mem_usage_bitmap(void *base) {
-  printf("lmc_um_new_mem_usage_bitmap\n");
   lmc_mem_descriptor_t *md = base;
   size_t ts = ((md->total_size + 7) / 8);
   char *bf = calloc(1, ts);

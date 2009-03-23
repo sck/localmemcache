@@ -154,6 +154,22 @@ int lmc_ruby_iter(void *ctx, const char* key, const char* value) {
   return 1;
 }
 
+static VALUE lmc_ruby_iter_handle_exception(VALUE unused) {
+  printf("Exception while iterating!\n");
+  abort();
+  return Qnil;
+}
+
+static VALUE __LocalMemCache__keys(VALUE d) {
+  VALUE obj = rb_ary_entry(d, 0);
+  VALUE r = rb_ary_entry(d, 1);
+  lmc_ruby_iter_collect_keys data;
+  data.ary = r;
+  int success = local_memcache_iterate(get_LocalMemCache(obj), 
+      (void *) &data, lmc_ruby_iter);
+  if (!success) { return Qnil; }
+}
+
 /* 
  *  call-seq:
  *     lmc.keys()   ->   array or nil
@@ -161,13 +177,11 @@ int lmc_ruby_iter(void *ctx, const char* key, const char* value) {
  *  Returns a list of keys.
  */
 static VALUE LocalMemCache__keys(VALUE obj) {
-  VALUE r = rb_ary_new();
-  lmc_ruby_iter_collect_keys data;
-  data.ary = r;
-  int success = local_memcache_iterate(get_LocalMemCache(obj), 
-      (void *) &data, lmc_ruby_iter);
-  if (!success) { return Qnil; }
-  return r;
+  VALUE d = rb_ary_new();
+  rb_ary_push(d, obj);
+  rb_ary_push(d, rb_ary_new());
+  rb_rescue(__LocalMemCache__keys, d, lmc_ruby_iter_handle_exception, 0);
+  return rb_ary_entry(d, 1);
 }
 
 void Init_rblocalmemcache() {
