@@ -211,7 +211,7 @@ check_lock_failed:
 
 int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
   int r;
-  printf("[%s] LOCK\n", who);
+  //printf("[%s] LOCK\n", who);
 retry:
   r = lmc_lock_obtain(who, lmc->lock, &lmc->error);
   if (!r && (strcmp(lmc->error.error_type, "LockTimedOut") == 0)) {
@@ -228,18 +228,25 @@ retry:
 }
 
 int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc) {
-  printf("[%s] unlock\n", who);
+  //printf("[%s] unlock\n", who);
   int r = 1;
   if (!lmc_release_lock_flag(lmc->base, &lmc->error)) r = 0;
   lmc_lock_release(who, lmc->lock, &lmc->error);
   return r;
 }
 
-const char *local_memcache_get(local_memcache_t *lmc, 
+const char *__local_memcache_get(local_memcache_t *lmc, 
     const char *key, size_t n_key, size_t *n_value) {
   if (!lmc_lock_shm_region("local_memcache_get", lmc)) return 0;
   const char *r = ht_get(lmc->base, lmc->va_hash, key, n_key, n_value);
-  if (!lmc_unlock_shm_region("local_memcache_get", lmc)) return 0;
+  //if (!lmc_unlock_shm_region("local_memcache_get", lmc)) return 0;
+  return r;
+}
+
+const char *local_memcache_get(local_memcache_t *lmc, 
+    const char *key, size_t n_key, size_t *n_value) {
+  const char *r = __local_memcache_get(lmc, key, n_key, n_value);
+  if (!lmc_lock_shm_region("local_memcache_get", lmc)) return 0;
   return r;
 }
 

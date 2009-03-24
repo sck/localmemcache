@@ -18,12 +18,12 @@ typedef struct {
 } lmc_log_ht_set;
 
 size_t lmc_ht_strdup(void *base, const char *s, size_t l) {
-  size_t va_s = lmc_valloc(base, l +  sizeof(size_t));
+  size_t va_s = lmc_valloc(base, l +  sizeof(size_t) + 1);
   if (!va_s) { return 0; }
   char *p = base + va_s;
   *(size_t *) p = l;
   p += sizeof(size_t);
-  memcpy(p, s, l);
+  memcpy(p, s, l + 1);
   return va_s;
 }
 
@@ -59,22 +59,25 @@ ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key,
   ht_hash_t *ht = base + va_ht;
   size_t i;
   for (va_hr = ht->va_buckets[ht_hash_key(key, n_key)]; 
-      va_hr != 0 && hr != NULL; va_hr = hr->va_next) {
+      va_hr != 0 && hr != NULL; ) {
     hr = va_hr ? base + va_hr : 0;
-    if (!hr) continue;
-    if (!lmc_is_va_valid(base, hr->va_key)) {
-      printf("va is invalid: %x\n", hr->va_key);
-      printf("value: %x\n", hr->va_value);
-    }
+    if (!hr) goto next;
+    //if (!lmc_is_va_valid(base, hr->va_key)) {
+    //  printf("va is invalid: %x\n", hr->va_key);
+    //  printf("value: %x\n", hr->va_value);
+    //}
     //printf("va_key: %d\n", hr->va_key);
     char *s = base + hr->va_key;
     size_t l = *(size_t *) s;
-    if (l != n_key) continue;
+    if (l != n_key) goto next;
     s += sizeof(size_t);
     for (i = 0; i < l; i++) {
-      if (s[i] != key[i]) continue;
+      if (s[i] != key[i]) goto next;
     }
     return hr;
+
+next:
+    va_hr = hr->va_next;
   }
   return &null_node;
 }
@@ -122,6 +125,7 @@ int ht_redo(void *base, va_ht_hash_t va_ht, lmc_log_descriptor_t *l,
 int ht_set(void *base, va_ht_hash_t va_ht, const char *key, 
     size_t n_key, const char *value, size_t n_value, lmc_error_t *e) {
   ht_hash_t *ht = base + va_ht;
+  //printf("set: k '%s': %zd, v: %zd\n", key, n_key, n_value);
   ht_hash_entry_t *hr = ht_lookup(base, va_ht, key, n_key);
   unsigned v;
   if (hr->va_key == 0) {
@@ -173,43 +177,46 @@ failed_no_log:
 int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
   va_ht_hash_entry_t va_hr;
   ht_hash_entry_t *hr;
-  size_t va_p;
+  size_t va_p = 0;
   ht_hash_t *ht = base + va_ht;
   size_t i;
+  //printf("delete key: %s\n", key);
   unsigned long k = ht_hash_key(key, n_key);
   for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
       va_hr = hr->va_next) {
     hr = va_hr ? base + va_hr : 0;
     if (!hr) goto next;
+    //if (!lmc_is_va_valid(base, hr->va_key)) {
+    //  printf("va is invalid: %x\n", va_p);
+    //  abort();
+    //}
     char *s = base + hr->va_key;
     size_t l = *(size_t *) s;
     if (l != n_key) goto next;
     s += sizeof(size_t);
     for (i = 0; i < l; i++) {
-      if (s[i] != key[i]) continue;
+      if (s[i] != key[i]) goto next;
     }
 
-    if (!lmc_is_va_valid(base, va_p)) {
-      printf("va is invalid: %x\n", va_p);
-      abort();
-    }
+    //printf("deleting va: %zd\n", va_hr);
+
     ht_hash_entry_t *p = va_p ? base + va_p : 0;
-    printf("va_p: %x\n", va_p);
     if (p) { p->va_next = hr->va_next; }
     else { ht->va_buckets[k] = 0; }
-    printf("1\n");
     lmc_free(base, hr->va_key);
-    printf("2\n");
     lmc_free(base, hr->va_value);
-    printf("3\n");
     lmc_free(base, va_hr);
     return 1; 
 
   next:
-    va_p = hr->va_key;
+    va_p = va_hr;
   }
   return 0;
 }
+
+//void __ds(void* base, size_t va) {
+//  printf("va: %zd s: %zd\n", va, *(size_t *)(base + va));
+//}
 
 int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx, ITERATOR_P(iter)) {
   va_ht_hash_entry_t va_hr;
@@ -220,11 +227,13 @@ int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx, ITERATOR_P(iter))
     for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
         va_hr = hr->va_next) {
       hr = va_hr ? base + va_hr : 0;
-      if (!lmc_is_va_valid(base, hr->va_key)) {
-        printf("va is invalid: %x\n", hr->va_key);
-        printf("value: %x\n", hr->va_value);
-        abort();
-      }
+      //__ds(base, hr->va_value);
+      //__ds(base, hr->va_key);
+      //if (!lmc_is_va_valid(base, hr->va_key)) {
+      //  printf("va is invalid: %x\n", hr->va_key);
+      //  printf("value: %x\n", hr->va_value);
+      //  abort();
+      //}
       iter(ctx, base + hr->va_key, base + hr->va_value);
     }
   }

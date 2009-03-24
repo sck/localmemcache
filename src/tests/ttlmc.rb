@@ -9,22 +9,14 @@ $h = LocalMemCache.new :namespace=>'torture', :size_mb => 200
 
 class LocalMemCache
   def __set(k, v) 
-    puts "set: #{k.inspect} => #{v.inspect}"
     set(k, v)
-    puts "set done"
     if get(k) != v.to_s
       puts "Set FAILED!"
       raise "set failed"
     end
-    puts "se2t done"
-    keys();
-    puts "se3t done"
   end
   def __delete(k)
-    keys()
-    puts "delete: #{k.inspect}"
     delete(k)
-    keys()
   end
 
 end

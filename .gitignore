@@ -1,0 +1,16 @@
+*.o
+*.a
+core
+vgcore*
+core*
+*.bak
+.*.sw?
+autom4te.cache
+config.status
+?
+config.log
+lmc_config.h
+Makefile
+*.so
+pkg
+

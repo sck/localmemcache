@@ -39,4 +39,7 @@ int local_memcache_clear_namespace(const char *namespace, int repair,
     lmc_error_t *e);
 int local_memcache_check_namespace(const char *namespace, lmc_error_t *e);
 
+const char *__local_memcache_get(local_memcache_t *lmc, 
+    const char *key, size_t n_key, size_t *n_value);
+
 #endif

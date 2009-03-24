@@ -99,9 +99,11 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
  */
 static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
   size_t l;
-  const char* r = local_memcache_get(get_LocalMemCache(obj), 
+  const char* r = __local_memcache_get(get_LocalMemCache(obj), 
       rstring_ptr(key), rstring_length(key), &l);
-  return lmc_ruby_string2(r, l);
+  VALUE rr = lmc_ruby_string2(r, l);
+  lmc_unlock_shm_region("local_memcache_get", get_LocalMemCache(obj));
+  return rr;
 }
 
 /* 
@@ -154,12 +156,6 @@ int lmc_ruby_iter(void *ctx, const char* key, const char* value) {
   return 1;
 }
 
-static VALUE lmc_ruby_iter_handle_exception(VALUE unused) {
-  printf("Exception while iterating!\n");
-  abort();
-  return Qnil;
-}
-
 static VALUE __LocalMemCache__keys(VALUE d) {
   VALUE obj = rb_ary_entry(d, 0);
   VALUE r = rb_ary_entry(d, 1);
@@ -180,7 +176,12 @@ static VALUE LocalMemCache__keys(VALUE obj) {
   VALUE d = rb_ary_new();
   rb_ary_push(d, obj);
   rb_ary_push(d, rb_ary_new());
-  rb_rescue(__LocalMemCache__keys, d, lmc_ruby_iter_handle_exception, 0);
+  int error = 0;
+  rb_protect(__LocalMemCache__keys, d, &error);
+  if (error) {
+    lmc_unlock_shm_region("local_memcache_iterate", get_LocalMemCache(obj));
+    rb_exc_raise(ruby_errinfo);
+  }
   return rb_ary_entry(d, 1);
 }
 
