@@ -1,34 +1,24 @@
 Localmemcache README
 =====================
 
-Efficiently sharing a hashtable between processes on a local Unix machine.
+The beauty of memcached.  For local data.  Blazingly fast.
+
+* http://localmemcache.rubyforge.org/
 
 WHAT IS IT?
 ===========
 
-Localmemcache aims to be faster than using memcached locally by using shared
-memory, but providing a similar interface.
+Localmemcache is a library for C and ruby that aims to provide an interface
+similar to memcached but for accessing local data instead of remote data.  It's
+based on mmap()'ed shared memory for maximum speed.
 
+SUPPORTED SYSTEMS
+=================
 
-PERFORMANCE
-===========
-Here's a quick speed comparison, made on an 
-Intel(R) Xeon(R) CPU E5205 @ 1.86GHz:
-
-Benchmark pseudo code:
-
-2_000_000.times {
-  index = rand(10000).to_s
-  $hash.set(index, index)
-  $hash.get(index)
-}
-
-MemCache:      253326.122 ms
-LocalMemCache: 6055.552 ms
-Ruby's Hash:   4963.313 ms
-
-So localmemcache is about 40 times faster than using memcache locally, and
-about 20% slower than Ruby's hash.
+- Unix (for mmap)
+- A CPU architecture with more than 32 bits is recommended, since otherwise you
+  might run out of virtual address space when you use larger shared memory
+  segments.
 
 EXAMPLE
 =======
@@ -41,43 +31,13 @@ $lm[:foo] = 1
 $lm[:foo]
 $lm.delete(:foo)
 
-
 INSTALLATION
 ============
 
+Ruby binding:
+
 # gem install localmemcache
 
-How localmemcache works
-=======================
+If you just want to use the C API, download the .tar.gz from:
 
-localmemcache is essentially three components:
-
-- a wrapper around mmap()
-- an allocator that works with relative memory addresses (replaces malloc(), etc.)
-- hashtable data type
-
-Namespace life-cycle
-====================
-
-| $lm = LocalMemCache.new :namespace => :viewcounters #, :size_mb => 1024
-
-Namespaces reside as memory-mapped files in /var/tmp/localmemcache.  If the
-namespace does not yet exist, it is created with a default size of 1GB.  It is
-not possible to resize a namespace, so choose a size that will be enough to
-hold all your data.  The class method clear_namespace can be used to delete
-namespaces.  You should also use this function in case your namespace becomes
-inconsistent.  Note that just deleting the memory-mapped file is not enough.
-
-The default size of a namespace is 1GB, it can be changed by passing the option
-:size_mb to the constructor.  Note that this is the maximum size of the shared
-memory segment which cannot be extended later without clearing the namespace
-first.  Setting large sizes shouldn't be much of a problem since only that
-memory which is really used will exist in physical ram and disk.
-
-SUPPORTED SYSTEMS
-=================
-
-- Unix (for mmap)
-- A CPU architecture with more than 32 bit is recommended, since otherwise you
-  might run out of virtual address space when you use larger shared memory
-  segments.
+http://rubyforge.org/frs/?group_id=7925

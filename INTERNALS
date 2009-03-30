@@ -1,0 +1,26 @@
+How localmemcache works
+=======================
+
+localmemcache is essentially three components:
+
+- a wrapper around mmap()
+- an allocator that works with relative memory addresses (replaces malloc(), etc.)
+- hashtable data type
+
+Namespace life-cycle
+====================
+
+| $lm = LocalMemCache.new :namespace => :viewcounters #, :size_mb => 1024
+
+Namespaces reside as memory-mapped files in /var/tmp/localmemcache.  If the
+namespace does not yet exist, it is created with a default size of 1GB.  It is
+not possible to resize a namespace, so choose a size that will be enough to
+hold all your data.  The class method clear_namespace can be used to delete
+namespaces.  You should also use this function in case your namespace becomes
+inconsistent.  Note that just deleting the memory-mapped file is not enough.
+
+The default size of a namespace is 1GB, it can be changed by passing the option
+:size_mb to the constructor.  Note that this is the maximum size of the shared
+memory segment which cannot be extended later without clearing the namespace
+first.  Setting large sizes shouldn't be much of a problem since only that
+memory which is really used will exist in physical ram and disk.
