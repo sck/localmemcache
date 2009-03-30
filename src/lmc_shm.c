@@ -72,7 +72,6 @@ lmc_shm_t *lmc_shm_create(const char* namespace, size_t size, int use_persistenc
   lmc_shm_t *mc = calloc(1, sizeof(lmc_shm_t));
   if (!mc) { 
     STD_OUT_OF_MEMORY_ERROR("lmc_shm_create");
-    //lmc_handle_error_with_err_string("lmc_shm_create", "Out of memory", e);
     return NULL; 
   }
   strncpy((char *)&mc->namespace, namespace, 1023);

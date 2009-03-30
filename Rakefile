@@ -5,13 +5,13 @@ def manifest
   `git ls-files`.split("\n").select{|n| !%r!/site/!.match(n) }
 end
 
-def version() File.read("VERSION") end
+def version() File.read("VERSION").chomp end
 
 desc "Generate a ChangeLog"
 task :changelog do
   File.open("ChangeLog", "w") { |out|
     `git log -z`.split("\0").map { |chunk|
-      author = chunk[/Author: (.*)/, 1].strip
+      author = chunk[/Author: (.*)/, 1].strip.gsub(/mysites/, "Sven C. Koehler")
       date = chunk[/Date: (.*)/, 1].strip
       desc, detail = $'.strip.split("\n", 2)
       detail ||= ""
@@ -22,6 +22,13 @@ task :changelog do
       out.puts
     }
   }
+end
+
+task :c_api_package do
+  tgz = "pkg/localmemcache-#{version}.tar.gz"
+  sh "test -d pkg || mkdir pkg"
+  puts "Creating #{tgz}"
+  sh "tar czf #{tgz.inspect} #{manifest.map{|n| n.inspect }.join(" ")}"
 end
 
 #task :pushsite => [:rdoc] do
@@ -47,8 +54,8 @@ else
     s.name            = "localmemcache"
     s.version         = version
     s.platform        = Gem::Platform::RUBY
-    s.summary         = "Efficiently sharing a hashtable between " +
-        "processes on a local Unix machine."
+    s.summary         = "The beauty of memcached.  For local data.  " + 
+        "Blazingly fast" 
 
     s.description = <<-EOF
 

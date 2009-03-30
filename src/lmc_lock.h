@@ -21,4 +21,5 @@ int lmc_is_locked(lmc_lock_t* l, lmc_error_t *e);
 int lmc_is_lock_working(lmc_lock_t* l, lmc_error_t *e);
 void lmc_lock_repair(lmc_lock_t *l);
 int lmc_lock_get_value(lmc_lock_t* l);
+int lmc_clear_namespace_lock(const char *namespace);
 #endif

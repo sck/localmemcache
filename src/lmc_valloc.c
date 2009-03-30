@@ -134,7 +134,7 @@ size_t __s(char *where, lmc_mem_status_t ms, size_t mem_before, size_t expected_
 
 size_t lmc_valloc(void *base, size_t size) {
   lmc_mem_descriptor_t *md = base;
-  // MOD by power of 2
+  // idea: MOD by power of 2
   size_t s = lmc_max(size + sizeof(size_t), 
       sizeof(lmc_mem_chunk_descriptor_t) + sizeof(size_t));
   // larger than available space?
@@ -366,13 +366,11 @@ int lmc_um_find_leaks(void *base, char *bf) {
     if (lmc_um_getbit(bf, i) == 0) {
       if (!gap) {
         gs = i;
-        //printf("gs: %zd ", i);
         gap = 1;
         gap_count++;
       }
     } else {
       if (gap) {
-        //printf("ge: %zd, size: %zd\n", i, i - gs);
         gap = 0;
         space += i - gs;
         __lmc_free(base, gs, i - gs);
@@ -380,7 +378,6 @@ int lmc_um_find_leaks(void *base, char *bf) {
     }
   }
   if (gap) {
-    //printf("ge: %zd, size: %zd\n", i, i - gs);
     gap = 0;
     space += i - gs;
     __lmc_free(base, gs, i - gs);
@@ -393,8 +390,6 @@ int lmc_um_check_unmarked(void *base, char *bf, size_t va, size_t size) {
   size_t i;
   size_t n;
   memset(&n, 0x0, sizeof(n));
-  //printf("bf: %x\n", bf);
-  //printf("check: %zd %zd\n", va, size);
   size_t end = va + size;
   for (i = va; i < va + size; ++i) { 
     size_t *b = (void *)bf + i / 8;
@@ -402,14 +397,14 @@ int lmc_um_check_unmarked(void *base, char *bf, size_t va, size_t size) {
       i += sizeof(size_t) * 8; b++; 
     }
     if (lmc_um_getbit(bf, i) != 0) {
-      printf("umarked2: FAILED at: %zd\n", i);
-      printf("umarked2: FAILED start: %zd\n", va);
-      size_t d = i;
-      while (lmc_um_getbit(bf, d) != 0) { --d; }
-      printf("area starts at: %zd\n", d);
-      size_t e = i;
-      while (lmc_um_getbit(bf, e) != 0) { ++e; }
-      printf("area ends at: %zd\n", e);
+      //printf("umarked2: FAILED at: %zd\n", i);
+      //printf("umarked2: FAILED start: %zd\n", va);
+      //size_t d = i;
+      //while (lmc_um_getbit(bf, d) != 0) { --d; }
+      //printf("area starts at: %zd\n", d);
+      //size_t e = i;
+      //while (lmc_um_getbit(bf, e) != 0) { ++e; }
+      //printf("area ends at: %zd\n", e);
       return 0;
     }
   }
@@ -417,7 +412,6 @@ int lmc_um_check_unmarked(void *base, char *bf, size_t va, size_t size) {
 }
 
 int lmc_um_mark(void *base, char *bf, size_t va, size_t size) {
-  //printf("mark: %zd %zd\n", va, size);
   size_t i;
   lmc_mem_descriptor_t *md = base;
   if ((va > sizeof(lmc_mem_descriptor_t)) &&
@@ -442,7 +436,6 @@ int lmc_um_mark(void *base, char *bf, size_t va, size_t size) {
 }
 
 int lmc_um_mark_allocated(void *base, char *bf, size_t va) {
-  //printf("ma: %zd\n", va);
   size_t real_va = va - sizeof(size_t);
   size_t s = *(size_t *)(base + real_va);
   return lmc_um_mark(base, bf, real_va, s);

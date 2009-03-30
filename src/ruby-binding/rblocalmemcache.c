@@ -8,6 +8,8 @@
 /* :nodoc: */
 long long_value(VALUE i) { return NUM2LONG(rb_Integer(i)); }
 /* :nodoc: */
+double double_value(VALUE i) { return NUM2DBL(i); }
+/* :nodoc: */
 VALUE num2string(long i) { return rb_big2str(rb_int2big(i), 10); }
 /* :nodoc: */
 char *rstring_ptr(VALUE s) { 
@@ -43,10 +45,10 @@ void raise_exception(lmc_error_t *e) {
 }
 
 /* :nodoc: */
-static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size) {
+static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size_mb) {
   lmc_error_t e;
   local_memcache_t *lmc = local_memcache_create(rstring_ptr(namespace), 
-      long_value(size), &e);
+      double_value(size_mb), &e);
   if (!lmc) { raise_exception(&e); }
   return Data_Wrap_Struct(klass, NULL, local_memcache_free, lmc);
 }
@@ -142,7 +144,8 @@ static VALUE LocalMemCache__delete(VALUE obj, VALUE key) {
  *  Releases hashtable.
  */
 static VALUE LocalMemCache__close(VALUE obj) {
-  local_memcache_free(get_LocalMemCache(obj));
+  lmc_error_t e;
+  if (!local_memcache_free(get_LocalMemCache(obj), &e)) raise_exception(&e);
   return Qnil;
 }
 

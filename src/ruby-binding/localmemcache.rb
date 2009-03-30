@@ -27,10 +27,9 @@ class LocalMemCache
   #  The size_mb defaults to 1024 (1 GB).
   #
   def self.new(options)
-    o = { :size_mb => 1024 }.update(options || {})
+    o = { :size_mb => 0 }.update(options || {})
     raise "Missing mandatory option ':namespace'" if !o[:namespace]
-    _new(o[:namespace].to_s.gsub("/", "-"), 
-        (o[:size_mb].to_f * 1024 * 1024).to_i );
+    _new(o[:namespace].to_s, o[:size_mb].to_f);
   end
 
   # Deletes the given namespaces, removing semaphores if necessary.
