@@ -13,7 +13,11 @@
 
 #include "lmc_shm.h"
 
-#define LMC_SHM_ROOT_PATH "/var/tmp/localmemcache"
+const char *lmc_namespace_root_path() {
+  const char *ep = getenv("LMC_NAMESPACES_ROOT_PATH");
+  if (ep) { return ep; }
+  return "/var/tmp/localmemcache";
+}
 
 int lmc_does_file_exist(const char *fn) {
   struct stat st;
@@ -27,13 +31,13 @@ int lmc_file_size(const char *fn) {
 }
 
 void lmc_shm_ensure_root_path() {
-  if (!lmc_does_file_exist(LMC_SHM_ROOT_PATH)) {
-    mkdir(LMC_SHM_ROOT_PATH, 01777);
+  if (!lmc_does_file_exist(lmc_namespace_root_path())) {
+    mkdir(lmc_namespace_root_path(), 01777);
   }
 }
 
 void lmc_file_path_for_namespace(char *result, const char *ns) {
-  snprintf(result, 1023, "%s/%s.lmc", LMC_SHM_ROOT_PATH, ns);
+  snprintf(result, 1023, "%s/%s.lmc", lmc_namespace_root_path(), ns);
 }
 
 int lmc_does_namespace_exist(const char *ns) {

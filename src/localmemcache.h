@@ -34,7 +34,8 @@ int local_memcache_set(local_memcache_t *lmc, const char *key, size_t n_key,
     const char* value, size_t n_value);
 int local_memcache_delete(local_memcache_t *lmc, char *key, size_t n_key);
 int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e);
-int local_memcache_iterate(local_memcache_t *lmc, void *ctx, ITERATOR_P(iter));
+int local_memcache_iterate(local_memcache_t *lmc, void *ctx, 
+    LMC_ITERATOR_P(iter));
 int local_memcache_clear_namespace(const char *namespace, int repair, 
     lmc_error_t *e);
 int local_memcache_check_namespace(const char *namespace, lmc_error_t *e);

@@ -31,7 +31,7 @@ unsigned long ht_hash_key(const char *s, size_t l) {
   unsigned long v;
   size_t i;
   for (v = 0, i = 0; i++ < l; s++) { v = *s + 31 * v; }
-  return v % HT_BUCKETS;
+  return v % LMC_HT_BUCKETS;
 }
 
 ht_hash_entry_t null_node = { 0, 0, 0 };
@@ -190,12 +190,13 @@ int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
   return 0;
 }
 
-int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx, ITERATOR_P(iter)) {
+int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx, 
+    LMC_ITERATOR_P(iter)) {
   va_ht_hash_entry_t va_hr;
   ht_hash_entry_t *hr;
   ht_hash_t *ht = base + va_ht;
   size_t k;
-  for (k = 0; k < HT_BUCKETS; k++) {
+  for (k = 0; k < LMC_HT_BUCKETS; k++) {
     for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
         va_hr = hr->va_next) {
       hr = va_hr ? base + va_hr : 0;
@@ -213,15 +214,17 @@ int ht_check_memory(void *base, va_ht_hash_t va_ht) {
   ht_hash_t *ht = base + va_ht;
   if (!lmc_um_mark_allocated(base, bf, va_ht)) goto failed;
   size_t k;
-  for (k = 0; k < HT_BUCKETS; k++) {
+  for (k = 0; k < LMC_HT_BUCKETS; k++) {
     for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
         va_hr = hr->va_next) {
       hr = va_hr ? base + va_hr : 0;
-      if (!hr) continue;
+      if (!hr) goto next_bucket;
       if (!(lmc_um_mark_allocated(base, bf, va_hr) &&
           lmc_um_mark_allocated(base, bf, hr->va_key) &&
           lmc_um_mark_allocated(base, bf, hr->va_value))) goto failed;
     }
+  next_bucket:
+    continue;
   }
   lmc_um_find_leaks(base, bf);
   free(bf);

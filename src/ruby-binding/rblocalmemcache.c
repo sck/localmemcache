@@ -17,6 +17,7 @@ char *rstring_ptr(VALUE s) {
   return r ? r : "nil";
 }
 
+/* :nodoc: */
 size_t rstring_length(VALUE s) { 
   size_t r = NIL_P(s) ? 0 : RSTRING_LEN(rb_String(s)); 
   return r;
@@ -26,10 +27,12 @@ static VALUE ruby_string(const char *s) { return s ? rb_str_new2(s) : Qnil; }
 /* :nodoc: */
 int bool_value(VALUE v) { return v == Qtrue; }
 
+/* :nodoc: */
 static VALUE lmc_ruby_string2(const char *s, size_t l) { 
   return s ? rb_str_new(s, l) : Qnil; 
 }
 
+/* :nodoc: */
 static VALUE lmc_ruby_string(const char *s) { 
   return lmc_ruby_string2(s + sizeof(size_t), *(size_t *) s);
 }
@@ -153,12 +156,14 @@ typedef struct {
   VALUE ary;
 } lmc_ruby_iter_collect_keys;
 
+/* :nodoc: */
 int lmc_ruby_iter(void *ctx, const char* key, const char* value) {
   lmc_ruby_iter_collect_keys *data = ctx;
   rb_ary_push(data->ary, lmc_ruby_string(key));
   return 1;
 }
 
+/* :nodoc: */
 static VALUE __LocalMemCache__keys(VALUE d) {
   VALUE obj = rb_ary_entry(d, 0);
   VALUE r = rb_ary_entry(d, 1);

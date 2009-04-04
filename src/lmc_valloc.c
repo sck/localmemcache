@@ -105,7 +105,6 @@ int is_lmc_already_initialized(void *base) {
 void lmc_init_memory(void *ptr, size_t size) {
   lmc_mem_descriptor_t *md = ptr;
   size_t s = size - sizeof(lmc_mem_descriptor_t);
-  // size: enough space for lmc_mem_descriptor_t + lmc_mem_chunk_descriptor_t
   md->first_free = sizeof(lmc_mem_descriptor_t);
   md->magic = 0xF00D;
   md->locked = 0;
@@ -134,10 +133,9 @@ size_t __s(char *where, lmc_mem_status_t ms, size_t mem_before, size_t expected_
 
 size_t lmc_valloc(void *base, size_t size) {
   lmc_mem_descriptor_t *md = base;
-  // idea: MOD by power of 2
+  // consider: make size divisible by power of 2
   size_t s = lmc_max(size + sizeof(size_t), 
       sizeof(lmc_mem_chunk_descriptor_t) + sizeof(size_t));
-  // larger than available space?
   lmc_mem_chunk_descriptor_t *c = md_first_free(base);
   lmc_mem_chunk_descriptor_t *p = NULL;
   if (size == 0) { return 0; }
@@ -150,7 +148,6 @@ size_t lmc_valloc(void *base, size_t size) {
     c = base + c->next; 
   }
   if (!c) {
-    //fprintf(stderr, "lmc_valloc: Failed to allocate %d bytes!\n", size);
     return 0;
   }
   size_t r = 0;
@@ -176,8 +173,7 @@ size_t lmc_valloc(void *base, size_t size) {
   return r + sizeof(size_t);
 }
 
-// compact_chunks, 
-void lmc_check_coalesce(void *base, size_t va_chunk) {
+void lmc_compact_free_chunks(void *base, size_t va_chunk) {
   lmc_mem_descriptor_t *md = base;
   lmc_mem_chunk_descriptor_t *chunk = base + va_chunk;
   size_t c_size = chunk->size;
@@ -272,7 +268,7 @@ void __lmc_free(void *base, size_t va_used_chunk, size_t uc_size) {
       LMC_TEST_CRASH
       c_free_chunk->size += uc_size;
       LMC_TEST_CRASH
-      lmc_check_coalesce(base, va_c_free_chunk);
+      lmc_compact_free_chunks(base, va_c_free_chunk);
       break;
     } else 
     // ---------------------- 
@@ -286,7 +282,7 @@ void __lmc_free(void *base, size_t va_used_chunk, size_t uc_size) {
       mcd_used_chunk->next = c_free_chunk->next;
       mcd_used_chunk->size = uc_size + c_free_chunk->size;
       p->next = va_used_chunk;
-      lmc_check_coalesce(base, va_used_chunk);
+      lmc_compact_free_chunks(base, va_used_chunk);
       break;
     }
     if (va_used_chunk >= va_c_free_chunk && va_used_chunk <= va_c_free_end) {
@@ -331,11 +327,6 @@ void lmc_free(void *base, size_t chunk) {
   __lmc_free(base, va_used_chunk, uc_size);
 }
 
-void lmc_realloc(void *base, size_t chunk) {
-  // check if enough reserved space, true: resize; otherwise: alloc new and 
-  // then free
-}
-
 int lmc_um_getbit(char *bf, int i) {
   bf += i / 8; return (*bf & (1 << (i % 8))) != 0;
 }
@@ -349,7 +340,6 @@ void lmc_um_setbit(char *bf, int i, int v) {
 int lmc_um_find_leaks(void *base, char *bf) {
   lmc_mem_descriptor_t *md = base;
   size_t i;
-  // check if gap size if smaller than sizeof(free_chunk_t)
   int gap = 0;
   size_t gs = 0;
   size_t m;
@@ -382,7 +372,6 @@ int lmc_um_find_leaks(void *base, char *bf) {
     space += i - gs;
     __lmc_free(base, gs, i - gs);
   }
-  //printf("total leaks: %zd block, %zd bytes total\n", gap_count, space);
   return 1;
 }
 
@@ -396,17 +385,7 @@ int lmc_um_check_unmarked(void *base, char *bf, size_t va, size_t size) {
     while (*b == n && i < end - sizeof(size_t)) { 
       i += sizeof(size_t) * 8; b++; 
     }
-    if (lmc_um_getbit(bf, i) != 0) {
-      //printf("umarked2: FAILED at: %zd\n", i);
-      //printf("umarked2: FAILED start: %zd\n", va);
-      //size_t d = i;
-      //while (lmc_um_getbit(bf, d) != 0) { --d; }
-      //printf("area starts at: %zd\n", d);
-      //size_t e = i;
-      //while (lmc_um_getbit(bf, e) != 0) { ++e; }
-      //printf("area ends at: %zd\n", e);
-      return 0;
-    }
+    if (lmc_um_getbit(bf, i) != 0) { return 0; }
   }
   return 1;
 }
