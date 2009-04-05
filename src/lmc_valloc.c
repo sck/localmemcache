@@ -69,7 +69,8 @@ lmc_mem_status_t lmc_status(void *base, char *where) {
   ms.total_mem = md->total_size;
   while (c) { 
     if (!lmc_is_va_valid(base, (void *)c - base)) {
-      printf("[%s] invalid pointer detected: %d...\n", where, (void *)c - base);
+      printf("lmc: [%s] invalid pointer detected: %d...\n", where, 
+          (void *)c - base);
       lmc_dump(base);
       abort();
     }
@@ -395,7 +396,7 @@ int lmc_um_mark(void *base, char *bf, size_t va, size_t size) {
   lmc_mem_descriptor_t *md = base;
   if ((va > sizeof(lmc_mem_descriptor_t)) &&
       (!lmc_is_va_valid(base, va) || !lmc_is_va_valid(base, va + size))) {
-    printf("Error: VA start out of range: va: %zd - %zd max %zd!\n", 
+    printf("lmc: Error: VA start out of range: va: %zd - %zd max %zd!\n", 
         va, va + size, md->total_size);
     return 0;
   }

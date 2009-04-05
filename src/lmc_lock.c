@@ -48,14 +48,12 @@ int lmc_sem_timed_wait(lmc_lock_t* l) {
 #else
   ts.tv_sec += 2;
 #endif
-  printf("timed wait\n");
   return sem_timedwait(l->sem, &ts);
 #endif
 }
 
 int lmc_sem_timed_wait_mandatory(lmc_lock_t* l) {
 #ifdef __APPLE__
-  printf("2timed wait\n");
   return sem_wait(l->sem);
 #else
   struct timespec ts;
@@ -66,12 +64,9 @@ int lmc_sem_timed_wait_mandatory(lmc_lock_t* l) {
 }
 
 int lmc_is_lock_working(lmc_lock_t* l, lmc_error_t *e) {
-  printf("lock_working1\n");
   if (lmc_sem_timed_wait(l) == -1) {
-    printf("lock_working2\n");
     return 0;
   } else {
-    printf("lock_working3\n");
     sem_post(l->sem);
     return 1;
   }

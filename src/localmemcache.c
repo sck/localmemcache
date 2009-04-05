@@ -56,12 +56,9 @@ int local_memcache_clear_namespace(const char *namespace, int repair,
   char clean_ns[1024];
   lmc_clean_namespace_string((char *)clean_ns, namespace);
   lmc_clean_namespace((char *)clean_ns, e);
-  printf("cln2\n");
   if (repair) { 
     lmc_lock_t *l = lmc_lock_init((char *)clean_ns, 1, e);
-    printf("cln3\n");
     lmc_lock_repair(l);
-    printf("cln4\n");
     free(l);
     char check_lock_name[1024];
     snprintf((char *)&check_lock_name, 1023, "%s-check", (char *)clean_ns);
@@ -76,7 +73,6 @@ int local_memcache_clear_namespace(const char *namespace, int repair,
 local_memcache_t *__local_memcache_create(const char *namespace, size_t size, 
     int force, int *ok, lmc_error_t* e) {
   int d;
-  printf("create\n");
   if (!ok) { ok = &d; }
   *ok = 1;
   local_memcache_t *lmc = calloc(1, sizeof(local_memcache_t));
@@ -91,7 +87,6 @@ retry:
         "ShmLockFailed", e);
     goto failed;
   }
-  printf("lmc_is_lock_working\n");
   if (!lmc_is_lock_working(lmc->lock, e)) {
     if (!force) {
       if (local_memcache_check_namespace(namespace, e))  goto retry;
@@ -101,7 +96,6 @@ retry:
     } 
     *ok = 0;
   }
-  printf("l2\n");
   {
     if (*ok && !lmc_lock_obtain("local_memcache_create", lmc->lock, &lmc->error)) 
         goto failed;
