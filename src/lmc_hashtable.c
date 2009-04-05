@@ -34,7 +34,7 @@ unsigned long ht_hash_key(const char *s, size_t l) {
   return v % LMC_HT_BUCKETS;
 }
 
-ht_hash_entry_t null_node = { 0, 0, 0 };
+ht_hash_entry_t lmc_null_node = { 0, 0, 0 };
 
 va_ht_hash_t ht_hash_create(void *base, lmc_error_t *e) {
   va_ht_hash_t va_ht = lmc_valloc(base, sizeof(ht_hash_t));
@@ -54,7 +54,7 @@ int ht_hash_destroy(void *base, va_ht_hash_t ht) {
 ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key, 
     size_t n_key) {
   va_ht_hash_entry_t va_hr;
-  ht_hash_entry_t *hr ;
+  ht_hash_entry_t *hr = &lmc_null_node;
   ht_hash_t *ht = base + va_ht;
   size_t i;
   for (va_hr = ht->va_buckets[ht_hash_key(key, n_key)]; 
@@ -73,7 +73,7 @@ ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key,
 next:
     va_hr = hr->va_next;
   }
-  return &null_node;
+  return &lmc_null_node;
 }
 
 ht_hash_entry_t *ht_lookup2(void *base, va_ht_hash_t va_ht, char *k) {
@@ -159,7 +159,7 @@ failed_no_log:
 
 int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
   va_ht_hash_entry_t va_hr;
-  ht_hash_entry_t *hr;
+  ht_hash_entry_t *hr = &lmc_null_node;
   size_t va_p = 0;
   ht_hash_t *ht = base + va_ht;
   size_t i;
@@ -193,7 +193,7 @@ int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
 int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx, 
     LMC_ITERATOR_P(iter)) {
   va_ht_hash_entry_t va_hr;
-  ht_hash_entry_t *hr;
+  ht_hash_entry_t *hr = &lmc_null_node;
   ht_hash_t *ht = base + va_ht;
   size_t k;
   for (k = 0; k < LMC_HT_BUCKETS; k++) {
@@ -210,7 +210,7 @@ int ht_check_memory(void *base, va_ht_hash_t va_ht) {
   char *bf = lmc_um_new_mem_usage_bitmap(base);
   if (!bf) return 0;
   va_ht_hash_entry_t va_hr;
-  ht_hash_entry_t *hr;
+  ht_hash_entry_t *hr = &lmc_null_node;
   ht_hash_t *ht = base + va_ht;
   if (!lmc_um_mark_allocated(base, bf, va_ht)) goto failed;
   size_t k;
