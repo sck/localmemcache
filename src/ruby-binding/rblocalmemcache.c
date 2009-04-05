@@ -58,7 +58,6 @@ void raise_exception(lmc_error_t *e) {
 /* :nodoc: */
 static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size_mb) {
   lmc_error_t e;
-  printf("hello3\n");
   local_memcache_t *lmc = local_memcache_create(rstring_ptr(namespace), 
       double_value(size_mb), &e);
   if (!lmc) { raise_exception(&e); }
@@ -68,7 +67,6 @@ static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size_mb) {
 /* :nodoc: */
 static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns, 
     VALUE repair) {
-  printf("cln1\n");
   lmc_error_t e;
   if (!local_memcache_clear_namespace(rstring_ptr(ns), bool_value(repair), &e)) {
     raise_exception(&e); 
