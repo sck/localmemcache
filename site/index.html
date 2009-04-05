@@ -13,6 +13,20 @@
 an interface similar to memcached but for accessing local data instead of
 remote data.  It's based on <b>mmap()</b>'ed shared memory for maximum speed.
 
+<h2>Changes for 0.2.1</h2>
+
+<li>Fixed a bug that prevented setting values in the hashtable</li>
+<li>Accessing a closed memory cache does no longer result in a crash</li>
+<li><b>Speed improvements</b>: On my machine localmemcache is now only
+about <b>20</b>% slower than Ruby's hash (<b>0.2.0</b> was about 
+<b>40</b>% slower)</li>
+<li><b>OS X is now officially not supported</b> as it lacks sem_timedwait and
+sem_getvalue (You still can force a build but it won't be able to
+recover from crashes.)</li>
+<li>The environment variable <b>LMC_NAMESPACES_ROOT_PATH</b> can now be
+used to override the default, which is <b>/var/tmp/localmemcache</b></li>
+
+
 <h2>New features in 0.2.0</h2>
 
 <li><b>Logging</b>: In case your application is terminated while
@@ -66,12 +80,13 @@ Ruby benchmark pseudo code:
 
 <pre>
 MemCache:            <b>253,326.122</b> ms
-LocalMemCache 0.2.0: <b>6,729.452</b> ms
+LocalMemCache 0.2.1: <b>5,799.225</b> ms
 Ruby's Hash:         <b>4,963.313</b> ms
 </pre>
 
-<b>Localmemcache</b> 0.2.0 is about <b>37</b> times faster than using
-memcached locally, and about <b>30%</b> slower than Ruby's hash.
+So, on my machine <b>Localmemcache</b> 0.2.1 is about <b>43</b> times
+faster than using memcached locally, and about <b>20</b>% slower than
+Ruby's hash.
 
 <h2>Source code</h2>
 
