@@ -122,10 +122,10 @@ size_t lmc_max(size_t a, size_t b) {
 size_t __s(char *where, lmc_mem_status_t ms, size_t mem_before, size_t expected_diff) {
   size_t free = ms.total_free_mem;
   printf("(%s) ", where);
-  if (mem_before) { printf("[%ld:%zd] ", free - mem_before, expected_diff); }
+  if (mem_before) { printf("[%zd:%zd] ", free - mem_before, expected_diff); }
   printf("mem_free: %zu, chunks: %zu\n", free, ms.free_chunks);
   if (expected_diff && expected_diff != free - mem_before) {
-    printf("expected_diff (%zu) != diff (%ld)\n", expected_diff, 
+    printf("expected_diff (%zu) != diff (%zd)\n", expected_diff, 
         free - mem_before);
     abort();
   }
