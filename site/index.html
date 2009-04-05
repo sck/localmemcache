@@ -7,9 +7,30 @@
   <body>  
 
 <div id="content">
-<h1>Efficiently sharing a hashtable between processes on a local Unix machine.</h1>
+<h1>The beauty of memcached.&nbsp;&nbsp;For local data.&nbsp;&nbsp;Blazingly fast.</h1>
 
-<p><b>Localmemcache</b> aims to be faster than using <a href="http://www.danga.com/memcached/">memcached</a> locally by using shared memory and providing a similar interface for Ruby and C.
+<p><b>Localmemcache</b> is a library for C and ruby that aims to provide
+an interface similar to memcached but for accessing local data instead of
+remote data.  It's based on <b>mmap()</b>'ed shared memory for maximum speed.
+
+<h2>New features in 0.2.0</h2>
+
+<li><b>Logging</b>: In case your application is terminated while
+accessing the shared memory (eg by <b>kill -9</b>), it is now able to
+<b>restore the integrity of your data</b>.</li>
+<li><b>\0 character</b> can now be used in <b>keys</b> and
+<b>values</b></li>
+<li>The ruby binding now features a <b>keys()</b> method.</b>
+<li>Added a <b>C API</b>.  See <a href="http://github.com/sck/localmemcache/blob/8c753f74c53b107d271975bedcc1f91a3dbd6961/src/localmemcache.h">localmemcache.h</a></li>
+
+<h2>Supported Systems</h2>
+
+<li>Unix (for <b>mmap())</b></li>
+<li>OS X is currently not supported because it doesn't have
+sem_timedwait() and sem_getvalue()</li>
+<li>A CPU architecture with more than <b>32 bits</b> is recommended, since
+otherwise you might run out of virtual address space when you use larger
+shared memory segments.</li>
 
 <h2>Install</h2>
 
@@ -18,6 +39,8 @@
 <pre><code>gem install localmemcache
 </code></pre>
 
+If you just want to use the <b>C API</b>, download the .tar.gz from <a href="http://rubyforge.org/frs/?group_id=7925">here</a>.
+
 <h2>Using</h2>
 <p><pre><code>require 'localmemcache'
 $lm = LocalMemCache.new :namespace => :viewcounters
@@ -25,6 +48,7 @@ $lm[:foo] = 1
 $lm[:foo]
 $lm.delete(:foo)
 </code></pre> 
+(C version of this example: <a href="http://github.com/sck/localmemcache/blob/8c753f74c53b107d271975bedcc1f91a3dbd6961/example/hello.c">hello.c</a>)
 </p>
 <a href="http://github.com/sck/localmemcache/tree/master">Read more</a>.
 
@@ -32,7 +56,7 @@ $lm.delete(:foo)
 
 <p>Here's a quick speed comparison, made on an 
 <b>Intel(R) Xeon(R) CPU E5205 @ 1.86GHz</b>:</p>
-Benchmark pseudo code:
+Ruby benchmark pseudo code:
 <pre><code>2_000_000.times {
   index = rand(10000).to_s
   $hash.set(index, index)
@@ -41,13 +65,13 @@ Benchmark pseudo code:
 </code></pre>
 
 <pre>
-MemCache:      <b>253,326.122</b> ms
-LocalMemCache: <b>6,055.552</b> ms
-Ruby's Hash:   <b>4,963.313</b> ms
+MemCache:            <b>253,326.122</b> ms
+LocalMemCache 0.2.0: <b>6,729.452</b> ms
+Ruby's Hash:         <b>4,963.313</b> ms
 </pre>
 
-<b>Localmemcache</b> is about <b>40</b> times faster than using memcached
-locally, and about <b>20%</b> slower than Ruby's hash.
+<b>Localmemcache</b> 0.2.0 is about <b>37</b> times faster than using
+memcached locally, and about <b>30%</b> slower than Ruby's hash.
 
 <h2>Source code</h2>
 
@@ -56,6 +80,11 @@ can be retrieved by executing</p>
 
 <pre><code>git clone git://github.com/sck/localmemcache.git
 </code></pre>
+
+<h2>Read on</h2>
+
+A bit of documenation on how <b>localmemcache</b> <a
+href="http://github.com/sck/localmemcache/blob/96b5e0863e1da7f17e249a6c8884984e0c23ee2f/INTERNALS">works</a>.
 
 <h2>License</h2>
 
