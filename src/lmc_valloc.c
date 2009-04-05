@@ -69,7 +69,7 @@ lmc_mem_status_t lmc_status(void *base, char *where) {
   ms.total_mem = md->total_size;
   while (c) { 
     if (!lmc_is_va_valid(base, (void *)c - base)) {
-      printf("lmc: [%s] invalid pointer detected: %d...\n", where, 
+      printf("lmc: [%s] invalid pointer detected: %zd...\n", where, 
           (void *)c - base);
       lmc_dump(base);
       abort();

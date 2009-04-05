@@ -7,7 +7,7 @@ $defs << "-DRUBY_VERSION_CODE=#{RUBY_VERSION.gsub(/\D/, '')}"
 $srcs = ['lmctestapi.c']
 $objs = ['lmctestapi.o']
 
-$CFLAGS << "-g -I .."
+$CFLAGS << " -g -I .."
 $LDFLAGS << " -lpthread "
 $LOCAL_LIBS << "../liblmc.a"
 if have_library("rt")
