@@ -13,7 +13,7 @@ if test "x`uname`" = "xDarwin" && test "x$LMC_FORCE_BUILD" = "x"; then
   echo "    You may set the environment variable LMC_FORCE_BUILD "
   echo "    to build a version of localmemcache that cannot recover "
   echo "    from crashes."
-  exit;
+  exit 2;
 fi
 AC_MSG_RESULT([Ok])
 

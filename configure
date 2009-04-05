@@ -2759,12 +2759,12 @@ fi
 $as_echo_n "checking for apple OS X... " >&6; }
 if test "x`uname`" = "xDarwin" && test "x$LMC_FORCE_BUILD" = "x"; then
   echo ""
-  echo "->  Apple is not supported because it doesn't have "
+  echo "->  Apple OS X is not supported because it doesn't have "
   echo "    sem_getvalue and sem_timedwait!"
   echo "    You may set the environment variable LMC_FORCE_BUILD "
   echo "    to build a version of localmemcache that cannot recover "
   echo "    from crashes."
-  exit;
+  exit 2;
 fi
 { $as_echo "$as_me:$LINENO: result: Ok" >&5
 $as_echo "Ok" >&6; }

@@ -24,6 +24,14 @@ task :changelog do
   }
 end
 
+task :sanity_test do
+  sh "./configure && make -C src clean && make -C src && " +
+      "ruby src/ruby-binding/extconf.rb && " +
+      "make -C src/ruby-binding/ && " +
+      "ruby src/tests/extconf.rb && " +
+      "make -C src/tests/ && ./src/tests/lmc "
+end
+
 task :c_api_package do
   tgz = "pkg/localmemcache-#{version}.tar.gz"
   sh "test -d pkg || mkdir pkg"
