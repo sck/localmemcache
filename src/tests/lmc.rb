@@ -42,6 +42,11 @@ describe 'LocalMemCache' do
     $lm["null"].should.equal "foo\0goo"
   end
 
+  it 'should throw an exception when accessing a closed pool' do
+    $lm.close
+    should.raise(LocalMemCache::MemoryPoolClosed) { $lm.keys }
+  end
+
   it 'should throw exception if pool is full' do
     $lms["one"] = "a";
     should.raise(LocalMemCache::MemoryPoolFull) { $lms["two"] = "b" * 8000; }

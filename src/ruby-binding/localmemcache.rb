@@ -18,6 +18,7 @@ class LocalMemCache
   class RecoveryFailed < LocalMemCacheError; end
   class ShmLockFailed < LocalMemCacheError; end
   class ShmUnlockFailed < LocalMemCacheError; end
+  class MemoryPoolClosed < LocalMemCacheError; end
 
   #  Creates a new handle for accessing a shared memory region.
   #
