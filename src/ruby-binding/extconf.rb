@@ -8,7 +8,11 @@ $srcs = ['rblocalmemcache.c']
 $objs = ['rblocalmemcache.o']
 
 $CFLAGS << " -g -I .."
-$LDFLAGS << " ../liblmc.a -lpthread -lrt "
+$LDFLAGS << " -lpthread "
+$LOCAL_LIBS << "../liblmc.a"
+if have_library("rt")
+  $LDFLAGS << " -lrt"
+end
 
 dir_config('rblocalmemcache')
 create_makefile('rblocalmemcache')

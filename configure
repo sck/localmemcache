@@ -600,6 +600,7 @@ PACKAGE_BUGREPORT=
 
 ac_unique_file="${srcdir}/src/lmc_config.h.in"
 ac_default_prefix=$prefix
+ac_default_prefix=$prefix
 ac_subst_vars='SHELL
 PATH_SEPARATOR
 PACKAGE_NAME
@@ -2754,6 +2755,21 @@ fi
 
 
 
+{ $as_echo "$as_me:$LINENO: checking for apple OS X" >&5
+$as_echo_n "checking for apple OS X... " >&6; }
+if test "x`uname`" = "xDarwin" && test "x$LMC_FORCE_BUILD" = "x"; then
+  echo ""
+  echo "->  Apple is not supported because it doesn't have "
+  echo "    sem_getvalue and sem_timedwait!"
+  echo "    You may set the environment variable LMC_FORCE_BUILD "
+  echo "    to build a version of localmemcache that cannot recover "
+  echo "    from crashes."
+  exit;
+fi
+{ $as_echo "$as_me:$LINENO: result: Ok" >&5
+$as_echo "Ok" >&6; }
+
+
 { $as_echo "$as_me:$LINENO: checking version" >&5
 $as_echo_n "checking version... " >&6; }
 VERSION=`cat ${srcdir}/VERSION`
@@ -2785,11 +2801,32 @@ env > /tmp/lmc.env
 { $as_echo "$as_me:$LINENO: result: $PREFIX" >&5
 $as_echo "$PREFIX" >&6; }
 
+{ $as_echo "$as_me:$LINENO: checking installation directory prefix" >&5
+$as_echo_n "checking installation directory prefix... " >&6; }
+
+if test "$prefix" = "NONE"; then
+    if test "x$PREFIX" != "x" ; then
+  prefix=$PREFIX
+    else
+  prefix=/usr/local
+    fi
+fi
+
+PREFIX=$ac_default_prefix
+PREFIX=$prefix
+exec_prefix=$PREFIX
+
+{ $as_echo "$as_me:$LINENO: result: $PREFIX" >&5
+$as_echo "$PREFIX" >&6; }
+
+{ $as_echo "$as_me:$LINENO: checking if inside RubyGems" >&5
+$as_echo_n "checking if inside RubyGems... " >&6; }
+env > /tmp/lmc.env
+{ $as_echo "$as_me:$LINENO: result: $PREFIX" >&5
+$as_echo "$PREFIX" >&6; }
 
 
-#--------------------------------------------------------------------
-# Propagate prefix argument as installation directory.
-#--------------------------------------------------------------------
+
 
 
 
@@ -3230,8 +3267,8 @@ _ACEOF
 
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # Files that config.status was made for.
-config_files="`echo $ac_config_files`"
-config_headers="`echo $ac_config_headers`"
+config_files="$ac_config_files"
+config_headers="$ac_config_headers"
 
 _ACEOF
 
@@ -4459,8 +4496,8 @@ _ACEOF
 
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # Files that config.status was made for.
-config_files="`echo $ac_config_files`"
-config_headers="`echo $ac_config_headers`"
+config_files="$ac_config_files"
+config_headers="$ac_config_headers"
 
 _ACEOF
 

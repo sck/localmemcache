@@ -6,11 +6,11 @@ require 'localmemcache'
 
 Bacon.summary_on_exit
 
-LocalMemCache.clear_namespace("testing", true)
-$lm = LocalMemCache.new :namespace=>"testing"
+LocalMemCache.clear_namespace("test", true)
+$lm = LocalMemCache.new :namespace=>"test"
 
-LocalMemCache.clear_namespace("testing-small", true)
-$lms = LocalMemCache.new :namespace=>"testing-small", :size_mb => 0.01;
+LocalMemCache.clear_namespace("test-small", true)
+$lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 0.01;
 
 describe 'LocalMemCache' do
 
@@ -48,11 +48,11 @@ describe 'LocalMemCache' do
   end
 
   it 'should support checking of namespaces' do 
-    LocalMemCache.check_namespace("testing")
+    LocalMemCache.check_namespace("test")
   end
 
   it 'should support clearing of namespaces' do
-    LocalMemCache.clear_namespace("testing")
+    LocalMemCache.clear_namespace("test")
   end
 
 

@@ -36,7 +36,7 @@ task :pushsite do
   sh "chmod 755 site"
   sh "chmod 644 site/*.html"
   sh "chmod 644 site/*.css"
-  sh 'rsync --rsh="ssh -i $HOME/.ssh/id_rsa_projects -l sck" -avz site/ sck@localmemcache.rubyforge.org:/var/www/gforge-projects/localmemcache/'
+  sh 'rsync --rsh="ssh -i $HOME/.ssh/id_rsa_oss -l sck" -avz site/ sck@localmemcache.rubyforge.org:/var/www/gforge-projects/localmemcache/'
 end
 
 begin

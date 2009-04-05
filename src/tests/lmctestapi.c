@@ -7,6 +7,14 @@
 #include "lmc_hashtable.h"
 #include "lmc_valloc.h"
 
+#ifndef RSTRING_LEN
+#define RSTRING_LEN(x) RSTRING(x)->len
+#endif
+
+#ifndef RSTRING_PTR
+#define RSTRING_PTR(x) RSTRING(x)->ptr
+#endif
+
 void *memp = NULL;
 static VALUE OutOfMemoryError;
 

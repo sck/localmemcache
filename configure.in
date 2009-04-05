@@ -5,6 +5,19 @@ AC_SUBST(CC)
 AC_PROG_RANLIB
 AC_SUBST(RANLIB)
 
+AC_MSG_CHECKING([for apple OS X])
+if test "x`uname`" = "xDarwin" && test "x$LMC_FORCE_BUILD" = "x"; then
+  echo ""
+  echo "->  Apple OS X is not supported because it doesn't have "
+  echo "    sem_getvalue and sem_timedwait!"
+  echo "    You may set the environment variable LMC_FORCE_BUILD "
+  echo "    to build a version of localmemcache that cannot recover "
+  echo "    from crashes."
+  exit;
+fi
+AC_MSG_RESULT([Ok])
+
+
 AC_MSG_CHECKING([version])
 VERSION=`cat ${srcdir}/VERSION`
 AC_SUBST(VERSION)
@@ -30,11 +43,28 @@ AC_MSG_CHECKING([if inside RubyGems])
 env > /tmp/lmc.env
 AC_MSG_RESULT([$PREFIX])
 
+AC_MSG_CHECKING([installation directory prefix])
+
+if test "$prefix" = "NONE"; then 
+    if test "x$PREFIX" != "x" ; then
+  prefix=$PREFIX
+    else
+  prefix=/usr/local
+    fi
+fi
+AC_PREFIX_DEFAULT($prefix)
+PREFIX=$ac_default_prefix
+PREFIX=$prefix
+exec_prefix=$PREFIX
+AC_SUBST(PREFIX)
+AC_MSG_RESULT([$PREFIX])
+
+AC_MSG_CHECKING([if inside RubyGems])
+env > /tmp/lmc.env
+AC_MSG_RESULT([$PREFIX])
 
 
-#--------------------------------------------------------------------
-# Propagate prefix argument as installation directory.
-#--------------------------------------------------------------------
+
 AC_SUBST(PREFIX)
 
 
