@@ -26,9 +26,9 @@ end
 
 task :sanity_test do
   sh "./configure && make -C src clean && make -C src && " +
-      "ruby src/ruby-binding/extconf.rb && " +
+      "(cd src/ruby-binding; ruby extconf.rb) && " +
       "make -C src/ruby-binding/ && " +
-      "ruby src/tests/extconf.rb && " +
+      "(cd src/tests; ruby extconf.rb) && " +
       "make -C src/tests/ && ./src/tests/lmc "
 end
 
