@@ -13,7 +13,7 @@
 an interface similar to memcached but for accessing local data instead of
 remote data.  It's based on <b>mmap()</b>'ed shared memory for maximum speed.
 
-<h2>Changes for 0.2.1</h2>
+<h2>2009-04-05: Changes for 0.2.1</h2>
 
 <li>Fixed a bug that prevented setting values in the hashtable</li>
 <li>Accessing a closed memory cache does no longer result in a crash</li>
@@ -27,7 +27,7 @@ recover from crashes.)</li>
 used to override the default, which is <b>/var/tmp/localmemcache</b></li>
 
 
-<h2>New features in 0.2.0</h2>
+<h2>2009-03-30: New features in 0.2.0</h2>
 
 <li><b>Logging</b>: In case your application is terminated while
 accessing the shared memory (eg by <b>kill -9</b>), it is now able to
