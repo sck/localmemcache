@@ -45,31 +45,68 @@ static VALUE lmc_ruby_string(const char *s) {
   return lmc_ruby_string2(s + sizeof(size_t), *(size_t *) s);
 }
 
+typedef struct {
+  local_memcache_t *lmc;
+  int open;
+} rb_lmc_handle_t;
 
 static VALUE LocalMemCache;
 
 /* :nodoc: */
-void raise_exception(lmc_error_t *e) {
-  VALUE eid = rb_intern(e->error_type);
+void __rb_lmc_raise_exception(const char *error_type, const char *m) {
+  VALUE eid = rb_intern(error_type);
   VALUE k = rb_const_get(LocalMemCache, eid);
-  rb_raise(k, e->error_str);
+  rb_raise(k, m);
 }
+
+/* :nodoc: */
+void rb_lmc_raise_exception(lmc_error_t *e) {
+  __rb_lmc_raise_exception(e->error_type, e->error_str);
+}
+
+/* :nodoc: */
+local_memcache_t *rb_lmc_check_handle_access(rb_lmc_handle_t *h) {
+  if (!h || (h->open == 0) || !h->lmc) {
+    __rb_lmc_raise_exception("MemoryPoolClosed", "Pool is closed");
+    return 0;
+  }
+  return h->lmc;
+}
+
+/* :nodoc: */
+static void rb_lmc_free_handle(rb_lmc_handle_t *h) {
+  lmc_error_t e;
+  local_memcache_free(rb_lmc_check_handle_access(h), &e);
+}
+
 
 /* :nodoc: */
 static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size_mb) {
   lmc_error_t e;
-  local_memcache_t *lmc = local_memcache_create(rstring_ptr(namespace), 
+  local_memcache_t *l = local_memcache_create(rstring_ptr(namespace), 
       double_value(size_mb), &e);
-  if (!lmc) { raise_exception(&e); }
-  return Data_Wrap_Struct(klass, NULL, local_memcache_free, lmc);
+  if (!l)  rb_lmc_raise_exception(&e);
+  rb_lmc_handle_t *h = calloc(1, sizeof(rb_lmc_handle_t));
+  if (!h) rb_raise(rb_eRuntimeError, "memory allocation error");
+  h->lmc = l;
+  h->open = 1;
+  return Data_Wrap_Struct(klass, NULL, rb_lmc_free_handle, h);
 }
+
+/* :nodoc: */
+local_memcache_t *get_LocalMemCache(VALUE obj) {
+  rb_lmc_handle_t *h;
+  Data_Get_Struct(obj, rb_lmc_handle_t, h);
+  return rb_lmc_check_handle_access(h);
+}
+
 
 /* :nodoc: */
 static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns, 
     VALUE repair) {
   lmc_error_t e;
   if (!local_memcache_clear_namespace(rstring_ptr(ns), bool_value(repair), &e)) {
-    raise_exception(&e); 
+    rb_lmc_raise_exception(&e); 
   }
   return Qnil;
 }
@@ -78,7 +115,7 @@ static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns,
 static VALUE LocalMemCache__check_namespace(VALUE klass, VALUE ns) {
   lmc_error_t e;
   if (!local_memcache_check_namespace(rstring_ptr(ns), &e)) {
-    raise_exception(&e); 
+    rb_lmc_raise_exception(&e); 
   }
   return Qnil;
 }
@@ -96,12 +133,6 @@ static VALUE LocalMemCache__disable_test_crash(VALUE klass) {
   return Qnil;
 }
 
-/* :nodoc: */
-local_memcache_t *get_LocalMemCache(VALUE obj) {
-  local_memcache_t *lmc;
-  Data_Get_Struct(obj, local_memcache_t, lmc);
-  return lmc;
-}
 
 /* 
  *  call-seq:
@@ -131,7 +162,7 @@ static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
   local_memcache_t *lmc = get_LocalMemCache(obj);
   if (!local_memcache_set(lmc, rstring_ptr(key), rstring_length(key), 
       rstring_ptr(value), rstring_length(value))) { 
-    raise_exception(&lmc->error); 
+    rb_lmc_raise_exception(&lmc->error); 
   }
   return Qnil;
 }
@@ -156,7 +187,11 @@ static VALUE LocalMemCache__delete(VALUE obj, VALUE key) {
  */
 static VALUE LocalMemCache__close(VALUE obj) {
   lmc_error_t e;
-  if (!local_memcache_free(get_LocalMemCache(obj), &e)) raise_exception(&e);
+  rb_lmc_handle_t *h;
+  Data_Get_Struct(obj, rb_lmc_handle_t, h);
+  if (!local_memcache_free(rb_lmc_check_handle_access(h), &e)) 
+      rb_lmc_raise_exception(&e);
+  h->open = 0;
   return Qnil;
 }
 
