@@ -3,6 +3,8 @@
  */
 
 #include <ruby.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "localmemcache.h"
 
 #ifndef RSTRING_LEN
@@ -11,6 +13,11 @@
 
 #ifndef RSTRING_PTR
 #define RSTRING_PTR(x) RSTRING(x)->ptr
+#endif
+
+
+#if RUBY_VERSION_CODE >= 190
+#define ruby_errinfo rb_errinfo()
 #endif
 
 /* :nodoc: */
@@ -215,6 +222,7 @@ static VALUE __LocalMemCache__keys(VALUE d) {
   int success = local_memcache_iterate(get_LocalMemCache(obj), 
       (void *) &data, lmc_ruby_iter);
   if (!success) { return Qnil; }
+  return Qnil;
 }
 
 /* 

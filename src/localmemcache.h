@@ -43,4 +43,5 @@ int local_memcache_check_namespace(const char *namespace, lmc_error_t *e);
 const char *__local_memcache_get(local_memcache_t *lmc, 
     const char *key, size_t n_key, size_t *n_value);
 
+int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc);
 #endif
