@@ -13,12 +13,13 @@
 an interface similar to memcached but for accessing local data instead of
 remote data.  It's based on <b>mmap()</b>'ed shared memory for maximum speed.
 
-<h2>2009-04-05: Changes for 0.2.1</h2>
+<h2>2009-04-05: Changes for 0.2.2</h2>
 
 <li>Fixed a bug that prevented setting values in the hashtable</li>
 <li>Accessing a closed memory cache does no longer result in a crash</li>
+<li>Gem works now with Ruby 1.9</li>
 <li><b>Speed improvements</b>: On my machine localmemcache is now only
-about <b>20</b>% slower than Ruby's hash (<b>0.2.0</b> was about 
+about <b>20</b>% slower than a Ruby hash of strings(<b>0.2.0</b> was about 
 <b>40</b>% slower)</li>
 <li><b>OS X is now officially not supported</b> as it lacks sem_timedwait and
 sem_getvalue (You still can force a build but it won't be able to
@@ -40,8 +41,10 @@ accessing the shared memory (eg by <b>kill -9</b>), it is now able to
 <h2>Supported Systems</h2>
 
 <li>Unix (for <b>mmap())</b></li>
+<li>A file system which supports <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse files</a> (Localmemcache will be very slow, otherwise)</li>
 <li>OS X is currently not supported because it doesn't have
-sem_timedwait() and sem_getvalue()</li>
+sem_timedwait(), and sem_getvalue(); also <b>HFS+</b> doesn't support sparse 
+files...</li>
 <li>A CPU architecture with more than <b>32 bits</b> is recommended, since
 otherwise you might run out of virtual address space when you use larger
 shared memory segments.</li>
@@ -79,14 +82,16 @@ Ruby benchmark pseudo code:
 </code></pre>
 
 <pre>
-MemCache:            <b>253,326.122</b> ms
-LocalMemCache 0.2.1: <b>5,799.225</b> ms
-Ruby's Hash:         <b>4,963.313</b> ms
+Tokyo Tyrant:          <b>298,226.197</b> ms
+MemCache:              <b>253,326.122</b> ms
+GDBM:                   <b>24,226.116</b> ms
+LocalMemCache 0.2.2:     <b>5,799.225</b> ms
+Ruby Hash of Strings:    <b>4,963.313</b> ms
 </pre>
 
-So, on my machine <b>Localmemcache</b> 0.2.1 is about <b>43</b> times
+So, on my machine <b>Localmemcache</b> 0.2.2 is about <b>43</b> times
 faster than using memcached locally, and about <b>20</b>% slower than
-Ruby's hash.
+a Ruby hash of strings.
 
 <h2>Source code</h2>
 

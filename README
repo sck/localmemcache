@@ -16,11 +16,12 @@ SUPPORTED SYSTEMS
 =================
 
 - Unix (for mmap)
+- A file system which supports sparse files 
 - A CPU architecture with more than 32 bits is recommended, since otherwise you
   might run out of virtual address space when you use larger shared memory
   segments.
-- OS X is not supported, because it doesn't have sem_timedwait() and
-  sem_getvalue().
+- Note for OS X: It doesn't have sem_timedwait() and sem_getvalue(), and HPFS+
+  doesn't support sparse files...
 
 EXAMPLE
 =======
