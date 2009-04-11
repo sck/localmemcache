@@ -47,7 +47,7 @@ int lmc_namespace_or_filename(char *result, const char* ons, const char *ofn,
       strcpy(d, "./");
       d += 2;
     }
-    strncpy(d, ofn, n);
+    strcpy(d, ofn);
     return 1;
   }
   lmc_handle_error_with_err_string("lmc_namespace_or_filename", 

@@ -80,7 +80,7 @@ lmc_shm_t *lmc_shm_create(const char* namespace, size_t size, int use_persistenc
     STD_OUT_OF_MEMORY_ERROR("lmc_shm_create");
     return NULL; 
   }
-  strncpy((char *)&mc->namespace, namespace, 1023);
+  snprintf((char *)&mc->namespace, 1023, "%s", namespace);
   mc->use_persistence = 0;
   mc->size = size;
 
