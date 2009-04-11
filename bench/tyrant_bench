@@ -1,0 +1,10 @@
+#! /bin/sh
+
+ttserver -port 2001 /tmp/foo.tch > /dev/null & 
+PID=$!
+
+sleep 1
+
+ruby ./tyrant_bench.rb 
+
+kill $PID

@@ -21,6 +21,8 @@ extern int lmc_test_crash_enabled;
 void lmc_test_crash(const char* file, int line, const char *function);
 size_t lmc_test_valloc_fail(const char *file, int line, const char *function,
     void *base, size_t s);
+void lmc_clean_string(char *result, const char *source);
+int lmc_is_filename(const char *s);
 
 #endif
 

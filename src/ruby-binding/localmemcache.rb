@@ -15,6 +15,8 @@ class LocalMemCache
   class LockError < LocalMemCacheError; end
   class LockTimedOut < LocalMemCacheError; end
   class OutOfMemoryError < LocalMemCacheError; end
+  class ArgError < LocalMemCacheError; end
+  class InitError < LocalMemCacheError; end
   class RecoveryFailed < LocalMemCacheError; end
   class ShmLockFailed < LocalMemCacheError; end
   class ShmUnlockFailed < LocalMemCacheError; end
@@ -29,8 +31,7 @@ class LocalMemCache
   #
   def self.new(options)
     o = { :size_mb => 0 }.update(options || {})
-    raise "Missing mandatory option ':namespace'" if !o[:namespace]
-    _new(o[:namespace].to_s, o[:size_mb].to_f);
+    _new(o);
   end
 
   # Deletes the given namespaces, removing semaphores if necessary.
@@ -38,6 +39,10 @@ class LocalMemCache
   # processes.
   #
   def self.clear_namespace(namespace, repair = false) 
-    _clear_namespace(namespace.to_s, repair)
+    clear(:namespace => namespace.to_s, :repair => repair)
+  end
+
+  def self.check_namespace(namespace) 
+    check(:namespace => namespace.to_s) 
   end
 end

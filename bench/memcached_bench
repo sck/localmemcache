@@ -1,0 +1,8 @@
+#! /bin/sh
+
+/usr/bin/memcached -m 3072 -p 11211 &
+PID=$!
+
+ruby ./memcached_bench.rb
+
+kill $PID

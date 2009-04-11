@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009, Sven C. Koehler
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -8,8 +12,16 @@
 #include <unistd.h>
 #include <time.h>
 #include "lmc_lock.h"
+#include "lmc_common.h"
 
-lmc_lock_t *lmc_lock_init(const char *namespace, int init, lmc_error_t *e) {
+void lmc_namespacify(char *result, const char *s) {
+  if (lmc_is_filename(s)) { lmc_clean_string(result, s); } 
+  else { strcpy(result, s); }
+}
+
+lmc_lock_t *lmc_lock_init(const char *ns, int init, lmc_error_t *e) {
+  char namespace[1024];
+  lmc_namespacify(namespace, ns);
   lmc_lock_t *l = malloc(sizeof(lmc_lock_t));
   if (!l) return NULL;
   strncpy((char *)&l->namespace, namespace, 1023);
@@ -20,7 +32,9 @@ lmc_lock_t *lmc_lock_init(const char *namespace, int init, lmc_error_t *e) {
   return l;
 }
 
-int lmc_clear_namespace_lock(const char *namespace) {
+int lmc_clear_namespace_lock(const char *ns) {
+  char namespace[1024];
+  lmc_namespacify(namespace, ns);
   lmc_error_t e;
   lmc_lock_t *l = lmc_lock_init(namespace, 1, &e);
   lmc_lock_repair(l);

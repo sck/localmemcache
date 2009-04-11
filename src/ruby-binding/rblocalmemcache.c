@@ -15,7 +15,6 @@
 #define RSTRING_PTR(x) RSTRING(x)->ptr
 #endif
 
-
 #if RUBY_VERSION_CODE >= 190
 #define ruby_errinfo rb_errinfo()
 #endif
@@ -30,6 +29,11 @@ VALUE num2string(long i) { return rb_big2str(rb_int2big(i), 10); }
 char *rstring_ptr(VALUE s) { 
   char* r = NIL_P(s) ? "nil" : RSTRING_PTR(rb_String(s)); 
   return r ? r : "nil";
+}
+
+char *rstring_ptr_null(VALUE s) { 
+  char* r = NIL_P(s) ? NULL : RSTRING_PTR(rb_String(s)); 
+  return r ? r : NULL;
 }
 
 /* :nodoc: */
@@ -58,6 +62,10 @@ typedef struct {
 } rb_lmc_handle_t;
 
 static VALUE LocalMemCache;
+static VALUE lmc_rb_sym_namespace;
+static VALUE lmc_rb_sym_filename;
+static VALUE lmc_rb_sym_size_mb;
+static VALUE lmc_rb_sym_repair;
 
 /* :nodoc: */
 void __rb_lmc_raise_exception(const char *error_type, const char *m) {
@@ -86,12 +94,20 @@ static void rb_lmc_free_handle(rb_lmc_handle_t *h) {
   local_memcache_free(rb_lmc_check_handle_access(h), &e);
 }
 
+void lmc_check_dict(VALUE o) {
+  if (TYPE(o) != T_HASH) {
+    rb_raise(rb_eArgError, "expected a Hash");
+  }
+}
 
 /* :nodoc: */
-static VALUE LocalMemCache__new2(VALUE klass, VALUE namespace, VALUE size_mb) {
+static VALUE LocalMemCache__new2(VALUE klass, VALUE o) {
+  lmc_check_dict(o);
   lmc_error_t e;
-  local_memcache_t *l = local_memcache_create(rstring_ptr(namespace), 
-      double_value(size_mb), &e);
+  local_memcache_t *l = local_memcache_create(
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)),
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)), 
+      double_value(rb_hash_aref(o, lmc_rb_sym_size_mb)), &e);
   if (!l)  rb_lmc_raise_exception(&e);
   rb_lmc_handle_t *h = calloc(1, sizeof(rb_lmc_handle_t));
   if (!h) rb_raise(rb_eRuntimeError, "memory allocation error");
@@ -107,21 +123,27 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
   return rb_lmc_check_handle_access(h);
 }
 
-
 /* :nodoc: */
-static VALUE LocalMemCache__clear_namespace(VALUE klass, VALUE ns, 
-    VALUE repair) {
+static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
+  lmc_check_dict(o);
   lmc_error_t e;
-  if (!local_memcache_clear_namespace(rstring_ptr(ns), bool_value(repair), &e)) {
+  if (!local_memcache_clear_namespace(
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)), 
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)),
+      bool_value(rb_hash_aref(o, lmc_rb_sym_repair)), &e)) {
     rb_lmc_raise_exception(&e); 
   }
   return Qnil;
 }
 
 /* :nodoc: */
-static VALUE LocalMemCache__check_namespace(VALUE klass, VALUE ns) {
+static VALUE LocalMemCache__check(VALUE klass, VALUE o) {
+  lmc_check_dict(o);
   lmc_error_t e;
-  if (!local_memcache_check_namespace(rstring_ptr(ns), &e)) {
+  if (!local_memcache_check_namespace(
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)), 
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)),
+      &e)) {
     rb_lmc_raise_exception(&e); 
   }
   return Qnil;
@@ -139,7 +161,6 @@ static VALUE LocalMemCache__disable_test_crash(VALUE klass) {
   lmc_test_crash_enabled = 0;
   return Qnil;
 }
-
 
 /* 
  *  call-seq:
@@ -246,11 +267,11 @@ static VALUE LocalMemCache__keys(VALUE obj) {
 
 void Init_rblocalmemcache() {
   LocalMemCache = rb_define_class("LocalMemCache", rb_cObject);
-  rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 2);
-  rb_define_singleton_method(LocalMemCache, "_clear_namespace", 
-      LocalMemCache__clear_namespace, 2);
-  rb_define_singleton_method(LocalMemCache, "check_namespace", 
-      LocalMemCache__check_namespace, 1);
+  rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 1);
+  rb_define_singleton_method(LocalMemCache, "clear", 
+      LocalMemCache__clear, 1);
+  rb_define_singleton_method(LocalMemCache, "check", 
+      LocalMemCache__check, 1);
   rb_define_singleton_method(LocalMemCache, "disable_test_crash", 
       LocalMemCache__disable_test_crash, 0);
   rb_define_singleton_method(LocalMemCache, "enable_test_crash", 
@@ -262,4 +283,9 @@ void Init_rblocalmemcache() {
   rb_define_method(LocalMemCache, "[]=", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "keys", LocalMemCache__keys, 0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
+
+  lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
+  lmc_rb_sym_filename = ID2SYM(rb_intern("filename"));
+  lmc_rb_sym_size_mb = ID2SYM(rb_intern("size_mb"));
+  lmc_rb_sym_repair = ID2SYM(rb_intern("repair"));
 }

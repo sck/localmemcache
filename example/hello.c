@@ -3,7 +3,7 @@
 
 int main() {
   lmc_error_t e;
-  local_memcache_t *lmc = local_memcache_create("viewcounters", 0, &e);
+  local_memcache_t *lmc = local_memcache_create("viewcounters", 0, 0, &e);
   if (!lmc) {
     fprintf(stderr, "Couldn't create localmemcache: %s\n", e.error_str);
     return 1;

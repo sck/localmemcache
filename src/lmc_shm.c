@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
+#include "lmc_common.h"
 #include "lmc_shm.h"
 
 const char *lmc_namespace_root_path() {
@@ -37,7 +38,8 @@ void lmc_shm_ensure_root_path() {
 }
 
 void lmc_file_path_for_namespace(char *result, const char *ns) {
-  snprintf(result, 1023, "%s/%s.lmc", lmc_namespace_root_path(), ns);
+  if (lmc_is_filename(ns)) { snprintf(result, 1023, "%s", ns); } 
+  else { snprintf(result, 1023, "%s/%s.lmc", lmc_namespace_root_path(), ns); }
 }
 
 int lmc_does_namespace_exist(const char *ns) {

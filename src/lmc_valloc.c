@@ -69,7 +69,7 @@ lmc_mem_status_t lmc_status(void *base, char *where) {
   ms.total_mem = md->total_size;
   while (c) { 
     if (!lmc_is_va_valid(base, (void *)c - base)) {
-      printf("lmc: [%s] invalid pointer detected: %zd...\n", where, 
+      printf("[localmemcache] [%s] invalid pointer detected: %zd...\n", where, 
           (void *)c - base);
       lmc_dump(base);
       abort();
@@ -319,7 +319,7 @@ void lmc_free(void *base, size_t chunk) {
   if (chunk == 0) { return; }
   if (!(chunk >= sizeof(lmc_mem_descriptor_t) + sizeof(size_t)) ||
       !lmc_is_va_valid(base, chunk)) {
-    printf("lmc_free: Invalid pointer: %zd\n", chunk);
+    fprintf(stderr, "[localmemcache] lmc_free: Invalid pointer: %zd\n", chunk);
     return;
   }
   size_t va_used_chunk = chunk - sizeof(size_t);
@@ -396,8 +396,8 @@ int lmc_um_mark(void *base, char *bf, size_t va, size_t size) {
   lmc_mem_descriptor_t *md = base;
   if ((va > sizeof(lmc_mem_descriptor_t)) &&
       (!lmc_is_va_valid(base, va) || !lmc_is_va_valid(base, va + size))) {
-    printf("lmc: Error: VA start out of range: va: %zd - %zd max %zd!\n", 
-        va, va + size, md->total_size);
+    printf("[localmemcache] Error: VA start out of range: "
+        "va: %zd - %zd max %zd!\n", va, va + size, md->total_size);
     return 0;
   }
   if (!lmc_um_check_unmarked(base, bf, va, size)) return 0;

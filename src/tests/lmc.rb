@@ -60,6 +60,15 @@ describe 'LocalMemCache' do
     LocalMemCache.clear_namespace("test")
   end
 
+  it 'should support filename parameters' do
+    lm = LocalMemCache.new :filename => ".tmp.a.lmc"
+    lm[:boo] = 1
+    lm.keys.size.should.equal 1
+    File.exists?(".tmp.a.lmc").should.be.true
+    LocalMemCache.check :filename => ".tmp.a.lmc"
+    LocalMemCache.clear :filename => ".tmp.a.lmc"
+  end
+
 
 end
 

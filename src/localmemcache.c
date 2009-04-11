@@ -33,30 +33,35 @@ int lmc_release_lock_flag(void *base, lmc_error_t *e) {
   return 1;
 }
 
-void lmc_clean_namespace_string(char *result, const char* original) {
-  size_t n = strlen(original);
-  if (n > 256) { n = 256; }
-  const char *s = original;
-  char *d = result;
-  char ch;
-  for (; n--; d++, s++) { 
-    ch = *s;
-    if ((ch >= 'a' && ch <= 'z') || 
-        (ch >= 'A' && ch <= 'Z')) {
-      *d = ch;
-    } else {
-      *d = '-';
-    }
+int lmc_namespace_or_filename(char *result, const char* ons, const char *ofn,
+    lmc_error_t *e) {
+  if (ons) {
+    lmc_clean_string(result, ons);
+    return 1;
   }
-  *d = 0x0;
+  if (ofn) {
+    size_t n = strlen(ofn);
+    if (n > 1010) { n = 1010; }
+    char *d = result;
+    if (!lmc_is_filename(ofn)) {
+      strcpy(d, "./");
+      d += 2;
+    }
+    strncpy(d, ofn, n);
+    return 1;
+  }
+  lmc_handle_error_with_err_string("lmc_namespace_or_filename", 
+      "Need to supply either namespace or filename argument", "ArgError", e);
+  return 0;
 }
 
-int local_memcache_clear_namespace(const char *namespace, int repair, 
-    lmc_error_t *e) {
+int local_memcache_clear_namespace(const char *namespace, const char *filename,
+    int repair, lmc_error_t *e) {
   char clean_ns[1024];
-  lmc_clean_namespace_string((char *)clean_ns, namespace);
+  if (!lmc_namespace_or_filename((char *)clean_ns, namespace, filename, e))
+      return 1;
   lmc_clean_namespace((char *)clean_ns, e);
-  if (repair) { 
+  if (repair) {
     lmc_lock_t *l = lmc_lock_init((char *)clean_ns, 1, e);
     lmc_lock_repair(l);
     free(l);
@@ -69,6 +74,8 @@ int local_memcache_clear_namespace(const char *namespace, int repair,
   }
   return 1;
 }
+
+int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e);
 
 local_memcache_t *__local_memcache_create(const char *namespace, size_t size, 
     int force, int *ok, lmc_error_t* e) {
@@ -89,11 +96,11 @@ retry:
   }
   if (!lmc_is_lock_working(lmc->lock, e)) {
     if (!force) {
-      if (local_memcache_check_namespace(namespace, e))  goto retry;
+      if (__local_memcache_check_namespace(namespace, e))  goto retry;
       lmc_handle_error_with_err_string("local_memcache_create",
           "Failed to repair shared memory!", "ShmLockFailed", e);
       goto failed;
-    } 
+    }
     *ok = 0;
   }
   {
@@ -133,25 +140,24 @@ failed:
   return NULL;
 }
 
-local_memcache_t *local_memcache_create(const char *namespace, double size_mb, 
-    lmc_error_t* e) {  
+local_memcache_t *local_memcache_create(const char *namespace, 
+    const char *filename, double size_mb, lmc_error_t* e) {  
   char clean_ns[1024];
   double s = size_mb == 0.0 ? 1024.0 : size_mb;
   size_t si = s * 1024 * 1024;
   //printf("size: %f, s: %f, si: %zd\n", size_mb, s, si);
-  lmc_clean_namespace_string((char *)clean_ns, namespace);
+  if (!lmc_namespace_or_filename((char *)clean_ns, namespace, filename, e))
+      return 0;
   return __local_memcache_create((char *)clean_ns, si, 0, 0, e);
 }
 
-int local_memcache_check_namespace(const char *namespace, lmc_error_t *e) {
-  char clean_ns[1024];
-  lmc_clean_namespace_string((char *)clean_ns, namespace);
+int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e) {
   char check_lock_name[1024];
   snprintf((char *)check_lock_name, 1023, "%s-check", (char *)clean_ns);
 
   if (!lmc_does_namespace_exist((char *)clean_ns)) { 
     lmc_clear_namespace_lock(check_lock_name);
-    lmc_clear_namespace_lock(namespace);
+    lmc_clear_namespace_lock(clean_ns);
     printf("namespace '%s' does not exist!\n", (char *)clean_ns);
     return 1;
   }
@@ -170,12 +176,14 @@ int local_memcache_check_namespace(const char *namespace, lmc_error_t *e) {
   local_memcache_t *lmc = __local_memcache_create((char *)clean_ns, ns_size, 
       1, &ok, e);
   if (!lmc) {
-    printf("WOAH: lmc == 0!\n");
+    lmc_handle_error_with_err_string("__local_memcache_create", 
+        "Unable to attach memory pool", "InitError", e);
     goto failed;
   }
   md = lmc->base;
   if (!ok) {
-    printf("[lmc] Auto repairing namespace '%s'\n", namespace);
+    fprintf(stderr, "[localmemcache] Auto repairing namespace '%s'\n", 
+        clean_ns);
     if (!md->locked) goto release;
     if (md->log.op_id == 0) goto unlock_and_release;
     if (ht_redo(lmc->base, md->va_hash, &md->log, e)) goto unlock_and_release;
@@ -208,9 +216,19 @@ failed:
   lmc_lock_release("local_memcache_check_namespace", check_l, e);
 check_lock_failed:
   free(check_l);
-  printf("[lmc] Failed to repair namespace '%s'\n", namespace);
+  fprintf(stderr, "[localmemcache] Failed to repair namespace '%s'\n", 
+      clean_ns);
   return 0;
 }
+
+int local_memcache_check_namespace(const char *namespace, const char *filename, 
+    lmc_error_t *e) {
+  char clean_ns[1024];
+  if (!lmc_namespace_or_filename((char *)clean_ns, namespace, filename, e)) 
+    return 0;
+  return __local_memcache_check_namespace(clean_ns, e);
+}
+
 
 
 int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
@@ -218,14 +236,16 @@ int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
   int retry_counter = 0;
 retry:
   if (retry_counter++ > 10) {
-    printf("[lmc] Too many retries: Cannot repair namespace '%s'\n", 
-        lmc->namespace);
+    fprintf(stderr, "[localmemcache] Too many retries: "
+        "Cannot repair namespace '%s'\n", lmc->namespace);
     return 0;
   }
   r = lmc_lock_obtain(who, lmc->lock, &lmc->error);
   if (!r && (strcmp(lmc->error.error_type, "LockTimedOut") == 0)) {
-    if (local_memcache_check_namespace(lmc->namespace, &lmc->error))  goto retry;
-    printf("[lmc] Cannot repair namespace '%s'\n", lmc->namespace);
+    if (__local_memcache_check_namespace(lmc->namespace, 
+        &lmc->error))  goto retry;
+    fprintf(stderr, "[localmemcache] Cannot repair namespace '%s'\n", 
+        lmc->namespace);
   }
   if (!r) return 0;
   if (!lmc_set_lock_flag(lmc->base, &lmc->error)) {
