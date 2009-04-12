@@ -32,6 +32,18 @@ task :sanity_test do
       "make -C src/tests/ && ./src/tests/lmc "
 end
 
+task :performance_test do
+  sh "./configure && make -C src clean && make -C src && " +
+      "(cd src/ruby-binding; ruby extconf.rb) && " +
+      "make -C src/ruby-binding/ && " +
+      "(cd src/tests; ruby extconf.rb) && " +
+      "make -C src/tests/ && ./src/tests/lmc; " +
+      "./src/tests/bench; " +
+      "ls -al /var/tmp/localmemcache/speed-comparison.lmc && " +
+      "du -h  /var/tmp/localmemcache/speed-comparison.lmc && " +
+      "uname -a && ruby -v "
+end
+
 task :c_api_package do
   tgz = "pkg/localmemcache-#{version}.tar.gz"
   sh "test -d pkg || mkdir pkg"
