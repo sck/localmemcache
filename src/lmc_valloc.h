@@ -26,6 +26,7 @@ typedef struct {
   size_t magic;
   size_t va_hash;
   int locked;
+  size_t version;
   lmc_log_descriptor_t log;
 } lmc_mem_descriptor_t;
 
