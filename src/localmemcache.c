@@ -158,7 +158,8 @@ int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e) {
   if (!lmc_does_namespace_exist((char *)clean_ns)) { 
     lmc_clear_namespace_lock(check_lock_name);
     lmc_clear_namespace_lock(clean_ns);
-    printf("namespace '%s' does not exist!\n", (char *)clean_ns);
+    fprintf(stderr, "[localmemcache] namespace '%s' does not exist!\n", 
+        (char *)clean_ns);
     return 1;
   }
 

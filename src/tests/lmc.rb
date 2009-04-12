@@ -10,7 +10,7 @@ LocalMemCache.clear_namespace("test", true)
 $lm = LocalMemCache.new :namespace=>"test"
 
 LocalMemCache.clear_namespace("test-small", true)
-$lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 0.01;
+$lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 0.20;
 
 describe 'LocalMemCache' do
 
@@ -49,7 +49,7 @@ describe 'LocalMemCache' do
 
   it 'should throw exception if pool is full' do
     $lms["one"] = "a";
-    should.raise(LocalMemCache::MemoryPoolFull) { $lms["two"] = "b" * 8000; }
+    should.raise(LocalMemCache::MemoryPoolFull) { $lms["two"] = "b" * 8000000; }
   end
 
   it 'should support checking of namespaces' do 

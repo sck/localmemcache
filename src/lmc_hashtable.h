@@ -16,7 +16,7 @@ typedef struct {
   va_string_t va_value;
 } ht_hash_entry_t;
 
-#define LMC_HT_BUCKETS 499
+#define LMC_HT_BUCKETS 20731
 #define LMC_ITERATOR_P(n) int ((n)) \
     (void *ctx, const char *key, const char *value)
 

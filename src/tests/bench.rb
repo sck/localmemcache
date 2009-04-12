@@ -18,7 +18,7 @@ def compare_speed(n)
     $lm2.get(r)
   }
   
-  puts "builtin"
+  puts "Ruby Hash of Strings"
   $hh = {}
   measure_time(n) {
     r = rand(10000).to_s
