@@ -20,7 +20,7 @@ SUPPORTED SYSTEMS
 - A CPU architecture with more than 32 bits is recommended, since otherwise you
   might run out of virtual address space when you use larger shared memory
   segments.
-- Note for OS X: It doesn't have sem_timedwait() and sem_getvalue(), and HPFS+
+- Note for OS X: It doesn't have sem_timedwait() and sem_getvalue(), and HFS+
   doesn't support sparse files...
 
 EXAMPLE
