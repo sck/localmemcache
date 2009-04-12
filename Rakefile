@@ -86,7 +86,7 @@ memory, but providing a similar interface.
     s.files = manifest 
     s.extensions = ['configure', 'src/ruby-binding/extconf.rb']
     s.require_path = 'src/ruby-binding'
-    s.has_rdoc = false
+    s.has_rdoc = true
     s.test_files = Dir['src/test/*.rb']
 
     s.author = 'Sven C. Koehler'

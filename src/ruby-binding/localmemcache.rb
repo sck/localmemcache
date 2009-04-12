@@ -1,12 +1,5 @@
 require 'rblocalmemcache'
 
-# == Overview
-# TestRDocUsage: A useless file
-#
-# == Example
-#
-#  Usage:  ruby testRDocUsage.rb  [options]
-#
 class LocalMemCache
 
   class LocalMemCacheError < StandardError; end
@@ -23,26 +16,43 @@ class LocalMemCache
   class MemoryPoolClosed < LocalMemCacheError; end
 
   #  Creates a new handle for accessing a shared memory region.
-  #
+  # 
   #  LocalMemCache.new :namespace=>"foo", :size_mb=> 1
-  #
-  #  The namespace parameter is mandatory.  
+  # 
+  #  LocalMemCache.new :filename=>"./foo.lmc"
+  # 
+  #  You must supply at least a :namespace or :filename parameter
   #  The size_mb defaults to 1024 (1 GB).
-  #
+  # 
   def self.new(options)
     o = { :size_mb => 0 }.update(options || {})
     _new(o);
   end
 
-  # Deletes the given namespaces, removing semaphores if necessary.
-  # Do only use if you are sure the namespace is not used anymore by other
-  # processes.
+  # NOTE: This method is deprecated, use LocalMemCache.clear(*args) instead.
   #
+  # Deletes a memory pool.  If the repair flag is set, locked semaphores are
+  # removed as well.
+  #
+  # WARNING: Do only call this method with the repair=true flag if you are sure
+  # that you really want to remove this memory pool and no more processes are
+  # still using it.
   def self.clear_namespace(namespace, repair = false) 
-    clear(:namespace => namespace.to_s, :repair => repair)
+    clear :namespace => namespace.to_s, :repair => repair
   end
 
+  # NOTE: This method is deprecated, use LocalMemCache.check(*args) instead.
+  #
+  # Tries to repair a corrupt namespace.  Usually one doesn't call this method
+  # directly, it's invoked automatically when operations time out.
+  # 
+  # valid +options+ are 
+  # [:namespace] 
+  # [:filename] 
+  # 
+  # The memory pool must be specified by either setting the :filename or
+  # :namespace option.  The default for :repair is false.
   def self.check_namespace(namespace) 
-    check(:namespace => namespace.to_s) 
+    check :namespace => namespace.to_s
   end
 end

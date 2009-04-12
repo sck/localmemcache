@@ -123,7 +123,25 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
   return rb_lmc_check_handle_access(h);
 }
 
-/* :nodoc: */
+/*
+ * call-seq: LocalMemCache.clear(*args)
+ *
+ * Deletes a memory pool.  If the :repair option is set, locked semaphores are
+ * removed as well.
+ *
+ * WARNING: Do only call this method with the :repair option if you are sure
+ * that you really want to remove this memory pool and no more processes are
+ * still using it.
+ *
+ *
+ * valid +options+ for +clear+ are 
+ * [:namespace] 
+ * [:filename] 
+ * [:repair] 
+ *
+ * The memory pool must be specified by either setting the :filename or
+ * :namespace option.  The default for :repair is false.
+ */
 static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
   lmc_check_dict(o);
   lmc_error_t e;
@@ -136,7 +154,19 @@ static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
   return Qnil;
 }
 
-/* :nodoc: */
+/*
+ * call-seq: LocalMemCache.check(*args)
+ *
+ * Tries to repair a corrupt namespace.  Usually one doesn't call this method
+ * directly, it's invoked automatically when operations time out.
+ *
+ * valid +options+ are 
+ * [:namespace] 
+ * [:filename] 
+ *
+ * The memory pool must be specified by either setting the :filename or
+ * :namespace option.  The default for :repair is false.
+ */
 static VALUE LocalMemCache__check(VALUE klass, VALUE o) {
   lmc_check_dict(o);
   lmc_error_t e;
@@ -164,10 +194,10 @@ static VALUE LocalMemCache__disable_test_crash(VALUE klass) {
 
 /* 
  *  call-seq:
- *     lmc.get(key)   ->   Qnil
- *     lmc[key]       ->   Qnil
+ *     lmc.get(key)   ->   string value or nil
+ *     lmc[key]       ->   string value or nil
  *
- *  Retrieve value from hashtable.
+ *  Retrieve string value from hashtable.
  */
 static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
   size_t l;
@@ -183,9 +213,9 @@ static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
  *     lmc.set(key, value)   ->   Qnil
  *     lmc[key]=value        ->   Qnil
  *
- *  Set value for key in hashtable.
+ *  Set value for key in hashtable.  Value and key will be converted to
+ *  string.
  */
-
 static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
   local_memcache_t *lmc = get_LocalMemCache(obj);
   if (!local_memcache_set(lmc, rstring_ptr(key), rstring_length(key), 
@@ -199,7 +229,7 @@ static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
  *  call-seq:
  *     lmc.delete(key)   ->   Qnil
  *
- *  Deletes key from hashtable.
+ *  Deletes key from hashtable.  The key is converted to string.
  */
 static VALUE LocalMemCache__delete(VALUE obj, VALUE key) {
   return local_memcache_delete(get_LocalMemCache(obj), 
@@ -265,6 +295,27 @@ static VALUE LocalMemCache__keys(VALUE obj) {
   return rb_ary_entry(d, 1);
 }
 
+/*
+ * Document-class: LocalMemCache
+ * 
+ * <code>LocalMemCache</code> provides for a Hashtable of strings in shared
+ * memory (via a memory mapped file), which thus can be shared between
+ * processes on a computer.  Here is an example of its usage:
+ *
+ *   $lm = LocalMemCache.new :namespace => "viewcounters"
+ *   $lm[:foo] = 1
+ *   $lm[:foo]          # -> "1"
+ *   $lm.delete(:foo)
+ *
+ * <code>LocalMemCache</code> can also be used as a persistent key value
+ * database, just use the :filename instead of the :namespace parameter.
+ *
+ *   $lm = LocalMemCache.new :filename => "my-database.lmc"
+ *   $lm[:foo] = 1
+ *   $lm[:foo]          # -> "1"
+ *   $lm.delete(:foo)
+ *
+ */
 void Init_rblocalmemcache() {
   LocalMemCache = rb_define_class("LocalMemCache", rb_cObject);
   rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 1);
