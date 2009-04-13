@@ -134,7 +134,7 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
  * still using it.
  *
  *
- * valid +options+ for +clear+ are 
+ * valid options for clear are 
  * [:namespace] 
  * [:filename] 
  * [:repair] 
@@ -160,7 +160,7 @@ static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
  * Tries to repair a corrupt namespace.  Usually one doesn't call this method
  * directly, it's invoked automatically when operations time out.
  *
- * valid +options+ are 
+ * valid options are 
  * [:namespace] 
  * [:filename] 
  *
@@ -314,6 +314,32 @@ static VALUE LocalMemCache__keys(VALUE obj) {
  *   $lm[:foo] = 1
  *   $lm[:foo]          # -> "1"
  *   $lm.delete(:foo)
+ *
+ *  == Default sizes of memory pools
+ *
+ *  The default size for memory pools is 1024MB. It cannot be changed later, so
+ *  choose a size that will provide enough space for all your data.  You might
+ *  consider setting this size to the maximum filesize of your filesystem.
+ *  Also note that while these memory pools may look large on your disk, they
+ *  really aren't, because with sparse files only those parts of the file which
+ *  contain non-null data actually use disk space.
+ *
+ *  == Automatic recovery from crashes
+ *
+ *  In case a process is terminated while accessing a memory pool, other
+ *  processes will wait for the lock up to 2 seconds, and will then try to
+ *  resume the aborted operation.  This can also be done explicitly by using
+ *  LocalMemCache.check(options).
+ *
+ *  == Clearing memory pools
+ *
+ *  Removing memory pools can be done with LocalMemCache.clear(options). 
+ *
+ *  == Environment
+ *  
+ *  If you use the :namespace parameter, the .lmc file for your namespace will
+ *  reside in /var/tmp/localmemcache.  This can be overriden by setting the
+ *  LMC_NAMESPACES_ROOT_PATH variable in the environment.
  *
  */
 void Init_rblocalmemcache() {

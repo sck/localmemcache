@@ -23,6 +23,10 @@ class LocalMemCache
   # 
   #  You must supply at least a :namespace or :filename parameter
   #  The size_mb defaults to 1024 (1 GB).
+  #
+  #  If you use the :namespace parameter, the .lmc file for your namespace will
+  #  reside in /var/tmp/localmemcache.  This can be overriden by setting the
+  #  LMC_NAMESPACES_ROOT_PATH variable in the environment.
   # 
   def self.new(options)
     o = { :size_mb => 0 }.update(options || {})
@@ -46,7 +50,7 @@ class LocalMemCache
   # Tries to repair a corrupt namespace.  Usually one doesn't call this method
   # directly, it's invoked automatically when operations time out.
   # 
-  # valid +options+ are 
+  # valid options are 
   # [:namespace] 
   # [:filename] 
   # 
