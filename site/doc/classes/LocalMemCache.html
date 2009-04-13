@@ -55,10 +55,6 @@
         <tr class="top-aligned-row">
             <td><strong>In:</strong></td>
             <td>
-                <a href="../files/__/src/ruby-binding/localmemcache_rb.html">
-                ../src/ruby-binding/localmemcache.rb
-                </a>
-        <br />
                 <a href="../files/__/src/ruby-binding/rblocalmemcache_c.html">
                 ../src/ruby-binding/rblocalmemcache.c
                 </a>
@@ -119,7 +115,12 @@ a persistent key value database, just use the :filename instead of the
 
  In case a process is terminated while accessing a memory pool, other
  processes will wait for the lock up to 2 seconds, and will then try to
- resume the aborted operation.
+ resume the aborted operation.  This can also be done explicitly by using
+ LocalMemCache.check(options).
+
+ == Clearing memory pools
+
+ Removing memory pools can be done with LocalMemCache.clear(options).
 
  == Environment
 
@@ -137,18 +138,15 @@ a persistent key value database, just use the :filename instead of the
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000007">[]</a>&nbsp;&nbsp;
-      <a href="#M000010">[]=</a>&nbsp;&nbsp;
-      <a href="#M000005">check</a>&nbsp;&nbsp;
-      <a href="#M000003">check_namespace</a>&nbsp;&nbsp;
-      <a href="#M000004">clear</a>&nbsp;&nbsp;
-      <a href="#M000002">clear_namespace</a>&nbsp;&nbsp;
-      <a href="#M000012">close</a>&nbsp;&nbsp;
-      <a href="#M000008">delete</a>&nbsp;&nbsp;
-      <a href="#M000006">get</a>&nbsp;&nbsp;
-      <a href="#M000011">keys</a>&nbsp;&nbsp;
-      <a href="#M000001">new</a>&nbsp;&nbsp;
-      <a href="#M000009">set</a>&nbsp;&nbsp;
+      <a href="#M000004">[]</a>&nbsp;&nbsp;
+      <a href="#M000007">[]=</a>&nbsp;&nbsp;
+      <a href="#M000002">check</a>&nbsp;&nbsp;
+      <a href="#M000001">clear</a>&nbsp;&nbsp;
+      <a href="#M000009">close</a>&nbsp;&nbsp;
+      <a href="#M000005">delete</a>&nbsp;&nbsp;
+      <a href="#M000003">get</a>&nbsp;&nbsp;
+      <a href="#M000008">keys</a>&nbsp;&nbsp;
+      <a href="#M000006">set</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -159,23 +157,6 @@ a persistent key value database, just use the :filename instead of the
 
     <div id="section">
 
-    <div id="class-list">
-      <h3 class="section-bar">Classes and Modules</h3>
-
-      Class <a href="LocalMemCache/ArgError.html" class="link">LocalMemCache::ArgError</a><br />
-Class <a href="LocalMemCache/InitError.html" class="link">LocalMemCache::InitError</a><br />
-Class <a href="LocalMemCache/LocalMemCacheError.html" class="link">LocalMemCache::LocalMemCacheError</a><br />
-Class <a href="LocalMemCache/LockError.html" class="link">LocalMemCache::LockError</a><br />
-Class <a href="LocalMemCache/LockTimedOut.html" class="link">LocalMemCache::LockTimedOut</a><br />
-Class <a href="LocalMemCache/MemoryPoolClosed.html" class="link">LocalMemCache::MemoryPoolClosed</a><br />
-Class <a href="LocalMemCache/MemoryPoolFull.html" class="link">LocalMemCache::MemoryPoolFull</a><br />
-Class <a href="LocalMemCache/OutOfMemoryError.html" class="link">LocalMemCache::OutOfMemoryError</a><br />
-Class <a href="LocalMemCache/RecoveryFailed.html" class="link">LocalMemCache::RecoveryFailed</a><br />
-Class <a href="LocalMemCache/ShmError.html" class="link">LocalMemCache::ShmError</a><br />
-Class <a href="LocalMemCache/ShmLockFailed.html" class="link">LocalMemCache::ShmLockFailed</a><br />
-Class <a href="LocalMemCache/ShmUnlockFailed.html" class="link">LocalMemCache::ShmUnlockFailed</a><br />
-
-    </div>
 
 
 
@@ -187,12 +168,12 @@ Class <a href="LocalMemCache/ShmUnlockFailed.html" class="link">LocalMemCache::S
     <div id="methods">
       <h3 class="section-bar">Public Class methods</h3>
 
-      <div id="method-M000005" class="method-detail">
-        <a name="M000005"></a>
+      <div id="method-M000002" class="method-detail">
+        <a name="M000002"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000005.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000005.html');return false;">
+          <a href="LocalMemCache.src/M000002.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000002.html');return false;">
           <span class="method-name"> LocalMemCache.check(*args)<br />
 </span>
           </a>
@@ -213,41 +194,12 @@ The memory pool must be specified by either setting the :filename or
         </div>
       </div>
 
-      <div id="method-M000003" class="method-detail">
-        <a name="M000003"></a>
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000003.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000003.html');return false;">
-          <span class="method-name">check_namespace</span><span class="method-args">(namespace)</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
-          <p>
-NOTE: This method is deprecated, use <a
-href="LocalMemCache.html#M000005">LocalMemCache.check(*args)</a> instead.
-</p>
-<p>
-Tries to repair a corrupt namespace. Usually one doesn&#8216;t call this
-method directly, it&#8216;s invoked automatically when operations time out.
-</p>
-<p>
-valid options are [:namespace] [:filename]
-</p>
-<p>
-The memory pool must be specified by either setting the :filename or
-:namespace option. The default for :repair is false.
-</p>
-        </div>
-      </div>
-
-      <div id="method-M000004" class="method-detail">
-        <a name="M000004"></a>
-
-        <div class="method-heading">
-          <a href="LocalMemCache.src/M000004.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000004.html');return false;">
+          <a href="LocalMemCache.src/M000001.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000001.html');return false;">
           <span class="method-name"> LocalMemCache.clear(*args)<br />
 </span>
           </a>
@@ -256,7 +208,7 @@ The memory pool must be specified by either setting the :filename or
         <div class="method-description">
           <p>
 Deletes a memory pool. If the :repair option is <a
-href="LocalMemCache.html#M000009">set</a>, locked semaphores are removed as
+href="LocalMemCache.html#M000006">set</a>, locked semaphores are removed as
 well.
 </p>
 <p>
@@ -265,7 +217,7 @@ that you really want to remove this memory pool and no more processes are
 still using it.
 </p>
 <p>
-valid options for <a href="LocalMemCache.html#M000004">clear</a> are
+valid options for <a href="LocalMemCache.html#M000001">clear</a> are
 [:namespace] [:filename] [:repair]
 </p>
 <p>
@@ -275,77 +227,14 @@ The memory pool must be specified by either setting the :filename or
         </div>
       </div>
 
-      <div id="method-M000002" class="method-detail">
-        <a name="M000002"></a>
-
-        <div class="method-heading">
-          <a href="LocalMemCache.src/M000002.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000002.html');return false;">
-          <span class="method-name">clear_namespace</span><span class="method-args">(namespace, repair = false)</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
-          <p>
-NOTE: This method is deprecated, use <a
-href="LocalMemCache.html#M000004">LocalMemCache.clear(*args)</a> instead.
-</p>
-<p>
-Deletes a memory pool. If the repair flag is <a
-href="LocalMemCache.html#M000009">set</a>, locked semaphores are removed as
-well.
-</p>
-<p>
-WARNING: Do only call this method with the repair=true flag if you are sure
-that you really want to remove this memory pool and no more processes are
-still using it.
-</p>
-        </div>
-      </div>
-
-      <div id="method-M000001" class="method-detail">
-        <a name="M000001"></a>
-
-        <div class="method-heading">
-          <a href="LocalMemCache.src/M000001.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000001.html');return false;">
-          <span class="method-name">new</span><span class="method-args">(options)</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
-          <p>
-Creates a <a href="LocalMemCache.html#M000001">new</a> handle for accessing
-a shared memory region.
-</p>
-<p>
-<a href="LocalMemCache.html#M000001">LocalMemCache.new</a>
-:namespace=&gt;&quot;foo&quot;, :size_mb=&gt; 1
-</p>
-<p>
-<a href="LocalMemCache.html#M000001">LocalMemCache.new</a>
-:filename=&gt;&quot;./foo.lmc&quot;
-</p>
-<p>
-You must supply at least a :namespace or :filename parameter The size_mb
-defaults to 1024 (1 GB).
-</p>
-<p>
-If you use the :namespace parameter, the .lmc file for your namespace will
-reside in /var/tmp/localmemcache. This can be overriden by setting the
-LMC_NAMESPACES_ROOT_PATH variable in the environment.
-</p>
-        </div>
-      </div>
-
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000007" class="method-detail">
-        <a name="M000007"></a>
+      <div id="method-M000004" class="method-detail">
+        <a name="M000004"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000007.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000007.html');return false;">
+          <a href="LocalMemCache.src/M000004.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000004.html');return false;">
           <span class="method-name">lmc.get(key)   &rarr;   string value or nil<br />
 lmc[key]       &rarr;   string value or nil<br />
 </span>
@@ -359,12 +248,12 @@ Retrieve string value from hashtable.
         </div>
       </div>
 
-      <div id="method-M000010" class="method-detail">
-        <a name="M000010"></a>
+      <div id="method-M000007" class="method-detail">
+        <a name="M000007"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000010.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000010.html');return false;">
+          <a href="LocalMemCache.src/M000007.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000007.html');return false;">
           <span class="method-name">lmc.set(key, value)   &rarr;   Qnil<br />
 lmc[key]=value        &rarr;   Qnil<br />
 </span>
@@ -378,12 +267,12 @@ Set value for key in hashtable. Value and key will be converted to string.
         </div>
       </div>
 
-      <div id="method-M000012" class="method-detail">
-        <a name="M000012"></a>
+      <div id="method-M000009" class="method-detail">
+        <a name="M000009"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000012.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000012.html');return false;">
+          <a href="LocalMemCache.src/M000009.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000009.html');return false;">
           <span class="method-name">lmc.close()   &rarr;   Qnil<br />
 </span>
           </a>
@@ -396,12 +285,12 @@ Releases hashtable.
         </div>
       </div>
 
-      <div id="method-M000008" class="method-detail">
-        <a name="M000008"></a>
+      <div id="method-M000005" class="method-detail">
+        <a name="M000005"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000008.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000008.html');return false;">
+          <a href="LocalMemCache.src/M000005.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000005.html');return false;">
           <span class="method-name">lmc.delete(key)   &rarr;   Qnil<br />
 </span>
           </a>
@@ -414,12 +303,12 @@ Deletes key from hashtable. The key is converted to string.
         </div>
       </div>
 
-      <div id="method-M000006" class="method-detail">
-        <a name="M000006"></a>
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000006.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000006.html');return false;">
+          <a href="LocalMemCache.src/M000003.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000003.html');return false;">
           <span class="method-name">lmc.get(key)   &rarr;   string value or nil<br />
 lmc[key]       &rarr;   string value or nil<br />
 </span>
@@ -433,12 +322,12 @@ Retrieve string value from hashtable.
         </div>
       </div>
 
-      <div id="method-M000011" class="method-detail">
-        <a name="M000011"></a>
+      <div id="method-M000008" class="method-detail">
+        <a name="M000008"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000011.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000011.html');return false;">
+          <a href="LocalMemCache.src/M000008.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000008.html');return false;">
           <span class="method-name">lmc.keys()   &rarr;   array or nil<br />
 </span>
           </a>
@@ -446,17 +335,17 @@ Retrieve string value from hashtable.
       
         <div class="method-description">
           <p>
-Returns a list of <a href="LocalMemCache.html#M000011">keys</a>.
+Returns a list of <a href="LocalMemCache.html#M000008">keys</a>.
 </p>
         </div>
       </div>
 
-      <div id="method-M000009" class="method-detail">
-        <a name="M000009"></a>
+      <div id="method-M000006" class="method-detail">
+        <a name="M000006"></a>
 
         <div class="method-heading">
-          <a href="LocalMemCache.src/M000009.html" target="Code" class="method-signature"
-            onclick="popupCode('LocalMemCache.src/M000009.html');return false;">
+          <a href="LocalMemCache.src/M000006.html" target="Code" class="method-signature"
+            onclick="popupCode('LocalMemCache.src/M000006.html');return false;">
           <span class="method-name">lmc.set(key, value)   &rarr;   Qnil<br />
 lmc[key]=value        &rarr;   Qnil<br />
 </span>

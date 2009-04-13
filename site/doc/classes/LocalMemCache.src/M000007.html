@@ -5,19 +5,20 @@
 
 <html>
 <head>
-  <title>[] (LocalMemCache)</title>
+  <title>[]= (LocalMemCache)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
   <pre>/* 
  *  call-seq:
- *     lmc.get(key)   -&gt;   string value or nil
- *     lmc[key]       -&gt;   string value or nil
+ *     lmc.set(key, value)   -&gt;   Qnil
+ *     lmc[key]=value        -&gt;   Qnil
  *
- *  Retrieve string value from hashtable.
+ *  Set value for key in hashtable.  Value and key will be converted to
+ *  string.
  */
-static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
+static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
 </pre>
 </body>
 </html>
