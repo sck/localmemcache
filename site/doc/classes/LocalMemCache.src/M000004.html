@@ -5,19 +5,35 @@
 
 <html>
 <head>
-  <title>[] (LocalMemCache)</title>
+  <title>clear (LocalMemCache)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre>/* 
- *  call-seq:
- *     lmc.get(key)   -&gt;   string value or nil
- *     lmc[key]       -&gt;   string value or nil
+  <pre>/*
+ * call-seq: LocalMemCache.clear(*args)
  *
- *  Retrieve string value from hashtable.
+ * Deletes a memory pool.  If the :repair option is set, locked semaphores are
+ * removed as well.
+ *
+ * WARNING: Do only call this method with the :repair option if you are sure
+ * that you really want to remove this memory pool and no more processes are
+ * still using it.
+ *
+ * If you delete a pool and other processes still have handles open on it, the
+ * status of these handles becomes undefined.  There's no way for a process to
+ * know when a handle is not valid anymore, so only delete a memory pool if
+ * you are sure that all handles are closed.
+ *
+ * valid options for clear are 
+ * [:namespace] 
+ * [:filename] 
+ * [:repair] 
+ *
+ * The memory pool must be specified by either setting the :filename or
+ * :namespace option.  The default for :repair is false.
  */
-static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
+static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
 </pre>
 </body>
 </html>

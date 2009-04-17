@@ -5,31 +5,15 @@
 
 <html>
 <head>
-  <title>clear (LocalMemCache)</title>
+  <title>new (LocalMemCache)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre>/*
- * call-seq: LocalMemCache.clear(*args)
- *
- * Deletes a memory pool.  If the :repair option is set, locked semaphores are
- * removed as well.
- *
- * WARNING: Do only call this method with the :repair option if you are sure
- * that you really want to remove this memory pool and no more processes are
- * still using it.
- *
- *
- * valid options for clear are 
- * [:namespace] 
- * [:filename] 
- * [:repair] 
- *
- * The memory pool must be specified by either setting the :filename or
- * :namespace option.  The default for :repair is false.
- */
-static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
-</pre>
+  <pre><span class="ruby-comment cmt"># File ../src/ruby-binding/localmemcache.rb, line 39</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">options</span>)
+    <span class="ruby-identifier">o</span> = { <span class="ruby-identifier">:size_mb</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span> }.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">options</span> <span class="ruby-operator">||</span> {})
+    <span class="ruby-identifier">_new</span>(<span class="ruby-identifier">o</span>);
+  <span class="ruby-keyword kw">end</span></pre>
 </body>
 </html>
