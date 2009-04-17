@@ -27,6 +27,14 @@ class LocalMemCache
   #  If you use the :namespace parameter, the .lmc file for your namespace will
   #  reside in /var/tmp/localmemcache.  This can be overriden by setting the
   #  LMC_NAMESPACES_ROOT_PATH variable in the environment.
+  #
+  #  When you first call .new for a previously not existing memory pool, a
+  #  sparse file will be created and memory and disk space will be allocated to
+  #  hold the empty hashtable (about 100K), so the size_mb refers
+  #  only to the maximum size of the memory pool.  .new for an already existing
+  #  memory pool will only map the already previously allocated RAM into the
+  #  virtual address space of your process.  
+  #
   # 
   def self.new(options)
     o = { :size_mb => 0 }.update(options || {})
@@ -36,7 +44,12 @@ class LocalMemCache
   # NOTE: This method is deprecated, use LocalMemCache.clear(*args) instead.
   #
   # Deletes a memory pool.  If the repair flag is set, locked semaphores are
-  # removed as well.
+  # removed as well.  
+  #
+  # If you delete a pool and other processes still have handles open on it, the
+  # status of these handles becomes undefined.  There's no way for a process to
+  # know when a handle is not valid anymore, so only delete a memory pool if
+  # you are sure that all handles are closed.
   #
   # WARNING: Do only call this method with the repair=true flag if you are sure
   # that you really want to remove this memory pool and no more processes are

@@ -133,6 +133,10 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
  * that you really want to remove this memory pool and no more processes are
  * still using it.
  *
+ * If you delete a pool and other processes still have handles open on it, the
+ * status of these handles becomes undefined.  There's no way for a process to
+ * know when a handle is not valid anymore, so only delete a memory pool if
+ * you are sure that all handles are closed.
  *
  * valid options for clear are 
  * [:namespace] 
@@ -165,7 +169,7 @@ static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
  * [:filename] 
  *
  * The memory pool must be specified by either setting the :filename or
- * :namespace option.  The default for :repair is false.
+ * :namespace option. 
  */
 static VALUE LocalMemCache__check(VALUE klass, VALUE o) {
   lmc_check_dict(o);
@@ -317,12 +321,12 @@ static VALUE LocalMemCache__keys(VALUE obj) {
  *
  *  == Default sizes of memory pools
  *
- *  The default size for memory pools is 1024MB. It cannot be changed later, so
- *  choose a size that will provide enough space for all your data.  You might
- *  consider setting this size to the maximum filesize of your filesystem.
- *  Also note that while these memory pools may look large on your disk, they
- *  really aren't, because with sparse files only those parts of the file which
- *  contain non-null data actually use disk space.
+ *  The default size for memory pools is 1024 (MB). It cannot be changed later,
+ *  so choose a size that will provide enough space for all your data.  You
+ *  might consider setting this size to the maximum filesize of your
+ *  filesystem.  Also note that while these memory pools may look large on your
+ *  disk, they really aren't, because with sparse files only those parts of the
+ *  file which contain non-null data actually use disk space.
  *
  *  == Automatic recovery from crashes
  *
