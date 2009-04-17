@@ -54,8 +54,8 @@ end
 #task :pushsite => [:rdoc] do
 task :pushsite do
   sh "chmod 755 site"
-  sh "chmod 644 site/*.html"
-  sh "chmod 644 site/*.css"
+  sh "find site -type d | xargs chmod go+rx"
+  sh "find site -type f | xargs chmod go+r"
   sh 'rsync --rsh="ssh -i $HOME/.ssh/id_rsa_oss -l sck" -avz site/ sck@localmemcache.rubyforge.org:/var/www/gforge-projects/localmemcache/'
 end
 

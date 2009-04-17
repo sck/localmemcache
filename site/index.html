@@ -7,47 +7,29 @@
   <body>  
 
 <div id="content">
-<h1>The beauty of memcached.&nbsp;&nbsp;For local data.&nbsp;&nbsp;Blazingly fast.</h1>
+<h1>A persistent key-value database based on mmap()'ed shared memory</h1>
 
 <p><b>Localmemcache</b> is a library for C and ruby that aims to provide
 an interface similar to memcached but for accessing local data instead of
 remote data.  It's based on <b>mmap()</b>'ed shared memory for maximum speed.
+Since version 0.3.0 it supports persistence, also making it a fast
+alternative to GDBM and Berkeley DB.
 
-<h2>2009-04-05: Changes for 0.2.2</h2>
+<h2>Key features as of 0.3.0 (2009-04-17)</h2>
+<li><a href="#performance">blazingly fast</a></li>
+<li>persistent</li>
+<li>parallel writes are supported by default</li>
+<li>uses transactions internally to avoid data corruption</li>
+<li>lightweight: the core library is just about <b>1400</b> lines of <b>C</b> code</li>
 
-<li>Fixed a bug that prevented setting values in the hashtable</li>
-<li>Accessing a closed memory cache does no longer result in a crash</li>
-<li>Gem works now with Ruby 1.9</li>
-<li><b>Speed improvements</b>: On my machine localmemcache is now only
-about <b>20</b>% slower than a Ruby hash of strings(<b>0.2.0</b> was about 
-<b>40</b>% slower)</li>
-<li><b>OS X is now officially not supported</b> as it lacks sem_timedwait and
-sem_getvalue (You still can force a build but it won't be able to
-recover from crashes.)</li>
-<li>The environment variable <b>LMC_NAMESPACES_ROOT_PATH</b> can now be
-used to override the default, which is <b>/var/tmp/localmemcache</b></li>
-
-
-<h2>2009-03-30: New features in 0.2.0</h2>
-
-<li><b>Logging</b>: In case your application is terminated while
-accessing the shared memory (eg by <b>kill -9</b>), it is now able to
-<b>restore the integrity of your data</b>.</li>
-<li><b>\0 character</b> can now be used in <b>keys</b> and
-<b>values</b></li>
-<li>The ruby binding now features a <b>keys()</b> method.</b>
-<li>Added a <b>C API</b>.  See <a href="http://github.com/sck/localmemcache/blob/8c753f74c53b107d271975bedcc1f91a3dbd6961/src/localmemcache.h">localmemcache.h</a></li>
-
-<h2>Supported Systems</h2>
-
-<li>Unix (for <b>mmap())</b></li>
-<li>A file system which supports <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse files</a> (Localmemcache will be very slow, otherwise)</li>
-<li>OS X is currently not supported because it doesn't have
-sem_timedwait(), and sem_getvalue(); also <b>HFS+</b> doesn't support sparse 
-files...</li>
-<li>A CPU architecture with more than <b>32 bits</b> is recommended, since
-otherwise you might run out of virtual address space when you use larger
-shared memory segments.</li>
+<h2>Requirements</h2>
+<li>a &gt;=64bit Unix</li>
+<li>a file system that offers <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse files</a></li>
+Note for <b>OS X</b>: <b>OS X</b> disqualifies as <b>HFS+</b> doesn't
+have sparse files and <b>sem_timedwait</b>() and <b>sem_getvalue</b>() aren't
+supported as well.
+Note for <b>FreeBSD</b>: It has been reported that Localmemcache
+sometimes hangs there, it is not yet clear what the problem is.
 
 <h2>Install</h2>
 
@@ -56,19 +38,24 @@ shared memory segments.</li>
 <pre><code>gem install localmemcache
 </code></pre>
 
+
 If you just want to use the <b>C API</b>, download the .tar.gz from <a href="http://rubyforge.org/frs/?group_id=7925">here</a>.
 
 <h2>Using</h2>
+<b>API</b>:&nbsp;<a href="http://github.com/sck/localmemcache/blob/e980ba949034a349dbf0e6f8f9ef77bbe3e3e314/src/localmemcache.h">C</a>|<a href="http://localmemcache.rubyforge.org/doc/">Ruby</a><br>
 <p><pre><code>require 'localmemcache'
-$lm = LocalMemCache.new :namespace => :viewcounters
+# 1. the memcached way
+# $lm = LocalMemCache.new :namespace => :viewcounters
+# 2. the GDBM way
+$lm = LocalMemCache.new :filename => "./viewcounters.lmc"
 $lm[:foo] = 1
 $lm[:foo]
 $lm.delete(:foo)
 </code></pre> 
-(C version of this example: <a href="http://github.com/sck/localmemcache/blob/8c753f74c53b107d271975bedcc1f91a3dbd6961/example/hello.c">hello.c</a>)
+(C version of this example: <a href="http://github.com/sck/localmemcache/blob/e980ba949034a349dbf0e6f8f9ef77bbe3e3e314/example/hello.c">hello.c</a>)
 </p>
-<a href="http://github.com/sck/localmemcache/tree/master">Read more</a>.
 
+<a name="performance" id="performance"></a>
 <h2>Performance</h2>
 
 <p>Here's a quick speed comparison, made on an 
@@ -85,13 +72,19 @@ Ruby benchmark pseudo code:
 Tokyo Tyrant:          <b>298,226.197</b> ms
 MemCache:              <b>253,326.122</b> ms
 GDBM:                   <b>24,226.116</b> ms
-LocalMemCache 0.2.2:     <b>5,799.225</b> ms
+Localmemcache 0.2.2:     <b>5,799.225</b> ms
+Localmemcache 0.3.0:     <b>5,300.055</b> ms
 Ruby Hash of Strings:    <b>4,963.313</b> ms
 </pre>
+(<a href="http://github.com/sck/localmemcache/tree/e980ba949034a349dbf0e6f8f9ef77bbe3e3e314/bench">Code of the benchmarks used</a>)
 
-So, on my machine <b>Localmemcache</b> 0.2.2 is about <b>43</b> times
-faster than using memcached locally, and about <b>20</b>% slower than
-a Ruby hash of strings.
+<p>
+
+So, on my machine, using <b>Localmemcache</b> 0.3.0 to store key-value
+data on disk is about <b>10</b>% slower than keeping them in memory in a
+Ruby hash of strings.   Also keep in mind that of the above mentioned
+software components <b>Tokyo Tyrant</b> is the only one that offers
+persistence and parallel writes like <b>Localmemcache</b> does.
 
 <h2>Source code</h2>
 
@@ -101,10 +94,16 @@ can be retrieved by executing</p>
 <pre><code>git clone git://github.com/sck/localmemcache.git
 </code></pre>
 
-<h2>Read on</h2>
+<h2>Tips for backups</h1>
 
-A bit of documenation on how <b>localmemcache</b> <a
-href="http://github.com/sck/localmemcache/blob/96b5e0863e1da7f17e249a6c8884984e0c23ee2f/INTERNALS">works</a>.
+Note that you cannot copy Localmemcache's .lmc files while other
+processes are making changes to the data, this will likely result in a
+corrupt backup.  So you need to make sure that none of your processes are
+writing during the time you do an backup.  As for copying sparse files,
+<b>cp</b> recognizes them automatically, with <b>tar</b> you need to use
+the <b>-S</b> option.
+
+<h2><a href="http://localmemcache.rubyforge.org/doc/classes/LocalMemCache.html">Read on / RDoc</a></h2>
 
 <h2>License</h2>
 
