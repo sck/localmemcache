@@ -198,6 +198,56 @@ int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx,
   return 1;
 }
 
+int ht_random_pair(void *base, va_ht_hash_t va_ht, char **r_key, 
+    size_t *n_key, char **r_value, size_t *n_value) {
+  va_ht_hash_entry_t va_hr;
+  ht_hash_t *ht = base + va_ht;
+  ht_hash_entry_t *hr = &lmc_null_node;
+  size_t k;
+  int rk = -1;
+  int filled_buckets = 0;
+  for (k = 0; k < LMC_HT_BUCKETS; k++) {
+    if (ht->va_buckets[k]) { filled_buckets++; }
+  }
+  if (filled_buckets == 0) { *r_key = 0x0;  r_value = 0x0; return 0; }
+  int bnr = rand() % filled_buckets;
+  for (k = 0; k < LMC_HT_BUCKETS; k++) {
+    if (ht->va_buckets[k] && bnr-- < 1) { 
+      rk = k; 
+      break;
+    }
+  }
+  if (rk == -1) {
+    printf("WHOA: Bucket not found!\n");
+    abort();
+  }
+  int pair_counter = 0;
+  hr = &lmc_null_node;
+  for (va_hr = ht->va_buckets[rk]; va_hr != 0 && hr != NULL; 
+       va_hr = hr->va_next) { 
+    hr = va_hr ? base + va_hr : 0;
+    pair_counter++; 
+  }
+  int random_pair = rand() % pair_counter;
+  hr = &lmc_null_node;
+  for (va_hr = ht->va_buckets[rk]; va_hr != 0 && hr != NULL; 
+      va_hr = hr->va_next) { 
+    hr = va_hr ? base + va_hr : 0;
+    if (random_pair-- < 1) { 
+      char *k = base + hr->va_key;
+      char *v = base + hr->va_value;
+      *r_key = lmc_string_data(k);
+      *n_key = lmc_string_len(k);
+      *r_value = lmc_string_data(v);
+      *n_value = lmc_string_len(v);
+      return 1;
+    }
+  }
+  printf("whoa no random entry found!\n");
+  abort();
+  return 0;
+}
+
 int ht_check_memory(void *base, va_ht_hash_t va_ht) {
   char *bf = lmc_um_new_mem_usage_bitmap(base);
   if (!bf) return 0;

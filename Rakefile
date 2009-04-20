@@ -74,13 +74,16 @@ else
     s.name            = "localmemcache"
     s.version         = version
     s.platform        = Gem::Platform::RUBY
-    s.summary         = "The beauty of memcached.  For local data.  " + 
-        "Blazingly fast" 
+    s.summary         = "A persistent key-value database based on mmap()'ed shared memory."
 
     s.description = <<-EOF
 
-Localmemcache aims to be faster than using memcached locally by using shared
-memory, but providing a similar interface.
+Localmemcache is a library for C and ruby that aims to provide
+an interface similar to memcached but for accessing local data instead of
+remote data.  It's based on mmap()'ed shared memory for maximum speed.
+Since version 0.3.0 it supports persistence, also making it a fast
+alternative to GDBM and Berkeley DB.
+
     EOF
 
     s.files = manifest 

@@ -214,6 +214,28 @@ static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
 
 /* 
  *  call-seq:
+ *     lmc.random_pair()   ->  [key, value] or nil
+ *
+ *  Retrieves random pair from hashtable.
+ */
+static VALUE LocalMemCache__random_pair(VALUE obj) {
+  size_t l;
+  char *k, *v;
+  size_t n_k, n_v;
+  VALUE r = Qnil;
+  if (__local_memcache_random_pair(get_LocalMemCache(obj), &k, &n_k, &v, 
+      &n_v)) {
+    r = rb_ary_new();
+    rb_ary_push(r, lmc_ruby_string2(k, n_k));
+    rb_ary_push(r, lmc_ruby_string2(v, n_v));
+  }
+  lmc_unlock_shm_region("local_memcache_random_pair", 
+      get_LocalMemCache(obj));
+  return r;
+}
+
+/* 
+ *  call-seq:
  *     lmc.set(key, value)   ->   Qnil
  *     lmc[key]=value        ->   Qnil
  *
@@ -363,6 +385,8 @@ void Init_rblocalmemcache() {
   rb_define_method(LocalMemCache, "set", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "[]=", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "keys", LocalMemCache__keys, 0);
+  rb_define_method(LocalMemCache, "random_pair", LocalMemCache__random_pair, 
+      0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
 
   lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
