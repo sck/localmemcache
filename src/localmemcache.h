@@ -164,7 +164,7 @@ int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e);
  * triggering the automatic recovery.)
  *
  */
-int local_memcache_iterate(local_memcache_t *lmc, void *ctx, 
+int local_memcache_iterate(local_memcache_t *lmc, void *ctx, size_t *ofs,
     LMC_ITERATOR_P(iter));
 
 /*
@@ -195,16 +195,9 @@ int local_memcache_clear_namespace(const char *namespace, const char *filename,
 int local_memcache_check_namespace(const char *namespace, const char *filename, 
     lmc_error_t *e);
 
-int local_memcache_random_pair_new(local_memcache_t *lmc, 
-    char **r_key, size_t *n_key, char **r_value, size_t *n_value);
-
 /* internal, do not use */
 const char *__local_memcache_get(local_memcache_t *lmc, 
     const char *key, size_t n_key, size_t *n_value);
-
-/* internal, do not use */
-int __local_memcache_random_pair(local_memcache_t *lmc, 
-    char **r_key, size_t *n_key, char **r_value, size_t *n_value);
 
 /* internal, do not use */
 int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc);

@@ -37,12 +37,6 @@ describe 'LocalMemCache' do
     $lm.keys().size.should.equal 2
   end
 
-  it 'should support random_pair' do
-    $lm.random_pair.size.should.equal 2
-    ll = LocalMemCache.new :namespace => :empty
-    ll.random_pair.should.be.nil
-  end
-
   it 'should support \0 in values and keys' do
     $lm["null"] = "foo\0goo"
     $lm["null"].should.equal "foo\0goo"

@@ -230,8 +230,6 @@ int local_memcache_check_namespace(const char *namespace, const char *filename,
   return __local_memcache_check_namespace(clean_ns, e);
 }
 
-
-
 int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
   int r;
   int retry_counter = 0;
@@ -279,27 +277,6 @@ char *local_memcache_get_new(local_memcache_t *lmc,
   return new_s;
 }
 
-int __local_memcache_random_pair(local_memcache_t *lmc, 
-    char **r_key, size_t *n_key, char **r_value, size_t *n_value) {
-  if (!lmc_lock_shm_region("local_memcache_random_pair", lmc)) return 0;
-  return ht_random_pair(lmc->base, lmc->va_hash, r_key, n_key, r_value, 
-      n_value);
-}
-
-int local_memcache_random_pair_new(local_memcache_t *lmc, 
-    char **r_key, size_t *n_key, char **r_value, size_t *n_value) {
-  char *k;
-  char *v;
-  if (__local_memcache_random_pair(lmc, &k, n_key, &v, n_value)) {
-    char *new_k = malloc(*n_key);
-    memcpy(new_k, k, *n_key);
-    char *new_v = malloc(*n_value);
-    memcpy(new_v, v, *n_value);
-  }
-  if (!lmc_unlock_shm_region("local_memcache_random_pair", lmc)) return 0;
-  return 1;
-}
-
 int local_memcache_set(local_memcache_t *lmc, 
    const char *key, size_t n_key, const char* value, size_t n_value) {
   if (!lmc_lock_shm_region("local_memcache_set", lmc)) return 0;
@@ -327,9 +304,9 @@ int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e) {
 }
 
 int local_memcache_iterate(local_memcache_t *lmc, void *ctx, 
-    LMC_ITERATOR_P(iter)) {
+    size_t *ofs, LMC_ITERATOR_P(iter)) {
   if (!lmc_lock_shm_region("local_memcache_iterate", lmc)) return 0;
-  int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, iter);
+  int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, ofs, iter);
   if (!lmc_unlock_shm_region("local_memcache_iterate", lmc)) return 0;
   return r;
 }
