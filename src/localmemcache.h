@@ -164,7 +164,7 @@ int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e);
  * triggering the automatic recovery.)
  *
  */
-int local_memcache_iterate(local_memcache_t *lmc, void *ctx, 
+int local_memcache_iterate(local_memcache_t *lmc, void *ctx, size_t *ofs,
     LMC_ITERATOR_P(iter));
 
 /*

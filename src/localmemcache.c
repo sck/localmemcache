@@ -327,9 +327,9 @@ int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e) {
 }
 
 int local_memcache_iterate(local_memcache_t *lmc, void *ctx, 
-    LMC_ITERATOR_P(iter)) {
+    size_t *ofs, LMC_ITERATOR_P(iter)) {
   if (!lmc_lock_shm_region("local_memcache_iterate", lmc)) return 0;
-  int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, iter);
+  int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, ofs, iter);
   if (!lmc_unlock_shm_region("local_memcache_iterate", lmc)) return 0;
   return r;
 }

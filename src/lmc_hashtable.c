@@ -183,16 +183,24 @@ int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
 }
 
 int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx, 
-    LMC_ITERATOR_P(iter)) {
+    size_t *ofs, LMC_ITERATOR_P(iter)) {
   va_ht_hash_entry_t va_hr;
   ht_hash_entry_t *hr = &lmc_null_node;
   ht_hash_t *ht = base + va_ht;
   size_t k;
+  size_t item_c = 0;
+  size_t slice_counter = 0;
   for (k = 0; k < LMC_HT_BUCKETS; k++) {
     for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
         va_hr = hr->va_next) {
-      hr = va_hr ? base + va_hr : 0;
-      iter(ctx, base + hr->va_key, base + hr->va_value);
+      if (*ofs < ++item_c) {
+        hr = va_hr ? base + va_hr : 0;
+        iter(ctx, base + hr->va_key, base + hr->va_value);
+        if (++slice_counter > 99) {
+          *ofs = item_c;
+          return 2;
+        }
+      }
     }
   }
   return 1;
