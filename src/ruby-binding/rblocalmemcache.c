@@ -383,6 +383,7 @@ void Init_rblocalmemcache() {
       LocalMemCache__disable_test_crash, 0);
   rb_define_singleton_method(LocalMemCache, "enable_test_crash", 
       LocalMemCache__enable_test_crash, 0);
+  rb_define_method(LocalMemCache, "random_pair", LocalMemCache__random_pair, 0);
   rb_define_method(LocalMemCache, "get", LocalMemCache__get, 1);
   rb_define_method(LocalMemCache, "[]", LocalMemCache__get, 1);
   rb_define_method(LocalMemCache, "delete", LocalMemCache__delete, 1);
