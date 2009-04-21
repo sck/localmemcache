@@ -389,8 +389,6 @@ void Init_rblocalmemcache() {
   rb_define_method(LocalMemCache, "set", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "[]=", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "keys", LocalMemCache__keys, 0);
-  rb_define_method(LocalMemCache, "random_pair", LocalMemCache__random_pair, 
-      0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
 
   lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
