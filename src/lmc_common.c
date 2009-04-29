@@ -51,7 +51,8 @@ void lmc_clean_string(char *result, const char *source) {
   for (; n--; d++, s++) {
     ch = *s;
     if ((ch >= 'a' && ch <= 'z') || 
-        (ch >= 'A' && ch <= 'Z')) {
+        (ch >= 'A' && ch <= 'Z') ||
+	(ch >= '0' && ch <= '9')) {
       *d = ch;
     } else {
       *d = '-';

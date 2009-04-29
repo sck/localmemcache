@@ -30,7 +30,7 @@ end
 
 TortureTesting.no_progress
 
-TortureTesting.run(200_000,
+TortureTesting.run(20_000_000,
   [$h, :get, [:rand_index]],
   [$h, :__set, [:rand_index, :any]],
   [$h, :__delete, [:rand_index]]
