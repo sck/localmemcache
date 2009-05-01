@@ -205,5 +205,9 @@ const char *__local_memcache_get(local_memcache_t *lmc,
     const char *key, size_t n_key, size_t *n_value);
 
 /* internal, do not use */
+int __local_memcache_random_pair(local_memcache_t *lmc, 
+    char **r_key, size_t *n_key, char **r_value, size_t *n_value);
+
+/* internal, do not use */
 int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc);
 #endif
