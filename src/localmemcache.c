@@ -55,13 +55,13 @@ int lmc_namespace_or_filename(char *result, const char* ons, const char *ofn,
   return 0;
 }
 
-int local_memcache_clear_namespace(const char *namespace, const char *filename,
-    int repair, lmc_error_t *e) {
+int local_memcache_drop_namespace(const char *namespace, const char *filename,
+    int force, lmc_error_t *e) {
   char clean_ns[1024];
   if (!lmc_namespace_or_filename((char *)clean_ns, namespace, filename, e))
       return 1;
   lmc_clean_namespace((char *)clean_ns, e);
-  if (repair) {
+  if (force) {
     lmc_lock_t *l = lmc_lock_init((char *)clean_ns, 1, e);
     lmc_lock_repair(l);
     free(l);
@@ -106,7 +106,7 @@ retry:
   {
     if (*ok && !lmc_lock_obtain("local_memcache_create", lmc->lock, &lmc->error)) 
         goto failed;
-    if ((lmc->shm = lmc_shm_create(lmc->namespace, lmc->size, 0, e)) == NULL) 
+    if ((lmc->shm = lmc_shm_create(lmc->namespace, lmc->size, e)) == NULL) 
         goto release_and_fail;
     lmc->base = lmc->shm->base;
     if (!*ok || is_lmc_already_initialized(lmc->base)) {
@@ -304,6 +304,17 @@ int local_memcache_set(local_memcache_t *lmc,
   int r = ht_set(lmc->base, lmc->va_hash, key, n_key, value, n_value, 
       &lmc->error);
   if (!lmc_unlock_shm_region("local_memcache_set", lmc)) return 0;
+  return r;
+}
+
+int local_memcache_clear(local_memcache_t *lmc) {
+  if (!lmc_lock_shm_region("local_memcache_clear", lmc)) return 0;
+  lmc_init_memory(lmc->base, lmc->size);
+  lmc_mem_descriptor_t *md = lmc->base;
+  int r = 1;
+  if ((md->va_hash = ht_hash_create(lmc->base, &lmc->error)) == 0) { r = 0; }
+  else { lmc->va_hash = md->va_hash; }
+  if (!lmc_unlock_shm_region("local_memcache_clear", lmc)) return 0;
   return r;
 }
 

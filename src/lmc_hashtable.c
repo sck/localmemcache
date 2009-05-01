@@ -193,10 +193,10 @@ int ht_hash_iterate(void *base, va_ht_hash_t va_ht, void *ctx,
   for (k = 0; k < LMC_HT_BUCKETS; k++) {
     for (va_hr = ht->va_buckets[k]; va_hr != 0 && hr != NULL; 
         va_hr = hr->va_next) {
+      hr = va_hr ? base + va_hr : 0;
       if (*ofs < ++item_c) {
-        hr = va_hr ? base + va_hr : 0;
         iter(ctx, base + hr->va_key, base + hr->va_value);
-        if (++slice_counter > 99) {
+        if (++slice_counter > 999) {
           *ofs = item_c;
           return 2;
         }

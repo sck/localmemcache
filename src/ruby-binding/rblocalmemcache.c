@@ -65,7 +65,7 @@ static VALUE LocalMemCache;
 static VALUE lmc_rb_sym_namespace;
 static VALUE lmc_rb_sym_filename;
 static VALUE lmc_rb_sym_size_mb;
-static VALUE lmc_rb_sym_repair;
+static VALUE lmc_rb_sym_force;
 
 /* :nodoc: */
 void __rb_lmc_raise_exception(const char *error_type, const char *m) {
@@ -124,12 +124,12 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
 }
 
 /*
- * call-seq: LocalMemCache.clear(*args)
+ * call-seq: LocalMemCache.drop(*args)
  *
- * Deletes a memory pool.  If the :repair option is set, locked semaphores are
+ * Deletes a memory pool.  If the :force option is set, locked semaphores are
  * removed as well.
  *
- * WARNING: Do only call this method with the :repair option if you are sure
+ * WARNING: Do only call this method with the :force option if you are sure
  * that you really want to remove this memory pool and no more processes are
  * still using it.
  *
@@ -138,21 +138,21 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
  * know when a handle is not valid anymore, so only delete a memory pool if
  * you are sure that all handles are closed.
  *
- * valid options for clear are 
+ * valid options for drop are 
  * [:namespace] 
  * [:filename] 
- * [:repair] 
+ * [:force] 
  *
  * The memory pool must be specified by either setting the :filename or
- * :namespace option.  The default for :repair is false.
+ * :namespace option.  The default for :force is false.
  */
-static VALUE LocalMemCache__clear(VALUE klass, VALUE o) {
+static VALUE LocalMemCache__drop(VALUE klass, VALUE o) {
   lmc_check_dict(o);
   lmc_error_t e;
-  if (!local_memcache_clear_namespace(
+  if (!local_memcache_drop_namespace(
       rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)), 
       rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)),
-      bool_value(rb_hash_aref(o, lmc_rb_sym_repair)), &e)) {
+      bool_value(rb_hash_aref(o, lmc_rb_sym_force)), &e)) {
     rb_lmc_raise_exception(&e); 
   }
   return Qnil;
@@ -251,6 +251,19 @@ static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
   return Qnil;
 }
 
+
+/*
+ *  call-seq: 
+ *     lmc.clear -> Qnil
+ *
+ *  Clears content of hashtable.
+ */
+static VALUE LocalMemCache__clear(VALUE obj) {
+  local_memcache_t *lmc = get_LocalMemCache(obj);
+  if (!local_memcache_clear(lmc)) rb_lmc_raise_exception(&lmc->error); 
+  return Qnil;
+}
+
 /* 
  *  call-seq:
  *     lmc.delete(key)   ->   Qnil
@@ -325,6 +338,56 @@ static VALUE LocalMemCache__keys(VALUE obj) {
   return rb_ary_entry(d, 1);
 }
 
+typedef struct {
+  VALUE ary;
+} lmc_ruby_iter_collect_pairs_t;
+
+/* :nodoc: */
+int lmc_ruby_iter_collect_pairs(void *ctx, const char* key, const char* value) {
+  lmc_ruby_iter_collect_pairs_t *data = ctx;
+  rb_ary_push(data->ary, rb_assoc_new(lmc_ruby_string(key), 
+      lmc_ruby_string(value)));
+  return 1;
+}
+
+/* :nodoc: */
+static VALUE __LocalMemCache__each_pair(VALUE d) {
+  VALUE obj = rb_ary_entry(d, 0);
+  int success = 2;
+  size_t ofs = 0;
+  while (success == 2) {
+    VALUE r = rb_ary_new();
+    lmc_ruby_iter_collect_pairs_t data;
+    data.ary = r;
+    success = local_memcache_iterate(get_LocalMemCache(obj), 
+        (void *) &data, &ofs, lmc_ruby_iter_collect_pairs);
+    long i;
+    for (i = 0; i < RARRAY(r)->len; i++) {
+      rb_yield(RARRAY(r)->ptr[i]);
+    }
+  }
+  if (!success) { return Qnil; }
+  return Qnil;
+}
+
+/* 
+ *  call-seq:
+ *     lmc.each_pair {|k, v|  block } -> nil
+ *
+ *  Iterates over hashtable.
+ */
+static VALUE LocalMemCache__each_pair(VALUE obj) {
+  VALUE d = rb_ary_new();
+  rb_ary_push(d, obj);
+  int error = 0;
+  rb_protect(__LocalMemCache__each_pair, d, &error);
+  if (error) {
+    lmc_unlock_shm_region("local_memcache_iterate", get_LocalMemCache(obj));
+    rb_exc_raise(ruby_errinfo);
+  }
+  return Qnil;
+}
+
 /*
  * Document-class: LocalMemCache
  * 
@@ -363,7 +426,7 @@ static VALUE LocalMemCache__keys(VALUE obj) {
  *
  *  == Clearing memory pools
  *
- *  Removing memory pools can be done with LocalMemCache.clear(options). 
+ *  Removing memory pools can be done with LocalMemCache.drop(options). 
  *
  *  == Environment
  *  
@@ -375,8 +438,8 @@ static VALUE LocalMemCache__keys(VALUE obj) {
 void Init_rblocalmemcache() {
   LocalMemCache = rb_define_class("LocalMemCache", rb_cObject);
   rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 1);
-  rb_define_singleton_method(LocalMemCache, "clear", 
-      LocalMemCache__clear, 1);
+  rb_define_singleton_method(LocalMemCache, "drop", 
+      LocalMemCache__drop, 1);
   rb_define_singleton_method(LocalMemCache, "check", 
       LocalMemCache__check, 1);
   rb_define_singleton_method(LocalMemCache, "disable_test_crash", 
@@ -387,8 +450,10 @@ void Init_rblocalmemcache() {
   rb_define_method(LocalMemCache, "[]", LocalMemCache__get, 1);
   rb_define_method(LocalMemCache, "delete", LocalMemCache__delete, 1);
   rb_define_method(LocalMemCache, "set", LocalMemCache__set, 2);
+  rb_define_method(LocalMemCache, "clear", LocalMemCache__clear, 0);
   rb_define_method(LocalMemCache, "[]=", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "keys", LocalMemCache__keys, 0);
+  rb_define_method(LocalMemCache, "each_pair", LocalMemCache__each_pair, 0);
   rb_define_method(LocalMemCache, "random_pair", LocalMemCache__random_pair, 
       0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
@@ -396,6 +461,6 @@ void Init_rblocalmemcache() {
   lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
   lmc_rb_sym_filename = ID2SYM(rb_intern("filename"));
   lmc_rb_sym_size_mb = ID2SYM(rb_intern("size_mb"));
-  lmc_rb_sym_repair = ID2SYM(rb_intern("repair"));
+  lmc_rb_sym_force = ID2SYM(rb_intern("force"));
   rb_require("localmemcache.rb");
 }

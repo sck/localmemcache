@@ -41,35 +41,4 @@ class LocalMemCache
     _new(o);
   end
 
-  # NOTE: This method is deprecated, use LocalMemCache.clear(*args) instead.
-  #
-  # Deletes a memory pool.  If the repair flag is set, locked semaphores are
-  # removed as well.  
-  #
-  # If you delete a pool and other processes still have handles open on it, the
-  # status of these handles becomes undefined.  There's no way for a process to
-  # know when a handle is not valid anymore, so only delete a memory pool if
-  # you are sure that all handles are closed.
-  #
-  # WARNING: Do only call this method with the repair=true flag if you are sure
-  # that you really want to remove this memory pool and no more processes are
-  # still using it.
-  def self.clear_namespace(namespace, repair = false) 
-    clear :namespace => namespace.to_s, :repair => repair
-  end
-
-  # NOTE: This method is deprecated, use LocalMemCache.check(*args) instead.
-  #
-  # Tries to repair a corrupt namespace.  Usually one doesn't call this method
-  # directly, it's invoked automatically when operations time out.
-  # 
-  # valid options are 
-  # [:namespace] 
-  # [:filename] 
-  # 
-  # The memory pool must be specified by either setting the :filename or
-  # :namespace option.  The default for :repair is false.
-  def self.check_namespace(namespace) 
-    check :namespace => namespace.to_s
-  end
 end

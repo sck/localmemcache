@@ -73,15 +73,13 @@ void lmc_shm_ensure_namespace_file(const char *ns) {
   if (!lmc_does_namespace_exist(ns)) { close(open(fn, O_CREAT, 0777)); }
 }
 
-lmc_shm_t *lmc_shm_create(const char* namespace, size_t size, int use_persistence,
-    lmc_error_t *e) {
+lmc_shm_t *lmc_shm_create(const char* namespace, size_t size, lmc_error_t *e) {
   lmc_shm_t *mc = calloc(1, sizeof(lmc_shm_t));
   if (!mc) { 
     STD_OUT_OF_MEMORY_ERROR("lmc_shm_create");
     return NULL; 
   }
   snprintf((char *)&mc->namespace, 1023, "%s", namespace);
-  mc->use_persistence = 0;
   mc->size = size;
 
   lmc_shm_ensure_namespace_file(mc->namespace);

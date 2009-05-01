@@ -80,7 +80,7 @@ static lmc_shm_t* get_Shm(VALUE obj) {
 
 static VALUE SHM__new(VALUE klass, VALUE namespace) {
   Check_Type(namespace, T_STRING);
-  lmc_shm_t *ls = lmc_shm_create("test2", 2000000, 0, 0); 
+  lmc_shm_t *ls = lmc_shm_create("test2", 2000000, 0); 
   return Data_Wrap_Struct(klass, NULL, lmc_shm_destroy, ls);
 }
 

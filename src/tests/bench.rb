@@ -6,7 +6,7 @@ require 'localmemcache'
 
 Bacon.summary_on_exit
 
-LocalMemCache.clear_namespace("speed-comparison");
+LocalMemCache.drop :namespace => "speed-comparison", :force => true
 $lm2 = LocalMemCache.new :namespace=>"speed-comparison"
 
 def compare_speed(n)

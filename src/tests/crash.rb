@@ -3,7 +3,7 @@ $DIR=File.dirname(__FILE__)
 
 require 'localmemcache'
 
-LocalMemCache.clear_namespace("crash-t", true);
+LocalMemCache.drop :namespace => "crash-t", :force => true
 #exit
 #puts "c"
 #LocalMemCache.check_namespace("crash-t");

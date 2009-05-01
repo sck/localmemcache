@@ -69,7 +69,7 @@
  *
  *  == Clearing memory pools
  *
- *  Removing memory pools can be done with LocalMemCache.clear(options). 
+ *  Removing memory pools can be done with LocalMemCache.drop(options). 
  *
  *  == Environment
  *  
@@ -137,6 +137,11 @@ int local_memcache_set(local_memcache_t *lmc, const char *key, size_t n_key,
 int local_memcache_delete(local_memcache_t *lmc, char *key, size_t n_key);
 
 /*
+ * Clears content of hashtable.
+ */
+int local_memcache_clear(local_memcache_t *lmc);
+
+/*
  * Releases memory pool handle.
  */
 int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e);
@@ -183,8 +188,8 @@ int local_memcache_iterate(local_memcache_t *lmc, void *ctx, size_t *ofs,
  * The memory pool must be specified by either setting the filename or
  * namespace parameter.  
  */
-int local_memcache_clear_namespace(const char *namespace, const char *filename,
-    int repair, lmc_error_t *e);
+int local_memcache_drop_namespace(const char *namespace, const char *filename,
+    int force, lmc_error_t *e);
 /*
  * Tries to repair a corrupt namespace.  Usually one doesn't call this method
  * directly, it's invoked automatically when operations time out.

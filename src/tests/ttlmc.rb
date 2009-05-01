@@ -4,7 +4,7 @@ $DIR=File.dirname(__FILE__)
 require 'torture'
 require 'localmemcache'
 
-LocalMemCache.clear_namespace("torture", true);
+LocalMemCache.drop :namespace => "torture", :force => true
 $h = LocalMemCache.new :namespace=>'torture', :size_mb => 200
 
 class LocalMemCache
@@ -30,7 +30,7 @@ end
 
 TortureTesting.no_progress
 
-TortureTesting.run(20_000_000,
+TortureTesting.run(200_000,
   [$h, :get, [:rand_index]],
   [$h, :__set, [:rand_index, :any]],
   [$h, :__delete, [:rand_index]]

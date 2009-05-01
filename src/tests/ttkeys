@@ -1,0 +1,10 @@
+#! /bin/sh
+D=`dirname $0`
+DIR=`cd $D; pwd`
+script=$DIR/ttkeys.rb
+
+if test "x$1" = "x-d"; then
+  irb -r $script
+else
+  ruby $script
+fi

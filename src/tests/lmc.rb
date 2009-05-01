@@ -6,10 +6,10 @@ require 'localmemcache'
 
 Bacon.summary_on_exit
 
-LocalMemCache.clear_namespace("test", true)
+LocalMemCache.drop :namespace => "test", :force => true
 $lm = LocalMemCache.new :namespace=>"test"
 
-LocalMemCache.clear_namespace("test-small", true)
+LocalMemCache.drop :namespace => "test-small", :force => true
 $lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 0.20;
 
 describe 'LocalMemCache' do
@@ -37,6 +37,12 @@ describe 'LocalMemCache' do
     $lm.keys().size.should.equal 2
   end
 
+  it 'should support each_pair' do 
+    $lm.each_pair {|k, v|
+      puts "k: #{k}, v: #{v}"
+    }
+  end
+
   it 'should support \0 in values and keys' do
     $lm["null"] = "foo\0goo"
     $lm["null"].should.equal "foo\0goo"
@@ -58,12 +64,19 @@ describe 'LocalMemCache' do
     should.raise(LocalMemCache::MemoryPoolFull) { $lms["two"] = "b" * 8000000; }
   end
 
-  it 'should support checking of namespaces' do 
-    LocalMemCache.check_namespace("test")
+  it 'should support clearing of hashes' do
+    ($lms.keys.size > 0).should.be.true
+    $lms.clear
+    $lms.keys.size.should.equal 0
   end
 
-  it 'should support clearing of namespaces' do
-    LocalMemCache.clear_namespace("test")
+  it 'should support checking of namespaces' do 
+    LocalMemCache.check :namespace => "test"
+  end
+
+
+  it 'should support dropping of namespaces' do
+    LocalMemCache.drop :namespace => "test"
   end
 
   it 'should support filename parameters' do
@@ -72,7 +85,7 @@ describe 'LocalMemCache' do
     lm.keys.size.should.equal 1
     File.exists?(".tmp.a.lmc").should.be.true
     LocalMemCache.check :filename => ".tmp.a.lmc"
-    LocalMemCache.clear :filename => ".tmp.a.lmc"
+    LocalMemCache.drop :filename => ".tmp.a.lmc"
   end
 
 

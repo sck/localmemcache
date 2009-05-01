@@ -3,7 +3,7 @@ $DIR=File.dirname(__FILE__)
 
 require 'localmemcache'
 
-LocalMemCache.clear_namespace("alloc-failure-test", true);
+LocalMemCache.drop :namespace => "alloc-failure-test", :force => true
 
 
   LocalMemCache.enable_test_crash
