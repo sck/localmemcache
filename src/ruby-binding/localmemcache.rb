@@ -41,4 +41,9 @@ class LocalMemCache
     _new(o);
   end
 
+  class SharedObjectStorage < LocalMemCache
+    def []=(key,val) super(key, Marshal.dump(val)) end
+    def [](key) v = super(key); v.nil? ? nil : Marshal.load(v) end
+  end
+
 end

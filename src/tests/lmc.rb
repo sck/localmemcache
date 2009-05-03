@@ -80,7 +80,7 @@ describe 'LocalMemCache' do
 
   it 'should support filename parameters' do
     LocalMemCache.drop :filename => ".tmp.a.lmc", :force => true
-    lm = LocalMemCache.new :filename => ".tmp.a.lmc", :size_mb => 0.1
+    lm = LocalMemCache.new :filename => ".tmp.a.lmc", :size_mb => 0.20
     lm[:boo] = 1
     lm.keys.size.should.equal 1
     File.exists?(".tmp.a.lmc").should.be.true
@@ -89,5 +89,19 @@ describe 'LocalMemCache' do
   end
 
 
+end
+
+LocalMemCache.drop :namespace => "test-shared-hash", :force => true
+$lmsh = LocalMemCache::SharedHash.new :namespace=>"test-shared-hash", 
+    :size_mb => 20
+
+p $lmsh
+
+describe 'LocalMemCache::SharedHash' do
+  it 'should allow to set and query for ruby objects' do
+    $lmsh["non-existant"].should.be.nil
+    $lmsh["array"] = [:foo, :boo]
+    $lmsh["array"].should.be.kind_of? Array
+  end
 end
 
