@@ -9,11 +9,13 @@
 <div id="content">
 <h1>A persistent key-value database based on mmap()'ed shared memory</h1>
 
-<p><b>Localmemcache</b> is a library for C and ruby that aims to provide
+<p><b>Localmemcache</b> is a library for <b>C</b> and <b>Ruby</b> that aims 
+to provide
 an interface similar to memcached but for accessing local data instead of
-remote data.  It's based on <b>mmap()</b>'ed shared memory for maximum speed.
-Since version 0.3.0 it supports persistence, also making it a fast
-alternative to GDBM and Berkeley DB.
+remote data.  It's based on <b>mmap()</b>'ed shared memory for <b>maximum
+speed</b>.
+Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
+alternative to GDBM and Berkeley DB</b>.
 
 <h2>Key features as of 0.3.0 (2009-04-17)</h2>
 <li><a href="#performance">blazingly fast</a></li>
@@ -27,7 +29,7 @@ alternative to GDBM and Berkeley DB.
 <li>a file system that offers <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse files</a></li>
 Note for <b>OS X</b>: <b>OS X</b> disqualifies as <b>HFS+</b> doesn't
 have sparse files and <b>sem_timedwait</b>() and <b>sem_getvalue</b>() aren't
-supported as well.
+supported as well.<br>
 Note for <b>FreeBSD</b>: It has been reported that Localmemcache
 sometimes hangs there, it is not yet clear what the problem is.
 
@@ -115,4 +117,15 @@ Localmemcache is freely distributable under the terms of an
 </div>
 
   </body>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl."
+: "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost +
+"google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+  var pageTracker = _gat._getTracker("UA-657352-3");
+  pageTracker._trackPageview();
+} catch(err) {}</script>
 </html>
