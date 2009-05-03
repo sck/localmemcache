@@ -22,6 +22,7 @@ typedef struct {
 
 typedef size_t va_ht_hash_t;
 typedef struct {
+  size_t size;
   va_ht_hash_entry_t va_buckets[LMC_HT_BUCKETS];
 } ht_hash_t;
 

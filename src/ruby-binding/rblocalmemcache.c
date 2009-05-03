@@ -387,6 +387,12 @@ static VALUE LocalMemCache__each_pair(VALUE obj) {
   return Qnil;
 }
 
+static VALUE LocalMemCache__size(VALUE obj) {
+  local_memcache_t *lmc = get_LocalMemCache(obj);
+  ht_hash_t *ht = lmc->base + lmc->va_hash;
+  return rb_int2big(ht->size);
+}
+
 /*
  * Document-class: LocalMemCache
  * 
@@ -456,6 +462,7 @@ void Init_rblocalmemcache() {
   rb_define_method(LocalMemCache, "random_pair", LocalMemCache__random_pair, 
       0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
+  rb_define_method(LocalMemCache, "size", LocalMemCache__size, 0);
 
   lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
   lmc_rb_sym_filename = ID2SYM(rb_intern("filename"));

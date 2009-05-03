@@ -44,6 +44,13 @@ class LocalMemCache
   class SharedObjectStorage < LocalMemCache
     def []=(key,val) super(key, Marshal.dump(val)) end
     def [](key) v = super(key); v.nil? ? nil : Marshal.load(v) end
+    def each_pair(&block) 
+      super {|k, mv| block.call(k, Marshal.load(mv)) }
+    end
+    def random_pair
+      rp = super
+      rp.nil? ? nil : [rp.first, Marshal.load(rp.last)]
+    end
   end
 
 end

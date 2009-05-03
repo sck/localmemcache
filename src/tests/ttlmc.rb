@@ -12,10 +12,10 @@ puts "STARTED: #{$$}"
 class LocalMemCache
   def __set(k, v) 
     set(k, v)
-    if get(k) != v.to_s
-      puts "Set FAILED!"
-      raise "set failed"
-    end
+    #if get(k) != v.to_s
+    #  puts "Set FAILED!"
+    #  raise "set failed"
+    #end
   end
   def __delete(k)
     delete(k)

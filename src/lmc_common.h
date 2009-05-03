@@ -5,7 +5,7 @@
 #ifndef _LMC_COMMON_H_INCLUDED_
 #define _LMC_COMMON_H_INCLUDED_
 
-#define LMC_DB_VERSION 0
+#define LMC_DB_VERSION 1
 
 extern int lmc_test_crash_enabled;
 #ifdef DO_TEST_CRASH

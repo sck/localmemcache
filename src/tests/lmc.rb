@@ -48,6 +48,7 @@ describe 'LocalMemCache' do
 
   it 'should support random_pair' do
     $lm.random_pair.size.should.equal 2
+    LocalMemCache.drop :namespace => :empty, :force => true
     ll = LocalMemCache.new :namespace => :empty
     ll.random_pair.should.be.nil
   end
@@ -63,11 +64,28 @@ describe 'LocalMemCache' do
   end
 
 
-  it 'should support clearing of hashes' do
-    ($lms.keys.size > 0).should.be.true
+  it 'should support clearing of the hashtable' do
+    ($lms.size > 0).should.be.true
     $lms.clear
-    $lms.keys.size.should.equal 0
+    $lms.size.should.equal 0
   end
+
+  it 'should support size' do
+    LocalMemCache.drop :namespace =>"size-test", :force=>true
+    ll = LocalMemCache.new :namespace => "size-test", :size_mb => 0.2
+    ll.size.should.equal 0
+    ll[:one] = 1
+    ll.size.should.equal 1
+    ll.delete(:one)
+    ll.size.should.equal 0
+    ll[:foo] = 1
+    ll.size.should.equal 1
+    ll[:goo] = 2
+    ll.size.should.equal 2
+    ll.clear
+    ll.size.should.equal 0
+  end
+
 
   it 'should support checking of namespaces' do 
     LocalMemCache.check :namespace => "test"
@@ -82,26 +100,31 @@ describe 'LocalMemCache' do
     LocalMemCache.drop :filename => ".tmp.a.lmc", :force => true
     lm = LocalMemCache.new :filename => ".tmp.a.lmc", :size_mb => 0.20
     lm[:boo] = 1
-    lm.keys.size.should.equal 1
+    lm.size.should.equal 1
     File.exists?(".tmp.a.lmc").should.be.true
     LocalMemCache.check :filename => ".tmp.a.lmc"
     LocalMemCache.drop :filename => ".tmp.a.lmc"
   end
 
-
 end
 
-LocalMemCache.drop :namespace => "test-shared-hash", :force => true
-$lmsh = LocalMemCache::SharedHash.new :namespace=>"test-shared-hash", 
+LocalMemCache.drop :namespace => "test-shared-os", :force => true
+$lmsh = LocalMemCache::SharedObjectStorage.new :namespace=>"test-shared-os", 
     :size_mb => 20
 
-p $lmsh
-
-describe 'LocalMemCache::SharedHash' do
+describe 'LocalMemCache::SharedObjectStorage' do
   it 'should allow to set and query for ruby objects' do
     $lmsh["non-existant"].should.be.nil
     $lmsh["array"] = [:foo, :boo]
     $lmsh["array"].should.be.kind_of? Array
+  end
+
+  it 'support iteration' do
+    $lmsh.each_pair {|k, v| v.should.be.kind_of? Array }
+  end
+
+  it 'support random_pair' do
+    $lmsh.random_pair.last.should.be.kind_of? Array
   end
 end
 

@@ -131,6 +131,7 @@ int ht_set(void *base, va_ht_hash_t va_ht, const char *key,
     hr->va_next = ht->va_buckets[v];
     ht->va_buckets[v] = va;
     hr->va_value = l->va_value;
+    ht->size += 1;
     lmc_log_finish(base);
   } else {
     LMC_TEST_CRASH
@@ -174,6 +175,7 @@ int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key) {
     lmc_free(base, hr->va_key);
     lmc_free(base, hr->va_value);
     lmc_free(base, va_hr);
+    ht->size -= 1;
     return 1; 
 
   next:
