@@ -7,7 +7,7 @@ require 'localmemcache'
 Bacon.summary_on_exit
 
 LocalMemCache.drop :namespace => "test", :force => true
-$lm = LocalMemCache.new :namespace=>"test"
+$lm = LocalMemCache.new :namespace=>"test", :size_mb => 20
 
 LocalMemCache.drop :namespace => "test-small", :force => true
 $lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 0.20;
@@ -38,9 +38,7 @@ describe 'LocalMemCache' do
   end
 
   it 'should support each_pair' do 
-    $lm.each_pair {|k, v|
-      puts "k: #{k}, v: #{v}"
-    }
+    $lm.each_pair {|k, v| }
   end
 
   it 'should support \0 in values and keys' do
@@ -64,6 +62,7 @@ describe 'LocalMemCache' do
     should.raise(LocalMemCache::MemoryPoolFull) { $lms["two"] = "b" * 8000000; }
   end
 
+
   it 'should support clearing of hashes' do
     ($lms.keys.size > 0).should.be.true
     $lms.clear
@@ -80,7 +79,8 @@ describe 'LocalMemCache' do
   end
 
   it 'should support filename parameters' do
-    lm = LocalMemCache.new :filename => ".tmp.a.lmc"
+    LocalMemCache.drop :filename => ".tmp.a.lmc", :force => true
+    lm = LocalMemCache.new :filename => ".tmp.a.lmc", :size_mb => 0.1
     lm[:boo] = 1
     lm.keys.size.should.equal 1
     File.exists?(".tmp.a.lmc").should.be.true
