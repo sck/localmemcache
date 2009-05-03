@@ -219,7 +219,6 @@ static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
  *  Retrieves random pair from hashtable.
  */
 static VALUE LocalMemCache__random_pair(VALUE obj) {
-  size_t l;
   char *k, *v;
   size_t n_k, n_v;
   VALUE r = Qnil;
