@@ -4,7 +4,7 @@ $DIR=File.dirname(__FILE__)
 require 'localmemcache'
 require 'common.rb'
 
-LocalMemCache.clear_namespace("speed-comparison");
+LocalMemCache.drop :namespace=>"speed-comparison", :force => true
 $lm2 = LocalMemCache.new :namespace=>"speed-comparison"
 
 def compare_speed(n)
