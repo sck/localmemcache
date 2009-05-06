@@ -173,10 +173,19 @@ int local_memcache_iterate(local_memcache_t *lmc, void *ctx, size_t *ofs,
     LMC_ITERATOR_P(iter));
 
 /*
- * Deletes a memory pool.  If repair is 1, locked semaphores are
+ *  Retrieves random pair from hashtable.
+ *
+ *  It will return a newly allocated strings for r_key and r_value which you
+ *  will need to free() after use.
+ */
+int local_memcache_random_pair_new(local_memcache_t *lmc, 
+    char **r_key, size_t *n_key, char **r_value, size_t *n_value);
+
+/*
+ * Deletes a memory pool.  If force is 1, locked semaphores are
  * removed as well.
  *
- * WARNING: Do only call this method with the repair option if you are sure
+ * WARNING: Do only call this method with the force option if you are sure
  * that you really want to remove this memory pool and no more processes are
  * still using it.
  *
