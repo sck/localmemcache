@@ -41,6 +41,7 @@ void lmc_free(void *base, size_t chunk);
 lmc_mem_status_t lmc_status(void *base, char *where);
 int is_lmc_already_initialized(void *base);
 void lmc_init_memory(void *ptr, size_t size);
+size_t lmc_get_db_version(void *ptr);
 
 int lmc_um_mark_allocated(void *base, char *bf, size_t va);
 char *lmc_um_new_mem_usage_bitmap(void *base);

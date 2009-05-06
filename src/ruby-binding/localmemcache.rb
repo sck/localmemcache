@@ -14,6 +14,7 @@ class LocalMemCache
   class ShmLockFailed < LocalMemCacheError; end
   class ShmUnlockFailed < LocalMemCacheError; end
   class MemoryPoolClosed < LocalMemCacheError; end
+  class DBVersionNotSupported < LocalMemCacheError; end
 
   #  Creates a new handle for accessing a shared memory region.
   # 
@@ -41,6 +42,9 @@ class LocalMemCache
     _new(o);
   end
 
+  #  <code>SharedObjectStorage</code> inherits from class LocalMemCache but
+  #  stores Ruby objects as values instead of just strings (It still uses
+  #  strings for the keys, though).
   class SharedObjectStorage < LocalMemCache
     def []=(key,val) super(key, Marshal.dump(val)) end
     def [](key) v = super(key); v.nil? ? nil : Marshal.load(v) end

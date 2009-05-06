@@ -32,6 +32,10 @@ task :sanity_test do
       "make -C src/tests/ && ./src/tests/lmc "
 end
 
+task :site_doc do
+  sh "cd ./src/ruby-binding; rdoc -o ../../site/doc"
+end
+
 task :performance_test do
   sh "./configure && make -C src clean && make -C src && " +
       "(cd src/ruby-binding; ruby extconf.rb) && " +

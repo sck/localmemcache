@@ -116,6 +116,11 @@ void lmc_init_memory(void *ptr, size_t size) {
   c->size = s;
 }
 
+size_t lmc_get_db_version(void *ptr) {
+  lmc_mem_descriptor_t *md = ptr;
+  return md->version;
+}
+
 size_t lmc_max(size_t a, size_t b) { 
   return a > b ? a : b;
 }

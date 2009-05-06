@@ -387,6 +387,12 @@ static VALUE LocalMemCache__each_pair(VALUE obj) {
   return Qnil;
 }
 
+/* 
+ *  call-seq:
+ *     lmc.size -> number
+ *
+ *  Number of pairs in the hashtable.
+ */
 static VALUE LocalMemCache__size(VALUE obj) {
   local_memcache_t *lmc = get_LocalMemCache(obj);
   ht_hash_t *ht = lmc->base + lmc->va_hash;
@@ -438,6 +444,11 @@ static VALUE LocalMemCache__size(VALUE obj) {
  *  If you use the :namespace parameter, the .lmc file for your namespace will
  *  reside in /var/tmp/localmemcache.  This can be overriden by setting the
  *  LMC_NAMESPACES_ROOT_PATH variable in the environment.
+ *
+ *  == Storing Ruby Objects
+ *
+ *  If you want to store Ruby objects instead of just strings, consider 
+ *  using LocalMemCache::SharedObjectStorage.
  *
  */
 void Init_rblocalmemcache() {

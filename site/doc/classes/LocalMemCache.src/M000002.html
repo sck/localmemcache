@@ -5,14 +5,35 @@
 
 <html>
 <head>
-  <title>clear_namespace (LocalMemCache)</title>
+  <title>drop (LocalMemCache)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File ../src/ruby-binding/localmemcache.rb, line 57</span>
-  <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">clear_namespace</span>(<span class="ruby-identifier">namespace</span>, <span class="ruby-identifier">repair</span> = <span class="ruby-keyword kw">false</span>) 
-    <span class="ruby-identifier">clear</span> <span class="ruby-identifier">:namespace</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">namespace</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">:repair</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">repair</span>
-  <span class="ruby-keyword kw">end</span></pre>
+  <pre>/*
+ * call-seq: LocalMemCache.drop(*args)
+ *
+ * Deletes a memory pool.  If the :force option is set, locked semaphores are
+ * removed as well.
+ *
+ * WARNING: Do only call this method with the :force option if you are sure
+ * that you really want to remove this memory pool and no more processes are
+ * still using it.
+ *
+ * If you delete a pool and other processes still have handles open on it, the
+ * status of these handles becomes undefined.  There's no way for a process to
+ * know when a handle is not valid anymore, so only delete a memory pool if
+ * you are sure that all handles are closed.
+ *
+ * valid options for drop are 
+ * [:namespace] 
+ * [:filename] 
+ * [:force] 
+ *
+ * The memory pool must be specified by either setting the :filename or
+ * :namespace option.  The default for :force is false.
+ */
+static VALUE LocalMemCache__drop(VALUE klass, VALUE o) {
+</pre>
 </body>
 </html>

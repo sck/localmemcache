@@ -114,6 +114,11 @@ retry:
         if (!force)  goto release_and_fail;
         *ok = 0;
       }
+      if (lmc_get_db_version(lmc->base) != LMC_DB_VERSION) {
+        lmc_handle_error_with_err_string("local_memcache_create",
+            "DB version is incompatible", "DBVersionNotSupported", e);
+        goto unlock_and_fail;
+      }
       lmc_mem_descriptor_t *md = lmc->base;
       lmc->va_hash = md->va_hash;
     } else {

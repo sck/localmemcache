@@ -5,14 +5,25 @@
 
 <html>
 <head>
-  <title>check_namespace (LocalMemCache)</title>
+  <title>check (LocalMemCache)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File ../src/ruby-binding/localmemcache.rb, line 72</span>
-  <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">check_namespace</span>(<span class="ruby-identifier">namespace</span>) 
-    <span class="ruby-identifier">check</span> <span class="ruby-identifier">:namespace</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">namespace</span>.<span class="ruby-identifier">to_s</span>
-  <span class="ruby-keyword kw">end</span></pre>
+  <pre>/*
+ * call-seq: LocalMemCache.check(*args)
+ *
+ * Tries to repair a corrupt namespace.  Usually one doesn't call this method
+ * directly, it's invoked automatically when operations time out.
+ *
+ * valid options are 
+ * [:namespace] 
+ * [:filename] 
+ *
+ * The memory pool must be specified by either setting the :filename or
+ * :namespace option. 
+ */
+static VALUE LocalMemCache__check(VALUE klass, VALUE o) {
+</pre>
 </body>
 </html>
