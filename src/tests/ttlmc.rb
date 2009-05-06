@@ -4,7 +4,7 @@ $DIR=File.dirname(__FILE__)
 require 'torture'
 require 'localmemcache'
 
-#LocalMemCache.drop :namespace => "torture", :force => true
+LocalMemCache.drop :namespace => "torture", :force => true
 $h = LocalMemCache.new :namespace=>'torture', :size_mb => 200
 
 puts "STARTED: #{$$}"
