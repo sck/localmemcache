@@ -17,7 +17,8 @@ alternative to GDBM and Berkeley DB.
 SUPPORTED SYSTEMS
 =================
 
-- a >=64bit Unix
+- a >=64bit Unix (32bit is possible but you'll run out of virtual address
+  space quickly)
 - a file system that offers sparse files
 
 Note for OS X: OS X disqualifies as HFS+ doesn't have sparse files and
@@ -35,7 +36,9 @@ require 'localmemcache'
 # 1. the memcached way
 # $lm = LocalMemCache.new :namespace => :viewcounters
 # 2. the GDBM way
-$lm = LocalMemCache.new :filename => "./viewcounters.lmc"
+#$lm = LocalMemCache.new :filename => "./viewcounters.lmc"
+# 3. Using LocalMemCache::SharedObjectStorage
+$lm = LocalMemCache::SharedObjectStorage.new :filename => "./viewcounters.lmc"
 $lm[:foo] = 1
 $lm[:foo]
 $lm.delete(:foo)

@@ -17,15 +17,16 @@ speed</b>.
 Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
 alternative to GDBM and Berkeley DB</b>.
 
-<h2>Key features as of 0.3.0 (2009-04-17)</h2>
+<h2>Key features as of 0.4.0 (2009-05-16)</h2>
 <li><a href="#performance">blazingly fast</a></li>
+<li>a very simple API</li>
 <li>persistent</li>
 <li>parallel writes are supported by default</li>
 <li>uses transactions internally to avoid data corruption</li>
 <li>lightweight: the core library is just about <b>1400</b> lines of <b>C</b> code</li>
 
 <h2>Requirements</h2>
-<li>a &gt;=64bit Unix</li>
+<li>a &gt;=64bit Unix (32bit is possible but you'll run out of virtual address space quickly)</li>
 <li>a file system that offers <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse files</a></li>
 Note for <b>OS X</b>: <b>OS X</b> disqualifies as <b>HFS+</b> doesn't
 have sparse files and <b>sem_timedwait</b>() and <b>sem_getvalue</b>() aren't
@@ -44,15 +45,19 @@ sometimes hangs there, it is not yet clear what the problem is.
 If you just want to use the <b>C API</b>, download the .tar.gz from <a href="http://rubyforge.org/frs/?group_id=7925">here</a>.
 
 <h2>Using</h2>
-<b>API</b>:&nbsp;<a href="http://github.com/sck/localmemcache/blob/e980ba949034a349dbf0e6f8f9ef77bbe3e3e314/src/localmemcache.h">C</a>|<a href="http://localmemcache.rubyforge.org/doc/">Ruby</a><br>
+<b>API</b>:&nbsp;<a href="http://github.com/sck/localmemcache/blob/591d943507236035e99471f372dc2826271610c9/src/localmemcache.h">C</a>|<a href="http://localmemcache.rubyforge.org/doc/">Ruby</a><br>
 <p><pre><code>require 'localmemcache'
 # 1. the memcached way
 # $lm = LocalMemCache.new :namespace => :viewcounters
 # 2. the GDBM way
-$lm = LocalMemCache.new :filename => "./viewcounters.lmc"
+#$lm = LocalMemCache.new :filename => "./viewcounters.lmc"
+# 3. Using LocalMemCache::SharedObjectStorage
+$lm = LocalMemCache::SharedObjectStorage.new :filename => 
+    "./viewcounters.lmc"
 $lm[:foo] = 1
 $lm[:foo]
 $lm.delete(:foo)
+
 </code></pre> 
 (C version of this example: <a href="http://github.com/sck/localmemcache/blob/e980ba949034a349dbf0e6f8f9ef77bbe3e3e314/example/hello.c">hello.c</a>)
 </p>
@@ -71,22 +76,20 @@ Ruby benchmark pseudo code:
 </code></pre>
 
 <pre>
-Tokyo Tyrant:          <b>298,226.197</b> ms
 MemCache:              <b>253,326.122</b> ms
 GDBM:                   <b>24,226.116</b> ms
-Localmemcache 0.2.2:     <b>5,799.225</b> ms
-Localmemcache 0.3.0:     <b>5,300.055</b> ms
+Tokyo Cabinet:           <b>9,092.707</b> ms
+Localmemcache 0.4.0:     <b>5,310.055</b> ms
 Ruby Hash of Strings:    <b>4,963.313</b> ms
 </pre>
-(<a href="http://github.com/sck/localmemcache/tree/e980ba949034a349dbf0e6f8f9ef77bbe3e3e314/bench">Code of the benchmarks used</a>)
+(<a href="http://github.com/sck/localmemcache/tree/7e5a9549a3b8c32662aaebaec3642253ce0ea8b0/bench">Code of the benchmarks used</a>)
 
 <p>
 
-So, on my machine, using <b>Localmemcache</b> 0.3.0 to store key-value
+So, on my machine, using <b>Localmemcache</b> 0.4.0 to store key-value
 data on disk is about <b>10</b>% slower than keeping them in memory in a
-Ruby hash of strings.   Also keep in mind that of the above mentioned
-software components <b>Tokyo Tyrant</b> is the only one that offers
-persistence and parallel writes like <b>Localmemcache</b> does.
+Ruby hash of strings.  It's about 70% faster than <b>Tokyo Cabinet</b>
+(which offers features similar to <b>LocalMemCache</b>).
 
 <h2>Source code</h2>
 
