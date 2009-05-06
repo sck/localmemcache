@@ -32,7 +32,7 @@ task :sanity_test do
       "make -C src/tests/ && ./src/tests/lmc "
 end
 
-task :site_doc do
+task :site_rdoc do
   sh "cd ./src/ruby-binding; rdoc -o ../../site/doc"
 end
 
