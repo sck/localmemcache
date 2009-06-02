@@ -15,6 +15,15 @@
 #define RSTRING_PTR(x) RSTRING(x)->ptr
 #endif
 
+#ifndef RARRAY_PTR
+#define RARRAY_PTR(array) array->ptr
+#endif
+
+#ifndef RARRAY_LEN
+#define RARRAY_LEN(array) array->len
+#endif
+
+
 #if RUBY_VERSION_CODE >= 190
 #define ruby_errinfo rb_errinfo()
 #endif
@@ -31,6 +40,7 @@ char *rstring_ptr(VALUE s) {
   return r ? r : "nil";
 }
 
+/* :nodoc: */
 char *rstring_ptr_null(VALUE s) { 
   char* r = NIL_P(s) ? NULL : RSTRING_PTR(rb_String(s)); 
   return r ? r : NULL;
@@ -94,6 +104,7 @@ static void rb_lmc_free_handle(rb_lmc_handle_t *h) {
   local_memcache_free(rb_lmc_check_handle_access(h), &e);
 }
 
+/* :nodoc: */
 void lmc_check_dict(VALUE o) {
   if (TYPE(o) != T_HASH) {
     rb_raise(rb_eArgError, "expected a Hash");
@@ -361,8 +372,8 @@ static VALUE __LocalMemCache__each_pair(VALUE d) {
     success = local_memcache_iterate(get_LocalMemCache(obj), 
         (void *) &data, &ofs, lmc_ruby_iter_collect_pairs);
     long i;
-    for (i = 0; i < RARRAY(r)->len; i++) {
-      rb_yield(RARRAY(r)->ptr[i]);
+    for (i = 0; i < RARRAY_LEN(r); i++) {
+      rb_yield(RARRAY_PTR(r)[i]);
     }
   }
   if (!success) { return Qnil; }
