@@ -15,7 +15,7 @@ an interface similar to memcached but for accessing local data instead of
 remote data.  It's based on <b>mmap()</b>'ed shared memory for <b>maximum
 speed</b>.
 Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
-alternative to GDBM and Berkeley DB</b>.
+alternative to GDBM, Berkeley DB, and Tokyo Cabinet</b>.
 
 <h2>Key features as of 0.4.0 (2009-05-16)</h2>
 <li><a href="#performance">blazingly fast</a></li>
@@ -88,7 +88,7 @@ Ruby Hash of Strings:    <b>4,963.313</b> ms
 
 So, on my machine, using <b>Localmemcache</b> 0.4.0 to store key-value
 data on disk is about <b>10</b>% slower than keeping them in memory in a
-Ruby hash of strings.  It's about 70% faster than <b>Tokyo Cabinet</b>
+Ruby hash of strings.  It's about <b>40</b>% faster than <b>Tokyo Cabinet</b>
 (which offers features similar to <b>LocalMemCache</b>).
 
 <h2>Source code</h2>
