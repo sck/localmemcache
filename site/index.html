@@ -17,6 +17,16 @@ speed</b>.
 Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
 alternative to GDBM, Berkeley DB, and Tokyo Cabinet</b>.
 
+<h2>Version 0.4.2: Improving Append Performance (2009-08-10)</h2>
+
+In 0.4.2 the <b>:min_alloc_size</b> parameter was introduced to help with use
+cases that intend to use a hash table with growing values. This is
+currently not handled well by the internal allocator as it will end up
+with a large list of unusable free blocks. By setting the
+<b>:min_alloc_size</b> parameter you help the allocator to plan better
+ahead. (<a href="http://localmemcache.rubyforge.org/doc/classes/LocalMemCache.html#M000001">more</a>)
+
+
 <h2>Key features as of 0.4.0 (2009-05-16)</h2>
 <li><a href="#performance">blazingly fast</a></li>
 <li>a very simple API</li>
@@ -45,7 +55,7 @@ sometimes hangs there, it is not yet clear what the problem is.
 If you just want to use the <b>C API</b>, download the .tar.gz from <a href="http://rubyforge.org/frs/?group_id=7925">here</a>.
 
 <h2>Using</h2>
-<b>API</b>:&nbsp;<a href="http://github.com/sck/localmemcache/blob/591d943507236035e99471f372dc2826271610c9/src/localmemcache.h">C</a>|<a href="http://localmemcache.rubyforge.org/doc/">Ruby</a><br>
+<b>API</b>:&nbsp;<a href="http://github.com/sck/localmemcache/blob/d72a5bd825b0fb573f1048ea9cae92d8c143525c/src/localmemcache.h">C</a>|<a href="http://localmemcache.rubyforge.org/doc/">Ruby</a><br>
 <p><pre><code>require 'localmemcache'
 # 1. the memcached way
 # $lm = LocalMemCache.new :namespace => :viewcounters
@@ -59,7 +69,7 @@ $lm[:foo]
 $lm.delete(:foo)
 
 </code></pre> 
-(C version of this example: <a href="http://github.com/sck/localmemcache/blob/e980ba949034a349dbf0e6f8f9ef77bbe3e3e314/example/hello.c">hello.c</a>)
+(C version of this example: <a href="http://github.com/sck/localmemcache/blob/d72a5bd825b0fb573f1048ea9cae92d8c143525c/example/hello.c">hello.c</a>)
 </p>
 
 <a name="performance" id="performance"></a>
