@@ -95,13 +95,21 @@ typedef struct {
  * 
  *  lmc_error_t e;
  *  // open via namespace
- *  local_memcache_t *lmc = local_memcache_create("viewcounters", 0, 0, &e);
+ *  local_memcache_t *lmc = local_memcache_create("viewcounters", 0, 0, 0, &e);
  *  // open via filename
- *  local_memcache_t *lmc = local_memcache_create(0, "./foo.lmc", 0, &e);
+ *  local_memcache_t *lmc = local_memcache_create(0, "./foo.lmc", 0, 0, &e);
+ *  // open via filename + min_alloc_size set
+ *  local_memcache_t *lmc = local_memcache_create(0, "./foo.lmc", 0, 1024, &e);
  * 
  *  You must supply at least a namespace or filename parameter
  *
  *  The size_mb defaults to 1024 (1 GB).
+ *
+ *  The min_alloc_size parameter was introduced to help with use cases that
+ *  intend to use a hash table with growing values.  This is currently not
+ *  handled well by the internal allocator as it will end up with a large list
+ *  of unusable free blocks.  By setting the min_alloc_size parameter you help
+ *  the allocator to plan better ahead.
  *
  *  If you use the namespace parameter, the .lmc file for your namespace will
  *  reside in /var/tmp/localmemcache.  This can be overriden by setting the

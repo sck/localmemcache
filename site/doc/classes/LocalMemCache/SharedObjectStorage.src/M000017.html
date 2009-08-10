@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File localmemcache.rb, line 51</span>
+  <pre><span class="ruby-comment cmt"># File localmemcache.rb, line 59</span>
     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">each_pair</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>) 
       <span class="ruby-keyword kw">super</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">mv</span><span class="ruby-operator">|</span> <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">k</span>, <span class="ruby-constant">Marshal</span>.<span class="ruby-identifier">load</span>(<span class="ruby-identifier">mv</span>)) }
     <span class="ruby-keyword kw">end</span></pre>

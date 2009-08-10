@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File localmemcache.rb, line 54</span>
+  <pre><span class="ruby-comment cmt"># File localmemcache.rb, line 62</span>
     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">random_pair</span>
       <span class="ruby-identifier">rp</span> = <span class="ruby-keyword kw">super</span>
       <span class="ruby-identifier">rp</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-value">? </span><span class="ruby-keyword kw">nil</span> <span class="ruby-operator">:</span> [<span class="ruby-identifier">rp</span>.<span class="ruby-identifier">first</span>, <span class="ruby-constant">Marshal</span>.<span class="ruby-identifier">load</span>(<span class="ruby-identifier">rp</span>.<span class="ruby-identifier">last</span>)]

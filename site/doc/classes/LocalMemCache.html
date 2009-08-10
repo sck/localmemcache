@@ -285,15 +285,26 @@ a shared memory region.
 </p>
 <p>
 <a href="LocalMemCache.html#M000001">LocalMemCache.new</a>
-:namespace=&gt;&quot;foo&quot;, :size_mb=&gt; 1
+:namespace=&gt;&quot;foo&quot;, :size_mb=&gt; 1 <a
+href="LocalMemCache.html#M000001">LocalMemCache.new</a>
+:namespace=&gt;&quot;foo&quot;, :size_mb=&gt; 1, :min_alloc_size =&gt; 256
 </p>
 <p>
 <a href="LocalMemCache.html#M000001">LocalMemCache.new</a>
-:filename=&gt;&quot;./foo.lmc&quot;
+:filename=&gt;&quot;./foo.lmc&quot; <a
+href="LocalMemCache.html#M000001">LocalMemCache.new</a>
+:filename=&gt;&quot;./foo.lmc&quot;, :min_alloc_size =&gt; 512
 </p>
 <p>
 You must supply at least a :namespace or :filename parameter The size_mb
 defaults to 1024 (1 GB).
+</p>
+<p>
+The :min_alloc_size parameter was introduced to help with use cases that
+intend to use a hash table with growing values. This is currently not
+handled well by the internal allocator as it will end up with a large list
+of unusable free blocks. By setting the :min_alloc_size parameter you help
+the allocator to plan better ahead.
 </p>
 <p>
 If you use the :namespace parameter, the .lmc file for your namespace will

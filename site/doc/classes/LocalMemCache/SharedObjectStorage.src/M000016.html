@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File localmemcache.rb, line 50</span>
+  <pre><span class="ruby-comment cmt"># File localmemcache.rb, line 58</span>
     <span class="ruby-keyword kw">def</span> <span class="ruby-operator">[]</span>(<span class="ruby-identifier">key</span>) <span class="ruby-identifier">v</span> = <span class="ruby-keyword kw">super</span>(<span class="ruby-identifier">key</span>); <span class="ruby-identifier">v</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-value">? </span><span class="ruby-keyword kw">nil</span> <span class="ruby-operator">:</span> <span class="ruby-constant">Marshal</span>.<span class="ruby-identifier">load</span>(<span class="ruby-identifier">v</span>) <span class="ruby-keyword kw">end</span></pre>
 </body>
 </html>
