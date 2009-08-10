@@ -20,6 +20,7 @@ int lmc_set_lock_flag(void *base, lmc_error_t *e) {
   return 1;
 }
 
+
 int lmc_release_lock_flag(void *base, lmc_error_t *e) {
   lmc_mem_descriptor_t *md = base;
   if (md->locked != 1) {
@@ -78,7 +79,7 @@ int local_memcache_drop_namespace(const char *namespace, const char *filename,
 int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e);
 
 local_memcache_t *__local_memcache_create(const char *namespace, size_t size, 
-    int force, int *ok, lmc_error_t* e) {
+    long min_alloc_size, int force, int *ok, lmc_error_t* e) {
   int d;
   if (!ok) { ok = &d; }
   *ok = 1;
@@ -114,7 +115,7 @@ retry:
         if (!force)  goto release_and_fail;
         *ok = 0;
       }
-      if (lmc_get_db_version(lmc->base) != LMC_DB_VERSION) {
+      if (lmc_get_db_version(lmc->base) > LMC_DB_VERSION) {
         lmc_handle_error_with_err_string("local_memcache_create",
             "DB version is incompatible", "DBVersionNotSupported", e);
         goto unlock_and_fail;
@@ -129,6 +130,7 @@ retry:
       lmc->va_hash = md->va_hash;
     }
     if (*ok) { 
+      lmc_set_min_alloc_size(lmc->base, min_alloc_size);
       lmc_release_lock_flag(lmc->base, e);
       lmc_lock_release("local_memcache_create", lmc->lock, e); 
     }
@@ -146,14 +148,15 @@ failed:
 }
 
 local_memcache_t *local_memcache_create(const char *namespace, 
-    const char *filename, double size_mb, lmc_error_t* e) {  
+    const char *filename, double size_mb, size_t min_alloc_size, 
+    lmc_error_t* e) {  
   char clean_ns[1024];
   double s = size_mb == 0.0 ? 1024.0 : size_mb;
   size_t si = s * 1024 * 1024;
   //printf("size: %f, s: %f, si: %zd\n", size_mb, s, si);
   if (!lmc_namespace_or_filename((char *)clean_ns, namespace, filename, e))
       return 0;
-  return __local_memcache_create((char *)clean_ns, si, 0, 0, e);
+  return __local_memcache_create((char *)clean_ns, si, min_alloc_size, 0, 0, e);
 }
 
 int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e) {
@@ -180,7 +183,7 @@ int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e) {
   size_t ns_size = lmc_namespace_size((char *)clean_ns);
   int ok;
   local_memcache_t *lmc = __local_memcache_create((char *)clean_ns, ns_size, 
-      1, &ok, e);
+      0, 1, &ok, e);
   if (!lmc) {
     lmc_handle_error_with_err_string("__local_memcache_create", 
         "Unable to attach memory pool", "InitError", e);

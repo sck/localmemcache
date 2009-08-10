@@ -21,13 +21,14 @@ typedef struct {
 
 typedef struct {
   size_t first_free;
-  size_t dummy2;
+  size_t dummy2;  // dummy for next
   size_t total_size;
   size_t magic;
   size_t va_hash;
   int locked;
   size_t version;
   lmc_log_descriptor_t log;
+  size_t min_alloc_size;
 } lmc_mem_descriptor_t;
 
 typedef struct {
@@ -49,5 +50,6 @@ int lmc_um_find_leaks(void *base, char *bf);
 
 lmc_log_descriptor_t *lmc_log_op(void *base, int opid);
 void lmc_log_finish(void *base);
+void lmc_set_min_alloc_size(void *base, size_t s);
 
 #endif

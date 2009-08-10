@@ -10,7 +10,7 @@ LocalMemCache.drop :namespace => "test", :force => true
 $lm = LocalMemCache.new :namespace=>"test", :size_mb => 20
 
 LocalMemCache.drop :namespace => "test-small", :force => true
-$lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 0.20;
+$lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 1;
 
 describe 'LocalMemCache' do
 
@@ -72,7 +72,7 @@ describe 'LocalMemCache' do
 
   it 'should support size' do
     LocalMemCache.drop :namespace =>"size-test", :force=>true
-    ll = LocalMemCache.new :namespace => "size-test", :size_mb => 0.2
+    ll = LocalMemCache.new :namespace => "size-test", :size_mb => 1
     ll.size.should.equal 0
     ll[:one] = 1
     ll.size.should.equal 1
@@ -98,7 +98,7 @@ describe 'LocalMemCache' do
 
   it 'should support filename parameters' do
     LocalMemCache.drop :filename => ".tmp.a.lmc", :force => true
-    lm = LocalMemCache.new :filename => ".tmp.a.lmc", :size_mb => 0.20
+    lm = LocalMemCache.new :filename => ".tmp.a.lmc", :size_mb => 1
     lm[:boo] = 1
     lm.size.should.equal 1
     File.exists?(".tmp.a.lmc").should.be.true

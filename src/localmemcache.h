@@ -115,7 +115,8 @@ typedef struct {
  *  virtual address space of your process.  
  */
 local_memcache_t *local_memcache_create(const char *namespace, 
-    const char *filename, double size_mb, lmc_error_t* e);
+    const char *filename, double size_mb, size_t min_alloc_size, 
+    lmc_error_t* e);
 
 /* 
  *  Retrieve string value from hashtable.

@@ -52,6 +52,32 @@ void lmc_dump(void *base) {
   }
 }
 
+size_t lmc_min_alloc_size(void *base) {
+  lmc_mem_descriptor_t *md = base;
+  return md->version > 1 ? md->min_alloc_size : 0;
+}
+
+/*
+ * Thanks to: http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+ */
+size_t round_to_next_power_of_2(size_t v) {
+  v--;
+  v |= v >> 1;
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  //v |= v >> 32;
+  v++;
+  return v;
+}
+
+void lmc_set_min_alloc_size(void *base, size_t s) {
+  lmc_mem_descriptor_t *md = base;
+  if (md->version < 2) { return; }
+  md->min_alloc_size = round_to_next_power_of_2(s);
+}
+
 int lmc_is_va_valid(void *base, size_t va) {
   lmc_mem_descriptor_t *md = base;
   lmc_mem_chunk_descriptor_t* c = base + va;
@@ -140,9 +166,9 @@ size_t __s(char *where, lmc_mem_status_t ms, size_t mem_before, size_t expected_
 
 size_t lmc_valloc(void *base, size_t size) {
   lmc_mem_descriptor_t *md = base;
-  // consider: make size divisible by power of 2
   size_t s = lmc_max(size + sizeof(size_t), 
       sizeof(lmc_mem_chunk_descriptor_t) + sizeof(size_t));
+  s = lmc_max(lmc_min_alloc_size(base), round_to_next_power_of_2(s));
   lmc_mem_chunk_descriptor_t *c = md_first_free(base);
   lmc_mem_chunk_descriptor_t *p = NULL;
   if (size == 0) { return 0; }

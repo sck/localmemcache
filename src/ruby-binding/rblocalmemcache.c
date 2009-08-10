@@ -75,6 +75,7 @@ static VALUE LocalMemCache;
 static VALUE lmc_rb_sym_namespace;
 static VALUE lmc_rb_sym_filename;
 static VALUE lmc_rb_sym_size_mb;
+static VALUE lmc_rb_sym_min_alloc_size;
 static VALUE lmc_rb_sym_force;
 
 /* :nodoc: */
@@ -118,7 +119,8 @@ static VALUE LocalMemCache__new2(VALUE klass, VALUE o) {
   local_memcache_t *l = local_memcache_create(
       rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)),
       rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)), 
-      double_value(rb_hash_aref(o, lmc_rb_sym_size_mb)), &e);
+      double_value(rb_hash_aref(o, lmc_rb_sym_size_mb)),
+      long_value(rb_hash_aref(o, lmc_rb_sym_min_alloc_size)), &e);
   if (!l)  rb_lmc_raise_exception(&e);
   rb_lmc_handle_t *h = calloc(1, sizeof(rb_lmc_handle_t));
   if (!h) rb_raise(rb_eRuntimeError, "memory allocation error");
@@ -489,6 +491,7 @@ void Init_rblocalmemcache() {
   lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
   lmc_rb_sym_filename = ID2SYM(rb_intern("filename"));
   lmc_rb_sym_size_mb = ID2SYM(rb_intern("size_mb"));
+  lmc_rb_sym_min_alloc_size = ID2SYM(rb_intern("min_alloc_size"));
   lmc_rb_sym_force = ID2SYM(rb_intern("force"));
   rb_require("localmemcache.rb");
 }
