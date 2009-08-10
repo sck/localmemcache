@@ -19,9 +19,13 @@ class LocalMemCache
   #  Creates a new handle for accessing a shared memory region.
   # 
   #  LocalMemCache.new :namespace=>"foo", :size_mb=> 1
+  #
   #  LocalMemCache.new :namespace=>"foo", :size_mb=> 1, :min_alloc_size => 256
+  #
+  #
   # 
   #  LocalMemCache.new :filename=>"./foo.lmc"
+  #
   #  LocalMemCache.new :filename=>"./foo.lmc", :min_alloc_size => 512
   # 
   #  You must supply at least a :namespace or :filename parameter
