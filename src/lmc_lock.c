@@ -32,13 +32,19 @@ lmc_lock_t *lmc_lock_init(const char *ns, int init, lmc_error_t *e) {
   return l;
 }
 
+void lmc_lock_free(lmc_lock_t* l) {
+  if (!l) return;
+  if (l->sem) { sem_close(l->sem); }
+  free(l);
+}
+
 int lmc_clear_namespace_lock(const char *ns) {
   char namespace[1024];
   lmc_namespacify(namespace, ns);
   lmc_error_t e;
   lmc_lock_t *l = lmc_lock_init(namespace, 1, &e);
   lmc_lock_repair(l);
-  free(l);
+  lmc_lock_free(l);
   return 1;
 }
 

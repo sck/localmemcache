@@ -322,10 +322,11 @@ static VALUE __LocalMemCache__keys(VALUE d) {
   lmc_ruby_iter_collect_keys data;
   data.ary = r;
   int success = 2;
-  size_t ofs = 0;
+  ht_iter_status_t s;
+  memset(&s, 0x0, sizeof(ht_iter_status_t));
   while (success == 2) {
     success = local_memcache_iterate(get_LocalMemCache(obj), 
-        (void *) &data, &ofs, lmc_ruby_iter);
+        (void *) &data, &s, lmc_ruby_iter);
   }
   if (!success) { return Qnil; }
   return Qnil;
@@ -366,13 +367,15 @@ int lmc_ruby_iter_collect_pairs(void *ctx, const char* key, const char* value) {
 static VALUE __LocalMemCache__each_pair(VALUE d) {
   VALUE obj = rb_ary_entry(d, 0);
   int success = 2;
+  ht_iter_status_t s;
+  memset(&s, 0x0, sizeof(ht_iter_status_t));
   size_t ofs = 0;
   while (success == 2) {
     VALUE r = rb_ary_new();
     lmc_ruby_iter_collect_pairs_t data;
     data.ary = r;
     success = local_memcache_iterate(get_LocalMemCache(obj), 
-        (void *) &data, &ofs, lmc_ruby_iter_collect_pairs);
+        (void *) &data, &s, lmc_ruby_iter_collect_pairs);
     long i;
     for (i = 0; i < RARRAY_LEN(r); i++) {
       rb_yield(RARRAY_PTR(r)[i]);
