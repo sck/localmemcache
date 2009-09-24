@@ -170,7 +170,9 @@ int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e);
  *
  *   local_memcache_t *lmc;
  *   collector_t c;
- *   local_memcache_iterate(lmc, (void *) &c, my_collect);
+ *   ht_iter_status_t s;
+ *   memset(s, sizeof(ht_iter_status_t));
+ *   local_memcache_iterate(lmc, (void *) &c, &s, my_collect);
  *
  * The memory pool will be locked while iteration takes place, so try to make
  * sure you can iterate within under 2 seconds otherwise other waiting
@@ -178,7 +180,7 @@ int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e);
  * triggering the automatic recovery.)
  *
  */
-int local_memcache_iterate(local_memcache_t *lmc, void *ctx, size_t *ofs,
+int local_memcache_iterate(local_memcache_t *lmc, void *ctx, ht_iter_status_t *s,
     LMC_ITERATOR_P(iter));
 
 /*

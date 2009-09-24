@@ -13,6 +13,7 @@ typedef struct {
 } lmc_lock_t;
 
 lmc_lock_t *lmc_lock_init(const char *namespace, int init, lmc_error_t *e);
+void lmc_lock_free(lmc_lock_t* l);
 int lmc_lock_obtain(const char *where, lmc_lock_t* l, lmc_error_t *e);
 int lmc_lock_obtain_mandatory(const char *where, lmc_lock_t* l, lmc_error_t *e);
 int lmc_lock_release(const char *where, lmc_lock_t* l, lmc_error_t *e);
