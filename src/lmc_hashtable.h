@@ -16,11 +16,6 @@ typedef struct {
   va_string_t va_value;
 } ht_hash_entry_t;
 
-typedef struct {
-  size_t ofs;
-  size_t bucket_ofs;
-} ht_iter_status_t;
-
 #define LMC_HT_BUCKETS 20731
 #define LMC_ITERATOR_P(n) int ((n)) \
     (void *ctx, const char *key, const char *value)
@@ -40,7 +35,7 @@ const char *ht_get(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key
     size_t *n_value); 
 int ht_delete(void *base, va_ht_hash_t va_ht, const char *key, size_t n_key);
 int ht_hash_destroy(void *base, va_ht_hash_t ht);
-int ht_hash_iterate(void *base, va_ht_hash_t ht, void *ctx, ht_iter_status_t *s,
+int ht_hash_iterate(void *base, va_ht_hash_t ht, void *ctx, size_t *ofs,
     LMC_ITERATOR_P(iter));
 int ht_random_pair(void *base, va_ht_hash_t va_ht, char **r_key, 
     size_t *n_key, char **r_value, size_t *n_value);

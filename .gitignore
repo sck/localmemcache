@@ -1,6 +1,5 @@
 *.o
 *.a
-.tmp*
 core
 vgcore*
 core*

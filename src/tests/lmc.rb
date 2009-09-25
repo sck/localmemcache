@@ -53,14 +53,6 @@ describe 'LocalMemCache' do
     ll.random_pair.should.be.nil
   end
 
-  it 'should support iteration' do 
-    s = $lm.size
-    s.should.equal 3
-    c = 0
-    $lm.each_pair {|a,b| c += 1 }
-    s.should.equal c
-  end
-
   it 'should throw an exception when accessing a closed pool' do
     $lm.close
     should.raise(LocalMemCache::MemoryPoolClosed) { $lm.keys }
@@ -93,7 +85,6 @@ describe 'LocalMemCache' do
     ll.clear
     ll.size.should.equal 0
   end
-
 
 
   it 'should support checking of namespaces' do 
