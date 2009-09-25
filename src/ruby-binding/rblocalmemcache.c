@@ -369,7 +369,6 @@ static VALUE __LocalMemCache__each_pair(VALUE d) {
   int success = 2;
   ht_iter_status_t s;
   memset(&s, 0x0, sizeof(ht_iter_status_t));
-  size_t ofs = 0;
   while (success == 2) {
     VALUE r = rb_ary_new();
     lmc_ruby_iter_collect_pairs_t data;
