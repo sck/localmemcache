@@ -279,8 +279,13 @@ const char *__local_memcache_get(local_memcache_t *lmc,
 char *local_memcache_get_new(local_memcache_t *lmc, 
     const char *key, size_t n_key, size_t *n_value) {
   const char *r = __local_memcache_get(lmc, key, n_key, n_value);
-  char *new_s = malloc(*n_value);
+  char *new_s = 0;
+  if (!r) goto unknown_key;
+  new_s = malloc(*n_value);
   memcpy(new_s, r, *n_value);
+
+unknown_key:
+
   if (!lmc_unlock_shm_region("local_memcache_get_new", lmc)) return 0;
   return new_s;
 }
@@ -296,6 +301,8 @@ int local_memcache_random_pair_new(local_memcache_t *lmc,
     char **r_key, size_t *n_key, char **r_value, size_t *n_value) {
   char *k;
   char *v;
+  (*r_key) = 0;
+  (*r_value) = 0;
   if (__local_memcache_random_pair(lmc, &k, n_key, &v, n_value)) {
     (*r_key) = malloc(*n_key);
     memcpy((*r_key), k, *n_key);
