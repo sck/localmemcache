@@ -1,7 +1,7 @@
 #! /bin/sh
 D=`dirname $0`
 DIR=`cd $D; pwd`
-script=$DIR/crash.rb
+script=$DIR/crash-small.rb
 
 export CFLAGS=-DDO_TEST_CRASH
 make -C .. clean && make -C .. && make -C ../ruby-binding && 

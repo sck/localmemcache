@@ -4,10 +4,6 @@ $DIR=File.dirname(__FILE__)
 require 'localmemcache'
 
 LocalMemCache.drop :namespace => "crash-t", :force => true
-#exit
-#puts "c"
-#LocalMemCache.check_namespace("crash-t");
-
 
 $pids = []
 5.times { $pids << fork {
@@ -23,7 +19,7 @@ $pids = []
   puts "#{$$} Worker finished"
 }}
 
-40.times {
+10.times {
 $pid = fork {
   LocalMemCache.enable_test_crash
   $lm2 = LocalMemCache.new :namespace=>"crash-t"

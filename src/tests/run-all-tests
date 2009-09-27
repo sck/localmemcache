@@ -1,0 +1,26 @@
+#! /bin/sh
+
+
+echo "SHM"
+./shm
+echo "LMC"
+./lmc
+echo "capi"
+./capi.sh
+
+echo "bench"
+./bench
+echo "bench-append"
+./bench-append
+
+echo "ttlmc"
+./ttlmc
+echo "ttrandom_pair"
+./ttrandom_pair
+echo "ttalloc"
+./ttalloc
+
+echo "parallelwrite"
+./parallelwrite
+echo "crash"
+./crash

@@ -78,7 +78,7 @@ int lmc_sem_timed_wait_mandatory(lmc_lock_t* l) {
 #else
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
-  ts.tv_sec += 20;
+  ts.tv_sec += 60;
   return sem_timedwait(l->sem, &ts);
 #endif
 }

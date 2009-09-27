@@ -360,11 +360,11 @@ void lmc_free(void *base, size_t chunk) {
   __lmc_free(base, va_used_chunk, uc_size);
 }
 
-int lmc_um_getbit(char *bf, int i) {
+int lmc_um_getbit(char *bf, size_t i) {
   bf += i / 8; return (*bf & (1 << (i % 8))) != 0;
 }
 
-void lmc_um_setbit(char *bf, int i, int v) {
+void lmc_um_setbit(char *bf, size_t i, size_t v) {
   bf += i / 8;
   if (v) *bf |= 1 << (i % 8);    
   else *bf &= ~(1 << (i % 8));  
@@ -382,7 +382,8 @@ int lmc_um_find_leaks(void *base, char *bf) {
   for (i = 0; i < md->total_size; ++i) { 
     if (!gap) {
       size_t *b = (void *)bf + i / 8;
-      while (*b == m && i < md->total_size - sizeof(size_t)) { 
+      size_t ee = md->total_size - sizeof(size_t) * 8;
+      while (*b == m && i < ee) { 
         i += sizeof(size_t) * 8; b++; 
       }
     }
@@ -415,10 +416,13 @@ int lmc_um_check_unmarked(void *base, char *bf, size_t va, size_t size) {
   size_t end = va + size;
   for (i = va; i < va + size; ++i) { 
     size_t *b = (void *)bf + i / 8;
-    while (*b == n && i < end - sizeof(size_t)) { 
+    size_t ee = end - sizeof(size_t) * 8;
+    while (*b == n && i < ee) { 
       i += sizeof(size_t) * 8; b++; 
     }
-    if (lmc_um_getbit(bf, i) != 0) { return 0; }
+    if (lmc_um_getbit(bf, i) != 0) { 
+      return 0; 
+    }
   }
   return 1;
 }
@@ -428,11 +432,15 @@ int lmc_um_mark(void *base, char *bf, size_t va, size_t size) {
   lmc_mem_descriptor_t *md = base;
   if ((va > sizeof(lmc_mem_descriptor_t)) &&
       (!lmc_is_va_valid(base, va) || !lmc_is_va_valid(base, va + size))) {
-    printf("[localmemcache] Error: VA start out of range: "
+    fprintf(stderr, "[localmemcache] Error: VA start out of range: "
         "va: %zd - %zd max %zd!\n", va, va + size, md->total_size);
     return 0;
   }
-  if (!lmc_um_check_unmarked(base, bf, va, size)) return 0;
+  if (!lmc_um_check_unmarked(base, bf, va, size)) {
+    fprintf(stderr, "[localmemcache] Error: Part of a block to be "
+        "marked used is used already (va: %zd s: %zd) !\n", va, size);
+    return 0;
+  }
   for (i = va; i < va + size; ++i) { 
     if (i % 8 == 0) {
       size_t b_start = i / 8;
@@ -450,7 +458,8 @@ int lmc_um_mark(void *base, char *bf, size_t va, size_t size) {
 int lmc_um_mark_allocated(void *base, char *bf, size_t va) {
   size_t real_va = va - sizeof(size_t);
   size_t s = *(size_t *)(base + real_va);
-  return lmc_um_mark(base, bf, real_va, s);
+  int r =  lmc_um_mark(base, bf, real_va, s);
+  return r;
 }
 
 char *lmc_um_new_mem_usage_bitmap(void *base) {

@@ -414,6 +414,17 @@ static VALUE LocalMemCache__size(VALUE obj) {
   return rb_int2big(ht->size);
 }
 
+/* 
+ * internal, do not use
+ */
+static VALUE LocalMemCache__check_consistency(VALUE obj) {
+  lmc_error_t e;
+  rb_lmc_handle_t *h;
+  Data_Get_Struct(obj, rb_lmc_handle_t, h);
+  return local_memcache_check_consistency(rb_lmc_check_handle_access(h), &e) ? 
+      Qtrue : Qfalse;
+}
+
 /*
  * Document-class: LocalMemCache
  * 
@@ -489,6 +500,8 @@ void Init_rblocalmemcache() {
       0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
   rb_define_method(LocalMemCache, "size", LocalMemCache__size, 0);
+  rb_define_method(LocalMemCache, "check_consistency", 
+      LocalMemCache__check_consistency, 0);
 
   lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
   lmc_rb_sym_filename = ID2SYM(rb_intern("filename"));

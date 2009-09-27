@@ -56,6 +56,8 @@ int lmc_namespace_or_filename(char *result, const char* ons, const char *ofn,
   return 0;
 }
 
+void lmc_checkize(char *result, char *s) { snprintf(result, 1023, "%s-check", s); }
+
 int local_memcache_drop_namespace(const char *namespace, const char *filename,
     int force, lmc_error_t *e) {
   char clean_ns[1024];
@@ -67,7 +69,7 @@ int local_memcache_drop_namespace(const char *namespace, const char *filename,
     lmc_lock_repair(l);
     lmc_lock_free(l);
     char check_lock_name[1024];
-    snprintf((char *)&check_lock_name, 1023, "%s-check", (char *)clean_ns);
+    lmc_checkize(check_lock_name, clean_ns);
     lmc_lock_t *check_l;
     check_l =  lmc_lock_init(check_lock_name, 1, e);
     lmc_lock_repair(check_l);
@@ -159,9 +161,45 @@ local_memcache_t *local_memcache_create(const char *namespace,
   return __local_memcache_create((char *)clean_ns, si, min_alloc_size, 0, 0, e);
 }
 
+int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
+  int r;
+  int retry_counter = 0;
+retry:
+  if (retry_counter++ > 10) {
+    fprintf(stderr, "[localmemcache] Too many retries: "
+        "Cannot repair namespace '%s'\n", lmc->namespace);
+    return 0;
+  }
+  r = lmc_lock_obtain(who, lmc->lock, &lmc->error);
+  if (!r && (strcmp(lmc->error.error_type, "LockTimedOut") == 0)) {
+    if (__local_memcache_check_namespace(lmc->namespace, 
+        &lmc->error))  goto retry;
+    fprintf(stderr, "[localmemcache] Cannot repair namespace '%s'\n", 
+        lmc->namespace);
+  }
+  if (!r) return 0;
+  if (!lmc_set_lock_flag(lmc->base, &lmc->error)) {
+    lmc_lock_release(who, lmc->lock, &lmc->error);
+    return 0;
+  }
+  return 1;
+}
+
+int __local_memcache_free(local_memcache_t *lmc, lmc_error_t *e, int lock) {
+  if (lock && !lmc_lock_shm_region("local_memcache_free", lmc)) return 0;
+  int r = ht_hash_destroy(lmc->base, lmc->va_hash);
+  if (lock && !lmc_unlock_shm_region("local_memcache_free", lmc)) return 0;
+  lmc_shm_destroy(lmc->shm, e);
+  free(lmc->namespace);
+  lmc_lock_free(lmc->lock);
+  free(lmc);
+  return r;
+}
+
 int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e) {
+  int repair_failed = 0;
   char check_lock_name[1024];
-  snprintf((char *)check_lock_name, 1023, "%s-check", (char *)clean_ns);
+  lmc_checkize(check_lock_name, (char *)clean_ns);
 
   if (!lmc_does_namespace_exist((char *)clean_ns)) { 
     lmc_clear_namespace_lock(check_lock_name);
@@ -216,17 +254,21 @@ release:
 release_but_no_lock_correction:
   local_memcache_free(lmc, e);
   lmc_lock_release("local_memcache_check_namespace", check_l, e);
-  free(check_l);
+  lmc_lock_free(check_l);
   return 1;
 failed:
+  repair_failed = 1;
   lmc_handle_error_with_err_string("local_memcache_check_namespace",
       "Unable to recover namespace", "RecoveryFailed", e);
-  local_memcache_free(lmc, e);
+  __local_memcache_free(lmc, e, 0);
   lmc_lock_release("local_memcache_check_namespace", check_l, e);
+  fprintf(stderr, "[localmemcache] Recovery failed!\n");
 check_lock_failed:
-  free(check_l);
-  fprintf(stderr, "[localmemcache] Failed to repair namespace '%s'\n", 
-      clean_ns);
+  lmc_lock_free(check_l);
+  if (!repair_failed) {
+    fprintf(stderr, "[localmemcache] Failed to obtain the 'check lock' to repair "
+        "namespace '%s'\n", clean_ns);
+  }
   return 0;
 }
 
@@ -236,30 +278,6 @@ int local_memcache_check_namespace(const char *namespace, const char *filename,
   if (!lmc_namespace_or_filename((char *)clean_ns, namespace, filename, e)) 
     return 0;
   return __local_memcache_check_namespace(clean_ns, e);
-}
-
-int lmc_lock_shm_region(const char *who, local_memcache_t *lmc) {
-  int r;
-  int retry_counter = 0;
-retry:
-  if (retry_counter++ > 10) {
-    fprintf(stderr, "[localmemcache] Too many retries: "
-        "Cannot repair namespace '%s'\n", lmc->namespace);
-    return 0;
-  }
-  r = lmc_lock_obtain(who, lmc->lock, &lmc->error);
-  if (!r && (strcmp(lmc->error.error_type, "LockTimedOut") == 0)) {
-    if (__local_memcache_check_namespace(lmc->namespace, 
-        &lmc->error))  goto retry;
-    fprintf(stderr, "[localmemcache] Cannot repair namespace '%s'\n", 
-        lmc->namespace);
-  }
-  if (!r) return 0;
-  if (!lmc_set_lock_flag(lmc->base, &lmc->error)) {
-    lmc_lock_release(who, lmc->lock, &lmc->error);
-    return 0;
-  }
-  return 1;
 }
 
 int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc) {
@@ -280,12 +298,10 @@ char *local_memcache_get_new(local_memcache_t *lmc,
     const char *key, size_t n_key, size_t *n_value) {
   const char *r = __local_memcache_get(lmc, key, n_key, n_value);
   char *new_s = 0;
-  if (!r) goto unknown_key;
-  new_s = malloc(*n_value);
-  memcpy(new_s, r, *n_value);
-
-unknown_key:
-
+  if (r) {
+    new_s = malloc(*n_value);
+    memcpy(new_s, r, *n_value);
+  }
   if (!lmc_unlock_shm_region("local_memcache_get_new", lmc)) return 0;
   return new_s;
 }
@@ -341,14 +357,7 @@ int local_memcache_delete(local_memcache_t *lmc, char *key, size_t n_key) {
 }
 
 int local_memcache_free(local_memcache_t *lmc, lmc_error_t *e) {
-  if (!lmc_lock_shm_region("local_memcache_free", lmc)) return 0;
-  int r = ht_hash_destroy(lmc->base, lmc->va_hash);
-  if (!lmc_unlock_shm_region("local_memcache_free", lmc)) return 0;
-  lmc_shm_destroy(lmc->shm, e);
-  free(lmc->namespace);
-  lmc_lock_free(lmc->lock);
-  free(lmc);
-  return r;
+  return __local_memcache_free(lmc, e, 1);
 }
 
 int local_memcache_iterate(local_memcache_t *lmc, void *ctx, 
@@ -356,5 +365,13 @@ int local_memcache_iterate(local_memcache_t *lmc, void *ctx,
   if (!lmc_lock_shm_region("local_memcache_iterate", lmc)) return 0;
   int r = ht_hash_iterate(lmc->base, lmc->va_hash, ctx, s, iter);
   if (!lmc_unlock_shm_region("local_memcache_iterate", lmc)) return 0;
+  return r;
+}
+
+int local_memcache_check_consistency(local_memcache_t *lmc, lmc_error_t *e) {
+  lmc_mem_descriptor_t *md = lmc->base;
+  if (!lmc_lock_shm_region("local_memcache_check_consistency", lmc)) return 0;
+  int r = ht_check_memory(lmc->base, md->va_hash);
+  if (!lmc_unlock_shm_region("local_memcache_check_consistency", lmc)) return 0;
   return r;
 }

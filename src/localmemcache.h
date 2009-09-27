@@ -220,6 +220,7 @@ int local_memcache_drop_namespace(const char *namespace, const char *filename,
 int local_memcache_check_namespace(const char *namespace, const char *filename, 
     lmc_error_t *e);
 
+
 /* internal, do not use */
 const char *__local_memcache_get(local_memcache_t *lmc, 
     const char *key, size_t n_key, size_t *n_value);
@@ -230,4 +231,8 @@ int __local_memcache_random_pair(local_memcache_t *lmc,
 
 /* internal, do not use */
 int lmc_unlock_shm_region(const char *who, local_memcache_t *lmc);
+
+/* internal, do not use */
+int local_memcache_check_consistency(local_memcache_t *lmc, lmc_error_t *e);
+
 #endif

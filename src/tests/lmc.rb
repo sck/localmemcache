@@ -53,6 +53,10 @@ describe 'LocalMemCache' do
     ll.random_pair.should.be.nil
   end
 
+  it 'should allow be consistent' do
+    $lm.check_consistency.should.be.true
+  end
+
   it 'should support iteration' do 
     s = $lm.size
     s.should.equal 3
