@@ -17,7 +17,35 @@ speed</b>.
 Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
 alternative to GDBM, Berkeley DB, and Tokyo Cabinet</b>.
 
-<h2>Version 0.4.2: Improving Append Performance (2009-08-10)</h2>
+<h2>Version 0.4.3: Improving Iteration and bugfixes (2009-10-02)</h2>
+
+Fixes by <b>Paul Mineiro</b> (thanks!):
+<li><b>iteration speedup</b>: each_pair is now a lot faster when dealing with a
+large dictionary.  Eg: For 400k elements it's now about <b>14 times
+faster</b>.</li>
+<li><b>fix for leak</b> in local_memcache_free()</li>
+<li><b>C API</b>: Some C API functions were not yet covered by tests.  This
+has been fixed.</li>
+<p>
+
+Other fixes:
+<li><b>autorepair</b> fixed: Autorepair of namespaces did sometimes wrongly
+report corrupt namespaces.
+<li><b>:min_alloc_size</b> now also works on Ruby 1.9.</li>
+
+
+<script type="text/javascript">
+// <![CDATA[
+function show_complete_history() {
+  var e = document.getElementById('old-news')
+  e.style.display = e.style.display == "none" ? "block" : "none";
+  return false;
+}
+// ]]
+</script>
+
+<a href="#" onclick="show_complete_history()" />Previous Releases</a>
+<div id='old-news' style='display:none'><h2>Version 0.4.2: Improving Append Performance (2009-08-10)</h2>
 
 In 0.4.2 the <b>:min_alloc_size</b> parameter was introduced to help with use
 cases that intend to use a hash table with growing values. This is
@@ -26,6 +54,7 @@ with a large list of unusable free blocks. By setting the
 <b>:min_alloc_size</b> parameter you help the allocator to plan better
 ahead. (<a href="http://localmemcache.rubyforge.org/doc/classes/LocalMemCache.html#M000001">more</a>)
 
+</div>
 
 <h2>Key features as of 0.4.0 (2009-05-16)</h2>
 <li><a href="#performance">blazingly fast</a></li>
@@ -41,7 +70,7 @@ ahead. (<a href="http://localmemcache.rubyforge.org/doc/classes/LocalMemCache.ht
 Note for <b>OS X</b>: <b>OS X</b> disqualifies as <b>HFS+</b> doesn't
 have sparse files and <b>sem_timedwait</b>() and <b>sem_getvalue</b>() aren't
 supported as well.<br>
-Note for <b>FreeBSD</b>: It has been reported that Localmemcache
+Note for <b>FreeBSD</b>: It has been reported that localmemcache
 sometimes hangs there, it is not yet clear what the problem is.
 
 <h2>Install</h2>
@@ -96,7 +125,7 @@ Ruby Hash of Strings:    <b>4,963.313</b> ms
 
 <p>
 
-So, on my machine, using <b>Localmemcache</b> 0.4.0 to store key-value
+So, on my machine, using <b>localmemcache</b> 0.4.0 to store key-value
 data on disk is about <b>10</b>% slower than keeping them in memory in a
 Ruby hash of strings.  It's about <b>40</b>% faster than <b>Tokyo Cabinet</b>
 (which offers features similar to <b>LocalMemCache</b>).
@@ -109,15 +138,23 @@ can be retrieved by executing</p>
 <pre><code>git clone git://github.com/sck/localmemcache.git
 </code></pre>
 
+<h2>Caveats</h2>
+
+<li>Localmemcache's .lmc files are not binary compatible, they are essentially
+memory mapped c structs</li>
+<li>Because of the convenient auto repair feature after a lock timeout,
+localmemcache is allergic to SIGSTOP (If you manage to SIGSTOP a process
+while localmemcache is currently possessing a lock, that is)</li>
+
 <h2>Who uses Localmemcache?</h2>
 
-<a href="http://www.personifi.com">Personifi</a> use Localmemcache to
+<a href="http://www.personifi.com">Personifi</a> use localmemcache to
 serve billions of hits each month.  Armin Roehrl: "we use
 localmemcache because it solves one problem very well and we love it!"
 
 <h2>Tips for backups</h2>
 
-Note that you cannot copy Localmemcache's .lmc files while other
+Note that you cannot copy localmemcache's .lmc files while other
 processes are making changes to the data, this will likely result in a
 corrupt backup.  So you need to make sure that none of your processes are
 writing during the time you do an backup.  As for copying sparse files,
