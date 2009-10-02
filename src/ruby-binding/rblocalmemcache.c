@@ -29,7 +29,7 @@
 #endif
 
 /* :nodoc: */
-long long_value(VALUE i) { return NUM2LONG(rb_Integer(i)); }
+long long_value(VALUE i) { return NIL_P(i) ? 0 : NUM2LONG(rb_Integer(i)); }
 /* :nodoc: */
 double double_value(VALUE i) { return NUM2DBL(i); }
 /* :nodoc: */

@@ -11,5 +11,5 @@ if test "x$1" = "x-d"; then
   irb -r $script
 else
   #valgrind --leak-check=full --tool=memcheck ruby $script
-  ruby $script
+  time ruby $script
 fi

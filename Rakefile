@@ -25,11 +25,7 @@ task :changelog do
 end
 
 task :sanity_test do
-  sh "./configure && make -C src clean && make -C src && " +
-      "(cd src/ruby-binding; ruby extconf.rb) && " +
-      "make -C src/ruby-binding/ && " +
-      "(cd src/tests; ruby extconf.rb) && " +
-      "make -C src/tests/ && ./src/tests/lmc "
+  sh "./src/tests/sanity-test"
 end
 
 task :site_rdoc do
