@@ -34,6 +34,24 @@ long long_value(VALUE i) { return NIL_P(i) ? 0 : NUM2LONG(rb_Integer(i)); }
 double double_value(VALUE i) { return NUM2DBL(i); }
 /* :nodoc: */
 VALUE num2string(long i) { return rb_big2str(rb_int2big(i), 10); }
+
+typedef struct {
+  char *cstr;
+  size_t len;
+} lmc_rb_str_d_t;
+
+/* :nodoc: */
+void rstring_acquire(VALUE s, lmc_rb_str_d_t *d) { 
+  if (NIL_P(s)) {
+    d->cstr = "nil";
+    d->len = 0;
+    return;
+  }
+  VALUE v = TYPE(s) == T_STRING ? s : rb_funcall(s, rb_intern("to_s"), 0);
+  d->cstr = RSTRING_PTR(v);
+  d->len = RSTRING_LEN(v);
+}
+
 /* :nodoc: */
 char *rstring_ptr(VALUE s) { 
   char* r = NIL_P(s) ? "nil" : RSTRING_PTR(rb_String(s)); 
@@ -218,8 +236,10 @@ static VALUE LocalMemCache__disable_test_crash(VALUE klass) {
  */
 static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
   size_t l;
+  lmc_rb_str_d_t k;
+  rstring_acquire(key, &k);
   const char* r = __local_memcache_get(get_LocalMemCache(obj), 
-      rstring_ptr(key), rstring_length(key), &l);
+      k.cstr, k.len, &l);
   VALUE rr = lmc_ruby_string2(r, l);
   lmc_unlock_shm_region("local_memcache_get", get_LocalMemCache(obj));
   return rr;
@@ -256,8 +276,10 @@ static VALUE LocalMemCache__random_pair(VALUE obj) {
  */
 static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
   local_memcache_t *lmc = get_LocalMemCache(obj);
-  if (!local_memcache_set(lmc, rstring_ptr(key), rstring_length(key), 
-      rstring_ptr(value), rstring_length(value))) { 
+  lmc_rb_str_d_t k, v;
+  rstring_acquire(key, &k);
+  rstring_acquire(value, &v);
+  if (!local_memcache_set(lmc, k.cstr, k.len, v.cstr, v.len)) { 
     rb_lmc_raise_exception(&lmc->error); 
   }
   return Qnil;
@@ -283,8 +305,9 @@ static VALUE LocalMemCache__clear(VALUE obj) {
  *  Deletes key from hashtable.  The key is converted to string.
  */
 static VALUE LocalMemCache__delete(VALUE obj, VALUE key) {
-  return local_memcache_delete(get_LocalMemCache(obj), 
-      rstring_ptr(key), rstring_length(key));
+  lmc_rb_str_d_t k;
+  rstring_acquire(key, &k);
+  return local_memcache_delete(get_LocalMemCache(obj), k.cstr, k.len);
   return Qnil;
 }
 

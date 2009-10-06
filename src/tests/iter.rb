@@ -22,7 +22,7 @@ def compare_speed(n)
   
   puts "rhash: filling dict"
   $hh = {}
-  measure_time(1) { n.times {|i| $hh[i] = i } }
+  measure_time(1) { n.times {|i| $hh[i.to_s] = i.to_s } }
   puts "rhash: iterating"
   c = 0
   measure_time(1) {
