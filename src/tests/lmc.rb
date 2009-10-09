@@ -53,7 +53,7 @@ describe 'LocalMemCache' do
     ll.random_pair.should.be.nil
   end
 
-  it 'should allow be consistent' do
+  it 'should be consistent' do
     $lm.check_consistency.should.be.true
   end
 
@@ -128,8 +128,9 @@ $lmsh = LocalMemCache::SharedObjectStorage.new :namespace=>"test-shared-os",
 describe 'LocalMemCache::SharedObjectStorage' do
   it 'should allow to set and query for ruby objects' do
     $lmsh["non-existant"].should.be.nil
-    $lmsh["array"] = [:foo, :boo]
+    $lmsh.set("array", [:foo, :boo])
     $lmsh["array"].should.be.kind_of? Array
+    $lmsh.get("array").should.be.kind_of? Array
   end
 
   it 'support iteration' do
@@ -141,3 +142,14 @@ describe 'LocalMemCache::SharedObjectStorage' do
   end
 end
 
+LocalMemCache.drop :namespace => "test-expiry", :force => true
+$lmex = LocalMemCache::ExpiryCache.new :namespace=>"test-expiry", 
+    :size_mb => 20, :interval_secs => 0, :check_interval => 2
+
+describe 'LocalMemCache::ExpiryCache' do
+  it 'should expire automatically' do
+    $lmex["foo"] = 1
+    $lmex["foo"].should.equal "1"
+    $lmex["foo"].should.be.nil
+  end
+end

@@ -60,6 +60,8 @@ class LocalMemCache
   class SharedObjectStorage < LocalMemCache
     def []=(key,val) super(key, Marshal.dump(val)) end
     def [](key) v = super(key); v.nil? ? nil : Marshal.load(v) end
+    alias set []=
+    alias get []
     def each_pair(&block) 
       super {|k, mv| block.call(k, Marshal.load(mv)) }
     end
@@ -67,6 +69,45 @@ class LocalMemCache
       rp = super
       rp.nil? ? nil : [rp.first, Marshal.load(rp.last)]
     end
+  end
+
+  #  <code>ExpiryCache</code> is based on LocalMemCache 
+  #  but the contents are cleared periodically or when the cache is running out
+  #  of memory.
+  class ExpiryCache 
+    def initialize(options) 
+      o = { 
+        :interval_secs => 10 * 60,
+	:check_interval => 10000
+      }.update(options || {})
+      @c = LocalMemCache.new(o) 
+      @counter = 0
+      @check_interval = o[:check_interval]
+      @interval = o[:interval_secs]
+    end
+    def check
+      @counter = 0
+      @c["localmemcache-last-clear"] = Time.now.to_i if 
+          !@c["localmemcache-last-clear"]
+      if Time.now.to_i - @c["localmemcache-last-clear"].to_i >= @interval
+	@c.clear
+        @c["localmemcache-last-clear"] = Time.now.to_i
+      end
+    end
+    def []=(key,val) 
+      check if (@counter += 1) > @check_interval
+      @c[key] = val
+    rescue OutOfMemoryError
+      clear
+      @c[key] = val
+    end
+    def [](key) check if (@counter += 1) > @check_interval; @c[key] end
+    alias set []=
+    alias get []
+    def clear() @c.clear end
+    def each_pair(&block) @c.each_pair(&block) end
+    def random_pair() @c.random_pair() end
+    def hash() @c; end
   end
 
 end
