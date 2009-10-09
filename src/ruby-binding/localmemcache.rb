@@ -90,14 +90,14 @@ class LocalMemCache
       @c["localmemcache-last-clear"] = Time.now.to_i if 
           !@c["localmemcache-last-clear"]
       if Time.now.to_i - @c["localmemcache-last-clear"].to_i >= @interval
-	@c.clear
+	clear
         @c["localmemcache-last-clear"] = Time.now.to_i
       end
     end
     def []=(key,val) 
       check if (@counter += 1) > @check_interval
       @c[key] = val
-    rescue OutOfMemoryError
+    rescue MemoryPoolFull
       clear
       @c[key] = val
     end
