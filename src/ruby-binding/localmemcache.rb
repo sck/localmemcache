@@ -78,9 +78,10 @@ class LocalMemCache
     def initialize(options) 
       o = { 
         :interval_secs => 10 * 60,
+	:hash_type => LocalMemCache::SharedObjectStorage,
 	:check_interval => 10000
       }.update(options || {})
-      @c = LocalMemCache.new(o) 
+      @c = o[:hash_type].new(o) 
       @counter = 0
       @check_interval = o[:check_interval]
       @interval = o[:interval_secs]

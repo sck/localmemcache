@@ -438,6 +438,18 @@ static VALUE LocalMemCache__size(VALUE obj) {
 }
 
 /* 
+ *  call-seq:
+ *     lmc.free_bytes -> number
+ *
+ *  Number of free bytes.
+ */
+static VALUE LocalMemCache__free_bytes(VALUE obj) {
+  local_memcache_t *lmc = get_LocalMemCache(obj);
+  lmc_mem_status_t ms = lmc_status(lmc->base, "free_bytes");
+  return rb_int2big(ms.free_mem);
+}
+
+/* 
  * internal, do not use
  */
 static VALUE LocalMemCache__check_consistency(VALUE obj) {
@@ -523,6 +535,7 @@ void Init_rblocalmemcache() {
       0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
   rb_define_method(LocalMemCache, "size", LocalMemCache__size, 0);
+  rb_define_method(LocalMemCache, "free_bytes", LocalMemCache__free_bytes, 0);
   rb_define_method(LocalMemCache, "check_consistency", 
       LocalMemCache__check_consistency, 0);
 

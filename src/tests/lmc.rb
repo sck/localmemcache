@@ -149,7 +149,7 @@ $lmex = LocalMemCache::ExpiryCache.new :namespace=>"test-expiry",
 describe 'LocalMemCache::ExpiryCache' do
   it 'should expire automatically' do
     $lmex["foo"] = 1
-    $lmex["foo"].should.equal "1"
+    $lmex["foo"].should.equal 1
     $lmex["foo"].should.be.nil
   end
 end
