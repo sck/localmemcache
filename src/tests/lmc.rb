@@ -98,12 +98,9 @@ describe 'LocalMemCache' do
     ll.size.should.equal 0
   end
 
-
-
   it 'should support checking of namespaces' do 
     LocalMemCache.check :namespace => "test"
   end
-
 
   it 'should support dropping of namespaces' do
     LocalMemCache.drop :namespace => "test"

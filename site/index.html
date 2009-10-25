@@ -17,6 +17,11 @@ speed</b>.
 Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
 alternative to GDBM, Berkeley DB, and Tokyo Cabinet</b>.
 
+<h2>Slides for my talk at the <a href="http://www.munich-on-rails.com/">Ruby on Rails Group Munich</a> (October 2009)</h2>
+
+Now available on github&nbsp;&nbsp;&lt;&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.pdf">pdf</a>&nbsp;|&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.key">key</a>&nbsp;&gt;&nbsp;(German)
+
+
 <h2>Version 0.4.3: Improving Iteration and bugfixes (2009-10-02)</h2>
 
 Fixes by <b>Paul Mineiro</b> (thanks!):
@@ -140,7 +145,8 @@ can be retrieved by executing</p>
 
 <h2>Caveats</h2>
 
-<li>Localmemcache's .lmc files are not binary compatible, they are essentially
+<li>Localmemcache's .lmc files are not binary compatible across different
+CPU architectures, they are essentially
 memory mapped c structs</li>
 <li>Because of the convenient auto repair feature after a lock timeout,
 localmemcache is allergic to SIGSTOP (If you manage to SIGSTOP a process

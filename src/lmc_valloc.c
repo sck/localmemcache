@@ -383,7 +383,7 @@ int lmc_um_find_leaks(void *base, char *bf) {
     if (!gap) {
       size_t *b = (void *)bf + i / 8;
       size_t ee = md->total_size - sizeof(size_t) * 8;
-      while (*b == m && i < ee) { 
+      while (i < ee && *b == m) { 
         i += sizeof(size_t) * 8; b++; 
       }
     }
@@ -417,7 +417,7 @@ int lmc_um_check_unmarked(void *base, char *bf, size_t va, size_t size) {
   for (i = va; i < va + size; ++i) { 
     size_t *b = (void *)bf + i / 8;
     size_t ee = end - sizeof(size_t) * 8;
-    while (*b == n && i < ee) { 
+    while (i < ee && *b == n) { 
       i += sizeof(size_t) * 8; b++; 
     }
     if (lmc_um_getbit(bf, i) != 0) { 

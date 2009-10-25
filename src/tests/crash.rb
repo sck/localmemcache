@@ -10,7 +10,7 @@ $pids = []
   lm = LocalMemCache.new :namespace=>"crash-t"
   puts "pid: #{$$}"
   c = 0;
-  40000000.times {
+  40_000_000.times {
       c += 1
       r = rand(10000).to_s
       lm.set(r, r)
