@@ -16,9 +16,11 @@ class LocalMemCache
     if get(k) != v.to_s
       puts "Set FAILED!"
     end
+    raise "Consistency failed" if !check_consistency
   end
   def __delete(k)
     delete(k)
+    raise "Consistency failed" if !check_consistency
   end
 
   def __clear
@@ -44,7 +46,7 @@ end
 
 TortureTesting.no_progress
 
-TortureTesting.run(200_000,
+TortureTesting.run(2_000,
   [$h, :get, [:rand_index]],
   [$h, :__set, [:rand_index, :any]],
   [$h, :__delete, [:rand_index]],

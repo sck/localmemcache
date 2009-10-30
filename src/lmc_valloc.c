@@ -39,7 +39,6 @@ void lmc_dump_chunk_brief(char *who, void *base, lmc_mem_chunk_descriptor_t* c) 
   printf("[%s] chunk %zd:\n", who, va_c);
 }
 
-
 void lmc_dump(void *base) {
   lmc_mem_chunk_descriptor_t* c = md_first_free(base);
   size_t free = 0;
@@ -127,6 +126,11 @@ int is_lmc_already_initialized(void *base) {
     return 1;
   }
   return 0;
+}
+
+size_t lmc_total_shm_size(void *base) {
+  lmc_mem_descriptor_t *md = base;
+  return md->total_size + sizeof(lmc_mem_descriptor_t);
 }
 
 void lmc_init_memory(void *ptr, size_t size) {
@@ -379,10 +383,11 @@ int lmc_um_find_leaks(void *base, char *bf) {
   size_t gap_count = 0;
   size_t space = 0;
   memset(&m, 0xFF, sizeof(m));
-  for (i = 0; i < md->total_size; ++i) { 
+  size_t tts = lmc_total_shm_size(md);
+  for (i = 0; i < tts; ++i) { 
     if (!gap) {
       size_t *b = (void *)bf + i / 8;
-      size_t ee = md->total_size - sizeof(size_t) * 8;
+      size_t ee = tts - sizeof(size_t) * 8;
       while (i < ee && *b == m) { 
         i += sizeof(size_t) * 8; b++; 
       }
@@ -421,6 +426,7 @@ int lmc_um_check_unmarked(void *base, char *bf, size_t va, size_t size) {
       i += sizeof(size_t) * 8; b++; 
     }
     if (lmc_um_getbit(bf, i) != 0) { 
+      printf("i: %zd marked!\n", i);
       return 0; 
     }
   }
@@ -464,7 +470,7 @@ int lmc_um_mark_allocated(void *base, char *bf, size_t va) {
 
 char *lmc_um_new_mem_usage_bitmap(void *base) {
   lmc_mem_descriptor_t *md = base;
-  size_t ts = ((md->total_size + 7) / 8);
+  size_t ts = ((lmc_total_shm_size(md) + 7) / 8);
   char *bf = calloc(1, ts);
   size_t va = md->first_free;
   if (!lmc_um_mark(base, bf, 0, sizeof(lmc_mem_descriptor_t))) goto failed;
