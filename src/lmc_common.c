@@ -44,7 +44,7 @@ size_t lmc_test_valloc_fail(const char *file, int line, const char *function,
 
 void lmc_clean_string(char *result, const char *source) {
   size_t n = strlen(source);
-  if (n > 256) { n = 256; }
+  if (n > 20) { n = 20; }
   const char *s = source;
   char *d = result;
   char ch;

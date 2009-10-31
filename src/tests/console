@@ -1,0 +1,6 @@
+#! /bin/sh
+D=`dirname $0`
+DIR=`cd $D; pwd`
+script=$DIR/console.rb
+
+irb -r $script

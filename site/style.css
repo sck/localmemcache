@@ -14,6 +14,22 @@ h1, h2, h3, h4 {
   margin: 1em 0;
 }
 
+#opener, #opener * {
+  font: 40pt/44pt "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  letter-spacing: -0.75pt;
+  max-width: 20em;
+  margin: auto ;
+}
+
+#opener em {
+  color: #555;
+}
+
+#opener #title {
+  line-height: 1.9em;
+}
+
 pre, code {
   font-family: Courier;
   font-size: 11pt;
@@ -30,8 +46,3 @@ a:hover { color: #fff; background-color: #0088FF }
 
 ol, ul { padding-left: 0; }
 
-#content p {
-}
-#about {
-  list-style:none;
-}

@@ -4,11 +4,19 @@
     <title>Localmemcache</title>
     <link type="text/css" rel="stylesheet" href="style.css" media="screen"/>
   </head>
-  <body>  
-
+<body>  
+<div id="opener">
+<div id="title">How would one design a database today?</div>
+<table cellspacing=0 cellpadding=0 width="100%">
+<tr><td><em>then</em></td><td>memory scarce, open, read, write</td></tr>
+<tr><td><em>today</em></td><td>64bit, mmap, sparse files</td></tr>
+<tr><td><em>what</em></td><td>mmap + valloc + hashtable</td></tr>
+</table>
+</div>
 <div id="content">
-<h1>A persistent key-value database based on mmap()'ed shared memory</h1>
 
+
+<h1>A persistent key-value database based on mmap()'ed shared memory</h1>
 <p><b>Localmemcache</b> is a library for <b>C</b> and <b>Ruby</b> that aims 
 to provide
 an interface similar to memcached but for accessing local data instead of
