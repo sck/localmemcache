@@ -9,6 +9,7 @@ typedef struct {
   size_t free_chunks;
   size_t total_mem;
   size_t total_free_mem;
+  size_t total_shm_size;
   size_t free_mem;
   size_t largest_chunk;
 } lmc_mem_status_t;

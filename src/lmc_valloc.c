@@ -84,6 +84,11 @@ int lmc_is_va_valid(void *base, size_t va) {
       (base + md->total_size + sizeof(lmc_mem_descriptor_t)) < (void *)c);
 }
 
+size_t lmc_total_shm_size(void *base) {
+  lmc_mem_descriptor_t *md = base;
+  return md->total_size + sizeof(lmc_mem_descriptor_t);
+}
+
 lmc_mem_status_t lmc_status(void *base, char *where) {
   lmc_mem_descriptor_t *md = base;
   lmc_mem_chunk_descriptor_t* c = md_first_free(base);
@@ -92,6 +97,7 @@ lmc_mem_status_t lmc_status(void *base, char *where) {
   size_t largest_chunk = 0;
   long chunks = 0;
   ms.total_mem = md->total_size;
+  ms.total_shm_size = lmc_total_shm_size(base);
   while (c) { 
     if (!lmc_is_va_valid(base, (void *)c - base)) {
       printf("[localmemcache] [%s] invalid pointer detected: %zd...\n", where, 
@@ -126,11 +132,6 @@ int is_lmc_already_initialized(void *base) {
     return 1;
   }
   return 0;
-}
-
-size_t lmc_total_shm_size(void *base) {
-  lmc_mem_descriptor_t *md = base;
-  return md->total_size + sizeof(lmc_mem_descriptor_t);
 }
 
 void lmc_init_memory(void *ptr, size_t size) {

@@ -439,14 +439,32 @@ static VALUE LocalMemCache__size(VALUE obj) {
 
 /* 
  *  call-seq:
- *     lmc.free_bytes -> number
+ *     lmc.shm_status -> hash
  *
- *  Number of free bytes.
+ *  Some status information on the shared memory:
+ *
+ *    :size_bytes  # the total size of the shm in bytes 
+ *    :used_bytes  # how many bytes are used in this shm 
+ *                 # For exmpty namespaces this will reflect the amount
+ *                 # of memory used for the hash buckets and some other 
+ *                 # administrative data structures.
+ *    :free_bytes  # how many bytes are free 
  */
-static VALUE LocalMemCache__free_bytes(VALUE obj) {
+static VALUE LocalMemCache__shm_status(VALUE obj) {
+  VALUE hash = rb_hash_new();
+  
   local_memcache_t *lmc = get_LocalMemCache(obj);
-  lmc_mem_status_t ms = lmc_status(lmc->base, "free_bytes");
-  return rb_int2big(ms.free_mem);
+  if (!lmc_lock_shm_region("shm_status", lmc)) return Qnil;
+  lmc_mem_status_t ms = lmc_status(lmc->base, "shm_status");
+  if (!lmc_unlock_shm_region("shm_status", lmc)) return Qnil;
+
+  rb_hash_aset(hash, ID2SYM(rb_intern("free_bytes")), 
+      rb_int2big(ms.total_free_mem));
+  rb_hash_aset(hash, ID2SYM(rb_intern("total_bytes")), 
+      rb_int2big(ms.total_shm_size));
+  rb_hash_aset(hash, ID2SYM(rb_intern("used_bytes")), rb_int2big(
+      ms.total_shm_size - ms.total_free_mem));
+  return hash;
 }
 
 /* 
@@ -535,7 +553,7 @@ void Init_rblocalmemcache() {
       0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
   rb_define_method(LocalMemCache, "size", LocalMemCache__size, 0);
-  rb_define_method(LocalMemCache, "free_bytes", LocalMemCache__free_bytes, 0);
+  rb_define_method(LocalMemCache, "shm_status", LocalMemCache__shm_status, 0);
   rb_define_method(LocalMemCache, "check_consistency", 
       LocalMemCache__check_consistency, 0);
 

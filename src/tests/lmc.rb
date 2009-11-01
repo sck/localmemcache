@@ -48,7 +48,7 @@ describe 'LocalMemCache' do
 
   it 'should support random_pair' do
     $lm.random_pair.size.should.equal 2
-    LocalMemCache.drop :namespace => :empty, :force => true
+    LocalMemCache.drop :namespace => :empty, :force => true, :size_mb => 2
     ll = LocalMemCache.new :namespace => :empty
     ll.random_pair.should.be.nil
   end
