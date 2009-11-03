@@ -7,7 +7,7 @@ require 'localmemcache'
 Bacon.summary_on_exit
 
 LocalMemCache.drop :namespace => "test", :force => true
-$lm = LocalMemCache.new :namespace=>"test", :size_mb => 20
+$lm = LocalMemCache.new :namespace=>"test", :size_mb => 2
 
 LocalMemCache.drop :namespace => "test-small", :force => true
 $lms = LocalMemCache.new :namespace=>"test-small", :size_mb => 1;
@@ -18,6 +18,14 @@ describe 'LocalMemCache' do
     $lm.get("non-existant").should.be.nil
     $lm.set("foo", "1")
     $lm.get("foo").should.equal "1"
+  end
+
+  it 'should support has_key?' do
+    $lm.has_key?("foo").should.be.true
+    $lm.has_key?("non-existant").should.be.false
+    $lm[:bar] = nil
+    $lm.has_key?(:bar).should.be.true
+    $lm.delete(:bar)
   end
 
   it 'should support the [] and []= operators' do
@@ -49,7 +57,7 @@ describe 'LocalMemCache' do
   it 'should support random_pair' do
     $lm.random_pair.size.should.equal 2
     LocalMemCache.drop :namespace => :empty, :force => true, :size_mb => 2
-    ll = LocalMemCache.new :namespace => :empty
+    ll = LocalMemCache.new :namespace => :empty, :size_mb => 2
     ll.random_pair.should.be.nil
   end
 
@@ -120,7 +128,7 @@ end
 
 LocalMemCache.drop :namespace => "test-shared-os", :force => true
 $lmsh = LocalMemCache::SharedObjectStorage.new :namespace=>"test-shared-os", 
-    :size_mb => 20
+    :size_mb => 2
 
 describe 'LocalMemCache::SharedObjectStorage' do
   it 'should allow to set and query for ruby objects' do
@@ -137,16 +145,29 @@ describe 'LocalMemCache::SharedObjectStorage' do
   it 'support random_pair' do
     $lmsh.random_pair.last.should.be.kind_of? Array
   end
+
+  it 'should support has_key?' do
+    $lmsh[:foo] = 1
+    $lmsh.has_key?(:foo).should.be.true
+    $lmsh.has_key?(:non_existant).should.be.false
+    $lmsh[:bar] = nil
+    $lmsh.has_key?(:bar).should.be.true
+  end
 end
 
 LocalMemCache.drop :namespace => "test-expiry", :force => true
 $lmex = LocalMemCache::ExpiryCache.new :namespace=>"test-expiry", 
-    :size_mb => 20, :interval_secs => 0, :check_interval => 2
+    :size_mb => 2, :interval_secs => 0, :check_interval => 2
 
 describe 'LocalMemCache::ExpiryCache' do
   it 'should expire automatically' do
     $lmex["foo"] = 1
     $lmex["foo"].should.equal 1
     $lmex["foo"].should.be.nil
+  end
+  it 'should support has_key?' do
+    $lmex.has_key?("foo").should.be.false
+    $lmex[:bar] = nil
+    $lmex.has_key?(:bar).should.be.true
   end
 end

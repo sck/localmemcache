@@ -59,6 +59,7 @@ class LocalMemCache
   #  stores Ruby objects as values instead of just strings (It still uses
   #  strings for the keys, though).
   class SharedObjectStorage < LocalMemCache
+    alias __super_get get
     def []=(key,val) super(key, Marshal.dump(val)) end
     def [](key) v = super(key); v.nil? ? nil : Marshal.load(v) end
     alias set []=
@@ -70,6 +71,7 @@ class LocalMemCache
       rp = super
       rp.nil? ? nil : [rp.first, Marshal.load(rp.last)]
     end
+    def has_key?(k) !__super_get(k).nil?  end
   end
 
   #  <code>ExpiryCache</code> is based on LocalMemCache 
@@ -109,6 +111,7 @@ class LocalMemCache
     def clear() @c.clear end
     def each_pair(&block) @c.each_pair(&block) end
     def random_pair() @c.random_pair() end
+    def has_key?(k) @c.has_key?(k) end
     def hash() @c; end
   end
 
