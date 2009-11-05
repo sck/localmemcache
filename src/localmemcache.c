@@ -155,6 +155,7 @@ local_memcache_t *local_memcache_create(const char *namespace,
   char clean_ns[1024];
   double s = size_mb == 0.0 ? 1024.0 : size_mb;
   size_t si = s * 1024 * 1024;
+  if (si < 1024 * 1024) { si =  1024 * 1024; }
   //printf("size: %f, s: %f, si: %zd\n", size_mb, s, si);
   if (!lmc_namespace_or_filename((char *)clean_ns, namespace, filename, e))
       return 0;

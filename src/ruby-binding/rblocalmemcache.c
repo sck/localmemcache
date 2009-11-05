@@ -443,7 +443,7 @@ static VALUE LocalMemCache__size(VALUE obj) {
  *
  *  Some status information on the shared memory:
  *
- *    :size_bytes  # the total size of the shm in bytes 
+ *    :total_bytes # the total size of the shm in bytes 
  *    :used_bytes  # how many bytes are used in this shm 
  *                 # For exmpty namespaces this will reflect the amount
  *                 # of memory used for the hash buckets and some other 

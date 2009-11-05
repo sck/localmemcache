@@ -83,6 +83,12 @@ describe 'LocalMemCache' do
     should.raise(LocalMemCache::MemoryPoolFull) { $lms["two"] = "b" * 8000000; }
   end
 
+  it 'should set a minimum size' do
+    LocalMemCache.drop :namespace => :toosmall, :force => true
+    ll = LocalMemCache.new :namespace => :toosmall, :size_mb => 0.1
+    ll.shm_status[:total_bytes].should.equal 1024*1024
+  end
+
 
   it 'should support clearing of the hashtable' do
     ($lms.size > 0).should.be.true
