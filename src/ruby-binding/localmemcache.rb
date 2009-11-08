@@ -73,46 +73,4 @@ class LocalMemCache
     end
     def has_key?(k) !__super_get(k).nil?  end
   end
-
-  #  <code>ExpiryCache</code> is based on LocalMemCache 
-  #  but the contents are cleared periodically or when the cache is running out
-  #  of memory.
-  class ExpiryCache 
-    def initialize(options) 
-      o = { 
-        :interval_secs => 10 * 60,
-	:hash_type => LocalMemCache::SharedObjectStorage,
-	:check_interval => 10000
-      }.update(options || {})
-      @c = o[:hash_type].new(o) 
-      @counter = 0
-      @check_interval = o[:check_interval]
-      @interval = o[:interval_secs]
-    end
-    def check
-      @counter = 0
-      @c["localmemcache-last-clear"] = Time.now.to_i if 
-          !@c["localmemcache-last-clear"]
-      if Time.now.to_i - @c["localmemcache-last-clear"].to_i >= @interval
-	clear
-        @c["localmemcache-last-clear"] = Time.now.to_i
-      end
-    end
-    def []=(key,val) 
-      check if (@counter += 1) > @check_interval
-      @c[key] = val
-    rescue MemoryPoolFull
-      clear
-      @c[key] = val
-    end
-    def [](key) check if (@counter += 1) > @check_interval; @c[key] end
-    alias set []=
-    alias get []
-    def clear() @c.clear end
-    def each_pair(&block) @c.each_pair(&block) end
-    def random_pair() @c.random_pair() end
-    def has_key?(k) @c.has_key?(k) end
-    def hash() @c; end
-  end
-
 end
