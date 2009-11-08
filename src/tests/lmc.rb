@@ -160,20 +160,3 @@ describe 'LocalMemCache::SharedObjectStorage' do
     $lmsh.has_key?(:bar).should.be.true
   end
 end
-
-LocalMemCache.drop :namespace => "test-expiry", :force => true
-$lmex = LocalMemCache::ExpiryCache.new :namespace=>"test-expiry", 
-    :size_mb => 2, :interval_secs => 0, :check_interval => 2
-
-describe 'LocalMemCache::ExpiryCache' do
-  it 'should expire automatically' do
-    $lmex["foo"] = 1
-    $lmex["foo"].should.equal 1
-    $lmex["foo"].should.be.nil
-  end
-  it 'should support has_key?' do
-    $lmex.has_key?("foo").should.be.false
-    $lmex[:bar] = nil
-    $lmex.has_key?(:bar).should.be.true
-  end
-end
