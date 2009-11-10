@@ -1,52 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Localmemcache</title>
-    <link type="text/css" rel="stylesheet" href="style.css" media="screen"/>
-  </head>
-<body>  
-<div id="opener">
-<div id="title">How would one design a database today?</div>
-<table cellspacing=0 cellpadding=0 width="100%">
-<tr><td><em>then</em></td><td>memory scarce, open, read, write</td></tr>
-<tr><td><em>today</em></td><td>64bit, mmap, sparse files</td></tr>
-<tr><td><em>what</em></td><td>mmap + valloc + hashtable</td></tr>
-</table>
-</div>
-<div id="content">
-
-
-<h1>A persistent key-value database based on mmap()'ed shared memory</h1>
-<p><b>Localmemcache</b> is a library for <b>C</b> and <b>Ruby</b> that aims 
-to provide
-an interface similar to memcached but for accessing local data instead of
-remote data.  It's based on <b>mmap()</b>'ed shared memory for <b>maximum
-speed</b>.
-Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
-alternative to GDBM, Berkeley DB, and Tokyo Cabinet</b>.
-
-<h2>Slides for my talk at the <a href="http://www.munich-on-rails.com/">Ruby on Rails Group Munich</a> (October 2009)</h2>
-
-Now available on github&nbsp;&nbsp;&lt;&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.pdf">pdf</a>&nbsp;|&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.key">key</a>&nbsp;&gt;&nbsp;(German)
-
-
-<h2>Version 0.4.3: Improving Iteration and bugfixes (2009-10-02)</h2>
-
-Fixes by <b>Paul Mineiro</b> (thanks!):
-<li><b>iteration speedup</b>: each_pair is now a lot faster when dealing with a
-large dictionary.  Eg: For 400k elements it's now about <b>14 times
-faster</b>.</li>
-<li><b>fix for leak</b> in local_memcache_free()</li>
-<li><b>C API</b>: Some C API functions were not yet covered by tests.  This
-has been fixed.</li>
-<p>
-
-Other fixes:
-<li><b>autorepair</b> fixed: Autorepair of namespaces did sometimes wrongly
-report corrupt namespaces.
-<li><b>:min_alloc_size</b> now also works on Ruby 1.9.</li>
-
-
+    <title>Localmemcache: mmap -> lmc_valloc -> hashtable. BAM database</title>
 <script type="text/javascript">
 // <![CDATA[
 function show_complete_history() {
@@ -57,8 +12,125 @@ function show_complete_history() {
 // ]]
 </script>
 
-<a href="#" onclick="show_complete_history()" />Previous Releases</a>
-<div id='old-news' style='display:none'><h2>Version 0.4.2: Improving Append Performance (2009-08-10)</h2>
+<style type="text/css">
+body {
+  background: #FFF;
+  color: #333;
+  font-family: "Helvetica Neue", Helvetica, "Trebuchet MS", "Lucida Grande", Verdana, sans-serif;
+  margin: 0;
+  font-size: 17pt; 
+  line-height: 1.3em;
+}
+
+h1, h2, h3, h4 { 
+  color: #0;
+  padding: 0;
+  margin: 1em 0;
+}
+
+#opener-background {
+  background-color: #333;
+  padding-bottom: 10px;
+}
+
+#opener {
+  width: 1024px;
+}
+
+#opener, #opener * {
+  font: 40pt/44pt "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  letter-spacing: -0.75pt;
+  margin: auto ;
+  color: #aaa;
+  background-color: #333;
+}
+
+#opener em {
+  color: #fff;
+}
+
+#content em {
+  color: #aaa;
+  font: 50pt/40pt "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.75pt;
+  font-weight: bold;
+}
+
+#opener #title {
+  line-height: 1.9em;
+}
+
+pre, code {
+  font-family: Courier;
+  font-size: 17pt;
+  overflow: auto;
+}
+
+a { color: #0088FF; text-decoration: none }
+a:hover { color: #fff; background-color: #0088FF }
+
+#content { 
+  margin: 0 auto ;
+  width: 1024px;
+}
+
+ol, ul { padding-left: 0; }
+
+</style>
+  </head>
+<body>  
+<div id="opener-background">
+<div id="opener">
+<div id="title">How would you design a database today?</div>
+<table cellspacing=0 cellpadding=0 width="100%">
+<tr><td><em>then</em></td><td>memory scarce, open, read, write</td></tr>
+<tr><td><em>today</em></td><td>64bit, mmap, sparse files</td></tr>
+</table>
+</div>
+</div>
+
+<div id="content">
+<p><b>Localmemcache</b> is a library for <b>C</b> and <b>Ruby</b> that aims 
+to provide
+an interface similar to memcached but for accessing local data instead of
+remote data.  It's based on <b>mmap()</b>'ed shared memory for <b>maximum
+speed</b>.
+Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
+alternative to GDBM, Berkeley DB, and Tokyo Cabinet</b>.
+
+<h2>Slides for my talk at the <a href="http://www.munich-on-rails.com/">Ruby on Rails Group Munich</a></h2>
+
+Now available on github&nbsp;&nbsp;&lt;&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.pdf">pdf</a>&nbsp;|&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.key">key</a>&nbsp;&gt;&nbsp;(German)
+
+
+<h2>Version 0.4.4: Bugfixes for OS X and Autorepair</h2>
+
+Version 0.4.4 brings fixes for coredumps on OS X and bugs in the
+autorepair (now also better covered by tests).  <br>
+New methods: <b>shm_status</b>, <b>has_key?</b><br>
+(Thanks to <b>Max Sch&ouml;fmann</b> and <b>Florian D&uuml;tsch</b> for feedback/bug reports.)
+<p>
+
+<a href="#" onclick="return show_complete_history()" />Previous Releases</a>
+<div id='old-news' style='display:none'>
+
+<h2>Version 0.4.3: Improving Iteration and bugfixes (2009-10-02)</h2>
+
+Fixes by <b>Paul Mineiro</b> (thanks!):
+<li><b>iteration speedup</b>: each_pair is now a lot faster when dealing with a
+large dictionary.  Eg: For 400k elements it's now about <b>14 times
+faster</b>.</li>
+<li><b>fix for leak</b> in local_memcache_free()</li>
+<li><b>C API</b>: Some C API functions were not yet covered by tests.  This
+has been fixed.</li>
+
+Other fixes:
+<li><b>autorepair</b> fixed: Autorepair of namespaces did sometimes wrongly
+report corrupt namespaces.
+<li><b>:min_alloc_size</b> now also works on Ruby 1.9.</li>
+
+<h2>Version 0.4.2: Improving Append Performance (2009-08-10)</h2>
 
 In 0.4.2 the <b>:min_alloc_size</b> parameter was introduced to help with use
 cases that intend to use a hash table with growing values. This is
@@ -67,15 +139,15 @@ with a large list of unusable free blocks. By setting the
 <b>:min_alloc_size</b> parameter you help the allocator to plan better
 ahead. (<a href="http://localmemcache.rubyforge.org/doc/classes/LocalMemCache.html#M000001">more</a>)
 
-</div>
-
-<h2>Key features as of 0.4.0 (2009-05-16)</h2>
+<h2>Key features as of 0.4.4 (2009-11-10)</h2>
 <li><a href="#performance">blazingly fast</a></li>
 <li>a very simple API</li>
 <li>persistent</li>
 <li>parallel writes are supported by default</li>
 <li>uses transactions internally to avoid data corruption</li>
-<li>lightweight: the core library is just about <b>1400</b> lines of <b>C</b> code</li>
+<li>lightweight: the core library is just about <b>1500</b> lines of <b>C</b> code</li>
+
+</div>
 
 <h2>Requirements</h2>
 <li>a &gt;=64bit Unix (32bit is possible but you'll run out of virtual address space quickly)</li>
