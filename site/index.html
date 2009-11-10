@@ -82,7 +82,7 @@ ol, ul { padding-left: 0; }
 <body>  
 <div id="opener-background">
 <div id="opener">
-<div id="title">How would you design a database today?</div>
+<div id="title">How would one design a database today?</div>
 <table cellspacing=0 cellpadding=0 width="100%">
 <tr><td><em>then</em></td><td>memory scarce, open, read, write</td></tr>
 <tr><td><em>today</em></td><td>64bit, mmap, sparse files</td></tr>
@@ -98,11 +98,6 @@ remote data.  It's based on <b>mmap()</b>'ed shared memory for <b>maximum
 speed</b>.
 Since version 0.3.0 it supports <b>persistence</b>, also making it <b>a fast
 alternative to GDBM, Berkeley DB, and Tokyo Cabinet</b>.
-
-<h2>Slides for my talk at the <a href="http://www.munich-on-rails.com/">Ruby on Rails Group Munich</a></h2>
-
-Now available on github&nbsp;&nbsp;&lt;&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.pdf">pdf</a>&nbsp;|&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.key">key</a>&nbsp;&gt;&nbsp;(German)
-
 
 <h2>Version 0.4.4: Bugfixes for OS X and Autorepair</h2>
 
@@ -149,15 +144,6 @@ ahead. (<a href="http://localmemcache.rubyforge.org/doc/classes/LocalMemCache.ht
 
 </div>
 
-<h2>Requirements</h2>
-<li>a &gt;=64bit Unix (32bit is possible but you'll run out of virtual address space quickly)</li>
-<li>a file system that offers <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse files</a></li>
-Note for <b>OS X</b>: <b>OS X</b> disqualifies as <b>HFS+</b> doesn't
-have sparse files and <b>sem_timedwait</b>() and <b>sem_getvalue</b>() aren't
-supported as well.<br>
-Note for <b>FreeBSD</b>: It has been reported that localmemcache
-sometimes hangs there, it is not yet clear what the problem is.
-
 <h2>Install</h2>
 
 <p>The Ruby binding is available as a Ruby Gem. It can be installed by executing</p>
@@ -167,6 +153,16 @@ sometimes hangs there, it is not yet clear what the problem is.
 
 
 If you just want to use the <b>C API</b>, download the .tar.gz from <a href="http://rubyforge.org/frs/?group_id=7925">here</a>.
+
+<h2>Requirements</h2>
+<li>a &gt;=64bit Unix (32bit is possible but you'll run out of virtual address space quickly)</li>
+<li>a file system that offers <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse files</a></li>
+Note for <b>OS X</b>: <b>OS X</b> disqualifies as <b>HFS+</b> doesn't
+have sparse files and <b>sem_timedwait</b>() and <b>sem_getvalue</b>() aren't
+supported as well.<br>
+Note for <b>FreeBSD</b>: It has been reported that localmemcache
+sometimes hangs there, it is not yet clear what the problem is.
+
 
 <h2>Using</h2>
 <b>API</b>:&nbsp;<a href="http://github.com/sck/localmemcache/blob/d72a5bd825b0fb573f1048ea9cae92d8c143525c/src/localmemcache.h">C</a>|<a href="http://localmemcache.rubyforge.org/doc/">Ruby</a><br>
@@ -215,6 +211,16 @@ data on disk is about <b>10</b>% slower than keeping them in memory in a
 Ruby hash of strings.  It's about <b>40</b>% faster than <b>Tokyo Cabinet</b>
 (which offers features similar to <b>LocalMemCache</b>).
 
+<h2>Who uses Localmemcache?</h2>
+
+<a href="http://www.personifi.com">Personifi</a> use localmemcache to
+serve billions of hits each month.  Armin Roehrl: "we use
+localmemcache because it solves one problem very well and we love it!"
+
+<h2>Slides for my talk at the <a href="http://www.munich-on-rails.com/">Ruby on Rails Group Munich</a></h2>
+
+Now available on github&nbsp;&nbsp;&lt;&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.pdf">pdf</a>&nbsp;|&nbsp;<a href="http://cloud.github.com/downloads/sck/localmemcache/localmemcache.key">key</a>&nbsp;&gt;&nbsp;(German)
+
 <h2>Source code</h2>
 
 <p>The source code is hosted on <a href="http://github.com/sck/localmemcache/tree/master">github</a>. It
@@ -231,12 +237,6 @@ memory mapped c structs</li>
 <li>Because of the convenient auto repair feature after a lock timeout,
 localmemcache is allergic to SIGSTOP (If you manage to SIGSTOP a process
 while localmemcache is currently possessing a lock, that is)</li>
-
-<h2>Who uses Localmemcache?</h2>
-
-<a href="http://www.personifi.com">Personifi</a> use localmemcache to
-serve billions of hits each month.  Armin Roehrl: "we use
-localmemcache because it solves one problem very well and we love it!"
 
 <h2>Tips for backups</h2>
 
