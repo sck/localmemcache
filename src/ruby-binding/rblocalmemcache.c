@@ -464,6 +464,10 @@ static VALUE LocalMemCache__shm_status(VALUE obj) {
       rb_int2big(ms.total_shm_size));
   rb_hash_aset(hash, ID2SYM(rb_intern("used_bytes")), rb_int2big(
       ms.total_shm_size - ms.total_free_mem));
+  rb_hash_aset(hash, ID2SYM(rb_intern("free_chunks")), rb_int2big(
+      ms.free_chunks));
+  rb_hash_aset(hash, ID2SYM(rb_intern("largest_chunk")), rb_int2big(
+      ms.largest_chunk));
   return hash;
 }
 
