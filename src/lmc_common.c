@@ -62,7 +62,7 @@ void lmc_clean_string(char *result, const char *source) {
   *d = 0x0;
 }
 
-unsigned long ht_hash_key(const char *s, size_t l) {
+unsigned long lmc_hash(const char *s, size_t l) {
   unsigned long v;
   size_t i;
   for (v = 0, i = 0; i++ < l; s++) { v = *s + 31 * v; }
