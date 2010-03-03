@@ -15,8 +15,10 @@
 #include "lmc_common.h"
 
 void lmc_namespacify(char *result, const char *s) {
-  if (lmc_is_filename(s)) { lmc_clean_string(result, s); } 
-  else { strcpy(result, s); }
+  char cs[1024];
+  if (lmc_is_filename(s)) { lmc_clean_string(cs, s); }
+  else { strcpy(cs, s); }
+  snprintf(result, 15, "/lmc-%X\n", lmc_hash(cs, strlen(cs))) ;
 }
 
 lmc_lock_t *lmc_lock_init(const char *ns, int init, lmc_error_t *e) {

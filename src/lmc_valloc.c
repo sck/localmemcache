@@ -452,9 +452,9 @@ int lmc_um_mark(void *base, char *bf, size_t va, size_t size) {
     if (i % 8 == 0) {
       size_t b_start = i / 8;
       size_t b_end = (va + size - 1) / 8;
-      if (b_start != b_end) {
+      if (b_start < b_end) {
         memset(bf + b_start, 0xFF, b_end - b_start);
-        i += (b_end * 8) - va;
+        i += (b_end - b_start) * 8;
       }
     }
     lmc_um_setbit(bf, i, 1); 

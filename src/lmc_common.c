@@ -45,7 +45,7 @@ size_t lmc_test_valloc_fail(const char *file, int line, const char *function,
 void lmc_clean_string(char *result, const char *source) {
   size_t nn = strlen(source);
   size_t n = nn;
-  if (n > 20) { n = 20; }
+  if (n > 1023) { n = 1023; }
   const char *s = source + nn - n;
   char *d = result;
   char ch;
@@ -60,6 +60,13 @@ void lmc_clean_string(char *result, const char *source) {
     }
   }
   *d = 0x0;
+}
+
+unsigned long ht_hash_key(const char *s, size_t l) {
+  unsigned long v;
+  size_t i;
+  for (v = 0, i = 0; i++ < l; s++) { v = *s + 31 * v; }
+  return v;
 }
 
 int lmc_is_filename(const char *s) {

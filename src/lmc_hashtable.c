@@ -28,10 +28,7 @@ size_t lmc_ht_strdup(void *base, const char *s, size_t l) {
 }
 
 unsigned long ht_hash_key(const char *s, size_t l) {
-  unsigned long v;
-  size_t i;
-  for (v = 0, i = 0; i++ < l; s++) { v = *s + 31 * v; }
-  return v % LMC_HT_BUCKETS;
+  return lmc_hash(s, l) % LMC_HT_BUCKETS;
 }
 
 ht_hash_entry_t lmc_null_node = { 0, 0, 0 };
