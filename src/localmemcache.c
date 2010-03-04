@@ -66,12 +66,14 @@ int local_memcache_drop_namespace(const char *namespace, const char *filename,
   lmc_clean_namespace((char *)clean_ns, e);
   if (force) {
     lmc_lock_t *l = lmc_lock_init((char *)clean_ns, 1, e);
+    if (!l) return 0;
     lmc_lock_repair(l);
     lmc_lock_free(l);
     char check_lock_name[1024];
     lmc_checkize(check_lock_name, clean_ns);
     lmc_lock_t *check_l;
     check_l =  lmc_lock_init(check_lock_name, 1, e);
+    if (!check_l) return 0;
     lmc_lock_repair(check_l);
     lmc_lock_free(check_l);
   }
