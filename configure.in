@@ -40,7 +40,7 @@ AC_SUBST(PREFIX)
 AC_MSG_RESULT([$PREFIX])
 
 AC_MSG_CHECKING([if inside RubyGems])
-env > /tmp/lmc.env
+env > /tmp/$USER.$$.lmc.env
 AC_MSG_RESULT([$PREFIX])
 
 AC_MSG_CHECKING([installation directory prefix])
@@ -60,7 +60,7 @@ AC_SUBST(PREFIX)
 AC_MSG_RESULT([$PREFIX])
 
 AC_MSG_CHECKING([if inside RubyGems])
-env > /tmp/lmc.env
+env > /tmp/$USER.$$.lmc.env
 AC_MSG_RESULT([$PREFIX])
 
 

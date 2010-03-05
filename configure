@@ -2797,7 +2797,7 @@ $as_echo "$PREFIX" >&6; }
 
 { $as_echo "$as_me:$LINENO: checking if inside RubyGems" >&5
 $as_echo_n "checking if inside RubyGems... " >&6; }
-env > /tmp/lmc.env
+env > /tmp/$USER.$$.lmc.env
 { $as_echo "$as_me:$LINENO: result: $PREFIX" >&5
 $as_echo "$PREFIX" >&6; }
 
@@ -2821,7 +2821,7 @@ $as_echo "$PREFIX" >&6; }
 
 { $as_echo "$as_me:$LINENO: checking if inside RubyGems" >&5
 $as_echo_n "checking if inside RubyGems... " >&6; }
-env > /tmp/lmc.env
+env > /tmp/$USER.$$.lmc.env
 { $as_echo "$as_me:$LINENO: result: $PREFIX" >&5
 $as_echo "$PREFIX" >&6; }
 
