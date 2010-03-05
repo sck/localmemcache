@@ -34,6 +34,8 @@ int lmc_file_size(const char *fn) {
 void lmc_shm_ensure_root_path() {
   if (!lmc_does_file_exist(lmc_namespace_root_path())) {
     mkdir(lmc_namespace_root_path(), 01777);
+    /* FreeBSD ignores the sticky bit passed to mkdir() for some reason... */
+    chmod(lmc_namespace_root_path(), 01777);
   }
 }
 
