@@ -27,8 +27,6 @@ lmc_lock_t *lmc_lock_init(const char *ns, int init, lmc_error_t *e) {
   lmc_lock_t *l = malloc(sizeof(lmc_lock_t));
   if (!l) return NULL;
   snprintf((char *)&l->namespace, 1023, "%s", namespace);
-  printf("namespace: '%s'\n", l->namespace);
-  
   lmc_handle_error((l->sem = sem_open(l->namespace, O_CREAT, 0600, init)) == 
       NULL, "sem_open", "LockError", l->namespace, e);
   if (!l->sem) { free(l); return NULL; }
