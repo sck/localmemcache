@@ -18,7 +18,7 @@ void lmc_namespacify(char *result, const char *s) {
   char cs[1024];
   if (lmc_is_filename(s)) { lmc_clean_string(cs, s); }
   else { strcpy(cs, s); }
-  snprintf(result, 15, "/lmc-%X\n", lmc_hash(cs, strlen(cs))) ;
+  snprintf(result, 15, "/lmc-%X", lmc_hash(cs, strlen(cs))) ;
 }
 
 lmc_lock_t *lmc_lock_init(const char *ns, int init, lmc_error_t *e) {
@@ -27,9 +27,10 @@ lmc_lock_t *lmc_lock_init(const char *ns, int init, lmc_error_t *e) {
   lmc_lock_t *l = malloc(sizeof(lmc_lock_t));
   if (!l) return NULL;
   snprintf((char *)&l->namespace, 1023, "%s", namespace);
+  printf("namespace: '%s'\n", l->namespace);
   
   lmc_handle_error((l->sem = sem_open(l->namespace, O_CREAT, 0600, init)) == 
-      NULL, "sem_open", "LockError", e);
+      NULL, "sem_open", "LockError", l->namespace, e);
   if (!l->sem) { free(l); return NULL; }
   return l;
 }
@@ -122,22 +123,23 @@ int lmc_lock_obtain(const char *where, lmc_lock_t* l, lmc_error_t *e) {
   int r = lmc_sem_timed_wait(l);
   if (r == -1 && errno == ETIMEDOUT) {
     lmc_handle_error_with_err_string("sem_timedwait", strerror(errno), 
-        "LockTimedOut", e);
+        "LockTimedOut", 0, e);
     return 0;
   }
-  return lmc_handle_error(r, "sem_timedwait", "LockError", e);
+  return lmc_handle_error(r, "sem_timedwait", "LockError", l->namespace, e);
 }
 
 int lmc_lock_obtain_mandatory(const char *where, lmc_lock_t* l, lmc_error_t *e) {
   int r = lmc_sem_timed_wait_mandatory(l);
   if (r == -1 && errno == ETIMEDOUT) {
     lmc_handle_error_with_err_string("sem_timedwait", strerror(errno), 
-        "LockTimedOut", e);
+        "LockTimedOut", 0, e);
     return 0;
   }
-  return lmc_handle_error(r, "sem_wait", "LockError", e);
+  return lmc_handle_error(r, "sem_wait", "LockError", l->namespace, e);
 }
 
 int lmc_lock_release(const char *where, lmc_lock_t* l, lmc_error_t *e) {
-  return lmc_handle_error(sem_post(l->sem) == -1, "sem_post", "LockError", e);
+  return lmc_handle_error(sem_post(l->sem) == -1, "sem_post", "LockError", 
+      l->namespace, e);
 }

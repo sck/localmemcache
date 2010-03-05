@@ -12,7 +12,7 @@ int lmc_set_lock_flag(void *base, lmc_error_t *e) {
   lmc_mem_descriptor_t *md = base;
   if (md->locked != 0) {
     lmc_handle_error_with_err_string("lmc_set_lock_flag",
-        "Failed to lock shared memory--may be corrupt!", "ShmLockFailed", e);
+        "Failed to lock shared memory--may be corrupt!", "ShmLockFailed", 0, e);
     return 0;
   } else {
     md->locked = 1;
@@ -26,7 +26,7 @@ int lmc_release_lock_flag(void *base, lmc_error_t *e) {
   if (md->locked != 1) {
     lmc_handle_error_with_err_string("lmc_release_lock_flag",
         "Shared memory appears to be unlocked already--may be corrupt!", 
-        "ShmUnlockFailed", e);
+        "ShmUnlockFailed", 0, e);
     return 0;
   } else {
     md->locked = 0;
@@ -52,7 +52,7 @@ int lmc_namespace_or_filename(char *result, const char* ons, const char *ofn,
     return 1;
   }
   lmc_handle_error_with_err_string("lmc_namespace_or_filename", 
-      "Need to supply either namespace or filename argument", "ArgError", e);
+      "Need to supply either namespace or filename argument", "ArgError", 0, e);
   return 0;
 }
 
@@ -96,14 +96,14 @@ retry:
   if (retry_counter++ > 10) {
     lmc_handle_error_with_err_string("local_memcache_create",
         "Too many retries: Failed to repair shared memory!", 
-        "ShmLockFailed", e);
+        "ShmLockFailed", 0, e);
     goto failed;
   }
   if (!lmc_is_lock_working(lmc->lock, e)) {
     if (!force) {
       if (__local_memcache_check_namespace(namespace, e))  goto retry;
       lmc_handle_error_with_err_string("local_memcache_create",
-          "Failed to repair shared memory!", "ShmLockFailed", e);
+          "Failed to repair shared memory!", "ShmLockFailed", 0, e);
       goto failed;
     }
     *ok = 0;
@@ -121,7 +121,7 @@ retry:
       }
       if (lmc_get_db_version(lmc->base) > LMC_DB_VERSION) {
         lmc_handle_error_with_err_string("local_memcache_create",
-            "DB version is incompatible", "DBVersionNotSupported", e);
+            "DB version is incompatible", "DBVersionNotSupported", 0, e);
         goto unlock_and_fail;
       }
       lmc_mem_descriptor_t *md = lmc->base;
@@ -215,7 +215,8 @@ int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e) {
   lmc_lock_t *check_l;
   if ((check_l = lmc_lock_init(check_lock_name, 1, e)) == NULL)  {
     lmc_handle_error_with_err_string("lmc_lock_init", 
-        "Unable to initialize lock for checking namespace", "LockError", e);
+        "Unable to initialize lock for checking namespace", "LockError", 
+        check_lock_name, e);
     return 0;
   }
   if (!lmc_lock_obtain_mandatory("local_memcache_check_namespace", 
@@ -227,7 +228,7 @@ int __local_memcache_check_namespace(const char *clean_ns, lmc_error_t *e) {
       0, 1, &ok, e);
   if (!lmc) {
     lmc_handle_error_with_err_string("__local_memcache_create", 
-        "Unable to attach memory pool", "InitError", e);
+        "Unable to attach memory pool", "InitError", 0, e);
     goto failed;
   }
   md = lmc->base;
@@ -262,7 +263,7 @@ release_but_no_lock_correction:
 failed:
   repair_failed = 1;
   lmc_handle_error_with_err_string("local_memcache_check_namespace",
-      "Unable to recover namespace", "RecoveryFailed", e);
+      "Unable to recover namespace", "RecoveryFailed", 0, e);
   __local_memcache_free(lmc, e, 0);
   lmc_lock_release("local_memcache_check_namespace", check_l, e);
   fprintf(stderr, "[localmemcache] Recovery failed!\n");

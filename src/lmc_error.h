@@ -16,14 +16,14 @@ typedef struct {
 
 #define STD_OUT_OF_MEMORY_ERROR(ctx) \
     lmc_handle_error_with_err_string((ctx), "Out of memory error", \
-        "OutOfMemoryError", e)
+        "OutOfMemoryError", 0, e)
 
 #define LMC_MEMORY_POOL_FULL(ctx) \
     lmc_handle_error_with_err_string((ctx), "Memory pool full", \
-        "MemoryPoolFull", e)
+        "MemoryPoolFull", 0, e)
 
 int lmc_handle_error(int check, const char *ctx, const char *error_type, 
-    lmc_error_t* e);
+    char *handle, lmc_error_t* e);
 int lmc_handle_error_with_err_string(const char *ctx, const char *error_msg,
-    const char *error_type, lmc_error_t* e);
+    const char *error_type, char *handle, lmc_error_t* e);
 #endif
