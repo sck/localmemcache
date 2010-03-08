@@ -8,6 +8,10 @@
 #include "lmc_valloc.h"
 #include "lmc_shm.h"
 
+void lmc_init() {                                                               
+  srand(time(NULL));                                                            
+}     
+
 int lmc_set_lock_flag(void *base, lmc_error_t *e) {
   lmc_mem_descriptor_t *md = base;
   if (md->locked != 0) {

@@ -15,6 +15,11 @@
 #define LOCAL_MEMCACHE_FAILED 0
 #define LOCAL_MEMCACHE_SUCCESS 1
 
+/*                                                                              
+ * This should be called once after LocalMemCache has been loaded.              
+ */                                                                             
+void lmc_init();        
+
 /*
  * LocalMemCache provides for a Hashtable of strings in shared memory (via a
  * memory mapped file), which thus can be shared between processes on a

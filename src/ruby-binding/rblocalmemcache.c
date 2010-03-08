@@ -535,6 +535,7 @@ static VALUE LocalMemCache__check_consistency(VALUE obj) {
  *
  */
 void Init_rblocalmemcache() {
+  lmc_init();
   LocalMemCache = rb_define_class("LocalMemCache", rb_cObject);
   rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 1);
   rb_define_singleton_method(LocalMemCache, "drop", 
