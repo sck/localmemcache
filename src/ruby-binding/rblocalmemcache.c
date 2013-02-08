@@ -100,7 +100,7 @@ static VALUE lmc_rb_sym_force;
 void __rb_lmc_raise_exception(const char *error_type, const char *m) {
   VALUE eid = rb_intern(error_type);
   VALUE k = rb_const_get(LocalMemCache, eid);
-  rb_raise(k, m);
+  rb_raise(k, "%s", m);
 }
 
 /* :nodoc: */
