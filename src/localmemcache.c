@@ -92,7 +92,8 @@ local_memcache_t *__local_memcache_create(const char *namespace, size_t size,
   if (!ok) { ok = &d; }
   *ok = 1;
   local_memcache_t *lmc = calloc(1, sizeof(local_memcache_t));
-  if (!lmc || (lmc->namespace = strdup(namespace)) == NULL) return NULL;
+  if (!lmc) return NULL;
+  if ((lmc->namespace = strdup(namespace)) == NULL) goto failed;
   lmc->size = size;
   if ((lmc->lock = lmc_lock_init(lmc->namespace, 1, e)) == NULL) goto failed;
   int retry_counter = 0;
