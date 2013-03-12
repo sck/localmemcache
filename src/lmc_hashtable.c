@@ -57,7 +57,7 @@ ht_hash_entry_t *ht_lookup(void *base, va_ht_hash_t va_ht, const char *key,
   for (va_hr = ht->va_buckets[ht_hash_key(key, n_key)]; 
       va_hr != 0 && hr != NULL; ) {
     hr = va_hr ? base + va_hr : 0;
-    if (!hr) goto next;
+    if (!hr) break;
     char *s = base + hr->va_key;
     size_t l = *(size_t *) s;
     if (l != n_key) goto next;
