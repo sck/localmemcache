@@ -17,4 +17,5 @@ Makefile
 *.bundle
 *.log
 pkg
+.vagrant
 
