@@ -6,6 +6,9 @@ script=$DIR/lmc.rb
 if test "x$1" = "x-d"; then
   irb -r $script
 else
-  #valgrind --leak-check=full --tool=memcheck ruby $script
-  ruby $script
+  if test "x$DEBUG" = "x1"; then
+    gdb -ex run --args ruby $script
+  else
+    ruby $script
+  fi
 fi

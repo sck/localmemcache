@@ -121,13 +121,13 @@ describe 'LocalMemCache' do
   end
 
   it 'should support filename parameters' do
-    LocalMemCache.drop :filename => ".tmp.a.lmc", :force => true
-    lm = LocalMemCache.new :filename => ".tmp.a.lmc", :size_mb => 1
+    LocalMemCache.drop :filename => "/tmp/.tmp.a.lmc", :force => true
+    lm = LocalMemCache.new :filename => "/tmp/.tmp.a.lmc", :size_mb => 1
     lm[:boo] = 1
     lm.size.should.equal 1
     File.exists?(".tmp.a.lmc").should.be.true
-    LocalMemCache.check :filename => ".tmp.a.lmc"
-    LocalMemCache.drop :filename => ".tmp.a.lmc"
+    LocalMemCache.check :filename => "/tmp/.tmp.a.lmc"
+    LocalMemCache.drop :filename => "/tmp/.tmp.a.lmc"
   end
 
 end

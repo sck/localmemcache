@@ -20,7 +20,7 @@ module Bacon
   RestrictContext = //  unless defined? RestrictContext
 
   def self.summary_on_exit
-    return  if Counter[:installed_summary] > 0
+    return if Counter[:installed_summary] > 0
     at_exit {
       handle_summary
       if $!
@@ -28,6 +28,8 @@ module Bacon
       elsif Counter[:errors] + Counter[:failed] > 0
         exit 1
       end
+
+      exit 0
     }
     Counter[:installed_summary] += 1
   end
