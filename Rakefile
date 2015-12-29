@@ -24,6 +24,7 @@ task :changelog do
   }
 end
 
+desc "Run the tests"
 task :sanity_test do
   sh "./src/tests/sanity-test"
 end
@@ -65,7 +66,7 @@ begin
   require 'rake'
   require 'rake/clean'
   require 'rake/packagetask'
-  require 'rake/gempackagetask'
+  require 'rubygems/package_task'
   require 'fileutils'
 rescue LoadError
 else
@@ -98,10 +99,10 @@ alternative to GDBM and Berkeley DB.
     s.rubyforge_project = 'localmemcache'
   end
 
-  Rake::GemPackageTask.new(spec) do |p|
-    p.gem_spec = spec
-    p.need_tar = false
+  Rake::PackageTask.new(spec.name, spec.version.to_s) do |p|
+    p.package_files = spec.files
     p.need_zip = false
+    p.need_tar = false
   end
 
 end
